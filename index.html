@@ -369,6 +369,10 @@
   .sched-days::-webkit-scrollbar{ display:none; }
   .sched-days .daychip{ box-shadow:none; }
   .list-body{ padding:14px 16px 16px; }
+  /* 일정이 없는 날에는 빈 화면을 고르게 쓰고 추가 버튼을 날짜 바 가까이 둡니다. */
+  .list-body.has-empty-day{ flex:1 0 auto; display:flex; flex-direction:column; }
+  .list-body.has-empty-day #stopListEdit{ flex:1; display:flex; align-items:center; }
+  .list-body.has-empty-day .empty-note{ width:100%; }
   .empty-note.err{ color:var(--red); }
   .err-code{ display:inline-block; margin:8px 0; font-family:var(--font-mono); font-size:11px;
     background:var(--red-soft); border-radius:6px; padding:4px 8px; word-break:break-all; }
@@ -982,7 +986,7 @@
 const CFG = Object.assign({
   GOOGLE_MAPS_API_KEY:"", ENABLE_DIRECTIONS:false,
   AI_PROXY_URL:"", ALLOW_PERSONAL_AI_KEY:true, OPENAI_MODEL:"luna",
-  SUPABASE_URL:"", SUPABASE_ANON_KEY:"", TRIP_ID:"sapporo-2026"
+  SUPABASE_URL:"", SUPABASE_ANON_KEY:""
 }, (window.APP_CONFIG||{}));
 
 const HAS_GMAP = !!(CFG.GOOGLE_MAPS_API_KEY||'').trim();
@@ -991,8 +995,8 @@ const HAS_SYNC = !!((CFG.SUPABASE_URL||'').trim() && (CFG.SUPABASE_ANON_KEY||'')
 const HAS_PROXY = !!(CFG.AI_PROXY_URL||'').trim();
 const DISABLED_MSG = 'API 비활성화 상태입니다.';
 /* ---- 여행방 ID ----
-   ?trip=xxxx 로 들어오면 그 방, 없으면 마지막으로 열었던 방,
-   그것도 없으면 config.js 기본값을 씁니다. 방마다 데이터가 완전히 분리돼요. */
+   ?trip=xxxx 는 해당 여행을 열고, 기본 주소는 새 여행으로 시작합니다.
+   새 여행을 저장하면 고유 주소를 부여합니다. */
 function randomTripId(){
   const a = 'abcdefghijkmnopqrstuvwxyz23456789';   // 헷갈리는 글자 제외
   let out = '';
@@ -1003,15 +1007,7 @@ function randomTripId(){
 }
 function resolveTripId(){
   const q = new URLSearchParams(location.search).get('trip');
-  if(q && /^[a-z0-9-]{4,40}$/i.test(q)){
-    try{ localStorage.setItem('sapporo:lastTrip', q); }catch(e){}
-    return q;
-  }
-  try{
-    const last = localStorage.getItem('sapporo:lastTrip');
-    if(last) return last;
-  }catch(e){}
-  return (CFG.TRIP_ID || 'trip-1');
+  return q && /^[a-z0-9-]{4,40}$/i.test(q) ? q : randomTripId();
 }
 const TRIP_ID = resolveTripId();
 function tripUrl(id){
@@ -1882,7 +1878,7 @@ function renderScheduleScreenInner(){
     const hdr=document.querySelector('#screen-schedule .sec-header');
     if(hdr) hdr.appendChild(sumEl);
   }
-  if(!day){ wrap.innerHTML=`<div class="empty-note">날짜가 없어요.<br>위의 "날짜" 버튼으로 여행 날짜를 추가해보세요.</div>`; sumEl.innerHTML=''; return; }
+  if(!day){ body.classList.add('has-empty-day'); wrap.innerHTML=`<div class="empty-note">날짜가 없어요.<br>위의 "날짜" 버튼으로 여행 날짜를 추가해보세요.</div>`; sumEl.innerHTML=''; return; }
 
   renderWeather(day);
   renderPlanBar(day);
@@ -1890,6 +1886,7 @@ function renderScheduleScreenInner(){
   renderDaySummary(day, sumEl);
 
   const list = visibleStops(day);
+  body.classList.toggle('has-empty-day', !list.length);
   if(!list.length){
     wrap.innerHTML = day.stops.length
       ? `<div class="empty-note">이 날은 모두 '선택' 일정이에요.<br>위에서 선택 일정을 켜면 보입니다.</div>`
@@ -4488,6 +4485,8 @@ async function startTrip(){
   }
 
   activeDayId = TRIP.days[0].id;
+  // 기본 주소에서 만든 여행은 이후 새로고침해도 같은 여행을 열 수 있게 합니다.
+  if(!new URLSearchParams(location.search).get('trip')) history.replaceState(null, '', tripUrl());
   markChanged();
   document.getElementById('onboard').hidden = true;
   refreshAll(); switchScreen('schedule');
@@ -4508,7 +4507,7 @@ async function init(){
     const shared = decodeTrip(m[1]);
     if(shared && shared.days){
       TRIP = shared; writeLocal();
-      history.replaceState(null,'',location.pathname);
+      history.replaceState(null,'',tripUrl());
       setTimeout(()=> toast('공유받은 일정을 불러왔어요'), 400);
     }
   } else {
