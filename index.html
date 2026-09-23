@@ -4,13 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#2F93DD" />
+<meta name="application-name" content="TriviMe" />
+<meta name="description" content="친구들과 여행 일정과 이동 경로를 함께 만들고 공유하는 모바일 여행 플래너" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="여행 일정" />
-<meta name="apple-mobile-web-app-title" content="삿포로" />
+<meta name="apple-mobile-web-app-title" content="TriviMe" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
-<title>삿포로 여행 일정</title>
+<title>TriviMe | 함께 만드는 여행</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -528,6 +529,7 @@
   .ob-opt{ color:var(--muted-2); font-size:11.5px; }
   .ob-input{ width:100%; padding:14px; border:none; border-radius:11px; background:var(--fill);
     font-size:16px; font-family:inherit; letter-spacing:-.02em; }
+  .ob-input[type="date"]{ display:block; min-width:0; max-width:100%; box-sizing:border-box; }
   .ob-input:focus{ outline:2px solid var(--sky-soft); }
   .ob-countries{ display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
   .ob-c{ display:flex; align-items:center; justify-content:center; gap:5px;
@@ -871,8 +873,8 @@
   <div class="onboard" id="onboard" hidden>
     <div class="ob-inner">
       <div class="ob-mark"><span class="icon" data-i="navMap"></span></div>
-      <h2 class="ob-title">어디로 떠나세요?</h2>
-      <p class="ob-sub">여행할 나라를 고르면 그에 맞춰 지도와 경로 안내가 준비돼요.</p>
+      <h2 class="ob-title">TriviMe와 어디로 떠나세요?</h2>
+      <p class="ob-sub">친구들과 여행 일정을 함께 만들고, 지도와 이동 경로를 한눈에 확인해보세요.</p>
 
       <label class="ob-label">여행 이름</label>
       <input type="text" id="ob_title" class="ob-input" placeholder="예: 삿포로 3박4일" maxlength="24">
@@ -882,6 +884,13 @@
 
       <label class="ob-label">도시 <span class="ob-opt">선택</span></label>
       <input type="text" id="ob_city" class="ob-input" placeholder="예: 삿포로" maxlength="24">
+
+      <div id="ob_dates">
+        <label class="ob-label" for="ob_start_date">여행 시작일</label>
+        <input type="date" id="ob_start_date" class="ob-input">
+        <label class="ob-label" for="ob_end_date">여행 종료일</label>
+        <input type="date" id="ob_end_date" class="ob-input">
+      </div>
 
       <button class="btn-primary ob-go" id="ob_start">여행 시작하기</button>
       <p class="ob-note" id="ob_note"></p>
@@ -920,7 +929,7 @@
   <div class="modal-bg" id="shareModalBg">
     <div class="modal">
       <button class="modal-close" data-close="shareModalBg"><span class="icon" data-i="close"></span></button>
-      <h2>친구들과 공유</h2>
+      <h2>TriviMe로 친구들과 공유</h2>
       <div id="sharePanel"></div>
     </div>
   </div>
@@ -3775,6 +3784,7 @@ function renderPrep(){
 function refreshAll(){
   const t=document.getElementById('tripTitle');
   if(t) t.textContent = TRIP.title||'여행 일정';
+  document.title = `${TRIP.title||'여행 일정'} | TriviMe`;
   renderDayChips('daybar', onDayChange);
   renderPlanBarMap();
   try{ renderMapForDay(); }catch(err){ console.error('[지도 렌더]', err); }
@@ -4211,7 +4221,14 @@ function showOnboarding(editMode){
     document.getElementById('ob_city').value = (TRIP.country && TRIP.country.city) || '';
     document.getElementById('ob_start').textContent = '변경 저장';
     obPicked = tripCountry().code;
+  } else {
+    const today = new Date();
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()+2);
+    const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    document.getElementById('ob_start_date').value = localIso(today);
+    document.getElementById('ob_end_date').value = localIso(end);
   }
+  document.getElementById('ob_dates').hidden = !!editMode;
   box.dataset.edit = editMode? '1':'';
 
   list.innerHTML = COUNTRIES.map(c=>`
@@ -4231,7 +4248,7 @@ function showOnboarding(editMode){
     });
   });
 
-  document.getElementById('ob_start').addEventListener('click', startTrip);
+  document.getElementById('ob_start').onclick = startTrip;
   document.getElementById('ob_note').textContent =
     '일본은 구글이 대중교통 경로를 제공하지 않아서, 대중교통은 AI 추천으로 안내해요.';
   box.hidden = false;
@@ -4261,6 +4278,23 @@ async function startTrip(){
     return;
   }
 
+  const startIso = document.getElementById('ob_start_date').value;
+  const endIso = document.getElementById('ob_end_date').value;
+  const dateValue = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T12:00:00`) : new Date(NaN);
+  const startDate = dateValue(startIso);
+  const endDate = dateValue(endIso);
+  const validDate = (date, iso) => !isNaN(date) &&
+    `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}` === iso;
+  if(!validDate(startDate, startIso) || !validDate(endDate, endIso)){
+    alert('여행 시작일과 종료일을 입력해주세요.'); return;
+  }
+  const utcDay = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  const count = Math.round((utcDay(endDate)-utcDay(startDate))/86400000)+1;
+  if(count<1 || count>90){
+    alert(count<1 ? '종료일은 시작일보다 빠를 수 없어요.' : '여행 기간은 최대 90일까지 설정할 수 있어요.');
+    return;
+  }
+
   TRIP = {
     title,
     country: { code:co.code, name:co.name, city, lat:co.lat, lng:co.lng },
@@ -4276,11 +4310,11 @@ async function startTrip(){
     }catch(e){}
   }
 
-  // 오늘부터 3일을 기본으로 깔아둡니다
-  const base = new Date();
-  for(let i=0;i<3;i++){
-    const d = new Date(base); d.setDate(base.getDate()+i);
-    TRIP.days.push({ id:TRIP.nextDayId++, iso:d.toISOString().slice(0,10), label:`${i+1}일차`, stops:[] });
+  // 선택한 기간만큼 날짜별 기본 일정을 만듭니다.
+  for(let i=0;i<count;i++){
+    const d = new Date(startDate); d.setDate(startDate.getDate()+i);
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    TRIP.days.push({ id:TRIP.nextDayId++, iso, label:`${i+1}일차`, stops:[] });
   }
 
   activeDayId = TRIP.days[0].id;
