@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#5CB8EC" />
+<meta name="theme-color" content="#2F93DD" />
 <meta name="application-name" content="TriviMe" />
 <meta name="description" content="친구들과 여행 일정과 이동 경로를 함께 만들고 공유하는 모바일 여행 플래너" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -11,47 +11,12 @@
 <meta name="apple-mobile-web-app-title" content="TriviMe" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
-<title>TriviMe | 함께 만드는 여행</title>
+<title>TriviMe | 함께 계획하고, 같이 떠나요</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  /* 앱이 준비되는 동안 보여주는 브랜드 시작 화면 */
-  .splash{ position:fixed; inset:0; z-index:3000; display:flex; align-items:center;
-    justify-content:center; overflow:hidden; background:#5CB8EC; opacity:1;
-    transition:opacity .38s ease; }
-  .splash.hide{ opacity:0; pointer-events:none; }
-  .splash::before, .splash::after{ content:''; position:absolute; width:48vmax; height:48vmax;
-    border:1px solid rgba(255,255,255,.13); border-radius:50%; pointer-events:none; }
-  .splash::before{ top:-36vmax; right:-30vmax; }
-  .splash::after{ bottom:-38vmax; left:-32vmax; }
-  .splash-content{ display:flex; flex-direction:column; align-items:center;
-    max-width:100%; transform:translateY(-10px); }
-  .splash-brand{ display:flex; align-items:center; gap:0; max-width:100%; }
-  .splash-icon{ display:block; width:72px; height:72px; flex:0 0 72px;
-    animation:splash-enter .65s cubic-bezier(.2,.8,.2,1) both; }
-  .splash-wordmark{ display:flex; align-items:center; width:202px; height:64px;
-    flex:0 0 202px; margin-left:-5px;
-    animation:splash-enter .7s .12s cubic-bezier(.2,.8,.2,1) both; }
-  .splash-wordmark img{ display:block; width:202px; height:auto; }
-  .splash-tagline{ margin:11px 0 0; color:rgba(255,255,255,.9);
-    font-family:-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
-    font-size:13px; font-weight:500; letter-spacing:.14em;
-    animation:splash-enter .65s .28s both; }
-  .splash-progress{ width:88px; height:2px; margin-top:25px; overflow:hidden;
-    border-radius:3px; background:rgba(255,255,255,.26); }
-  .splash-progress::after{ content:''; display:block; width:100%; height:100%;
-    border-radius:inherit; background:#fff; transform-origin:left;
-    animation:splash-load 1.5s .18s ease-out both; }
-  @keyframes splash-enter{ from{ opacity:0; transform:translateY(10px); }
-    to{ opacity:1; transform:translateY(0); } }
-  @keyframes splash-load{ from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
-  @media (max-width:340px){
-    .splash-icon{ width:62px; height:62px; flex-basis:62px; }
-    .splash-wordmark{ width:176px; height:58px; flex-basis:176px; }
-    .splash-wordmark img{ width:176px; }
-  }
   :root{
     --paper:#FFFFFF; --ink:#1C1C1E; --muted:#8A8A8E; --muted-2:#C4C4C8;
     --line:#EDEDF0; --line-2:#DFDFE4; --tint:#F2F2F7;   /* iOS systemGroupedBackground 계열 */
@@ -261,10 +226,6 @@
   .stay-row.set .stay-txt{ color:var(--ink); }
   .stay-edit{ flex:0 0 auto; font-size:12.5px; font-weight:400; color:#C7C7CC; }
   .stay-txt b{ font-weight:700; color:var(--red); margin-right:4px; }
-  .quick-actions{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:12px; }
-  .quick-actions .stay-row{ min-width:0; margin:0; padding:11px; gap:7px; }
-  .quick-actions .stay-txt{ font-size:13px; }
-  .quick-actions .stay-edit{ display:none; }
   .stay-inherit{ font-size:10px; font-weight:600; color:var(--muted-2);
     border:1px solid var(--line-2); border-radius:999px; padding:1px 6px; margin-left:4px; }
   .stay-tag{ background:var(--red-soft) !important; color:var(--red) !important; }
@@ -571,13 +532,16 @@
     overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .onboard[hidden]{ display:none; }
   .ob-inner{ padding:calc(40px + env(safe-area-inset-top,0px)) 22px 40px; max-width:520px; margin:0 auto; }
-  .ob-mark{ width:52px; height:52px; border-radius:16px; color:#fff;
-    background:linear-gradient(135deg, var(--sky), var(--sky-deep));
-    display:flex; align-items:center; justify-content:center; margin-bottom:20px;
-    box-shadow:0 6px 18px rgba(47,147,221,.3); }
-  .ob-mark .icon{ width:26px; height:26px; }
+  .ob-head{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .ob-head .ob-title{ margin:0; flex:1; min-width:0; white-space:nowrap;
+    font-size:clamp(18px, 5.5vw, 27px); letter-spacing:-.04em; }
+  .ob-mark{ flex:0 0 44px; width:44px; height:44px; border-radius:13px;
+    background:linear-gradient(160deg, #6CC0F2 0%, #3A98DD 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(47,147,221,.28); }
+  .ob-mark img{ height:28px; width:auto; display:block; margin-left:1px; }
   .ob-title{ font-size:28px; font-weight:700; letter-spacing:-.035em; margin:0 0 7px; }
-  .ob-sub{ font-size:14px; color:var(--muted); line-height:1.6; margin:0 0 26px; letter-spacing:-.01em; }
+  .ob-sub{ font-size:14px; color:var(--muted); line-height:1.6; margin:4px 0 26px; letter-spacing:-.01em; }
   .ob-label{ display:block; font-size:12.5px; color:var(--muted); margin:18px 0 8px; }
   .ob-opt{ color:var(--muted-2); font-size:11.5px; }
   .ob-input{ width:100%; padding:14px; border:none; border-radius:11px; background:var(--fill);
@@ -590,6 +554,7 @@
     padding:13px 4px; font-size:13.5px; font-weight:500; cursor:pointer; letter-spacing:-.02em;
     transition:background .2s var(--ease), color .2s var(--ease); }
   .ob-flag{ font-size:15px; }
+  .ob-c[data-c="ETC"]{ grid-column:1 / -1; }     /* 마지막 '그 외'는 한 줄 전체로 */
   .ob-c.on{ background:var(--sky-soft); color:var(--sky-deep); font-weight:600;
     box-shadow:inset 0 0 0 1.5px var(--sky); }
   .ob-go{ width:100%; margin-top:28px; padding:16px; font-size:16px; }
@@ -613,6 +578,14 @@
   .rc-meta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;
     font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; }
   .rc-sum{ font-size:12px; color:var(--muted); margin-top:5px; line-height:1.5; }
+  .rc-hint{ margin-left:auto; font-size:11px; font-weight:400; color:var(--muted-2); }
+  .rc-why{ font-size:12px; color:var(--sky-deep); margin-top:4px; font-weight:500; letter-spacing:-.01em; }
+  .rc-item:not(.on) .rc-why{ color:var(--muted); }
+  /* 선택 표시 */
+  .rc-check{ display:inline-block; width:14px; height:14px; border-radius:50%; margin-right:7px;
+    border:1.5px solid var(--muted-2); vertical-align:-2px; transition:all .2s var(--ease); }
+  .rc-item.on .rc-check{ border-color:var(--sky); background:var(--sky);
+    box-shadow:inset 0 0 0 3px #fff; }
   .rc-detail .ai-route{ margin-top:8px; }
 
   /* 지도 범례 */
@@ -695,6 +668,8 @@
   .date-range input[type="date"]::-webkit-date-and-time-value{ text-align:center; }
   .dr-tilde{ flex:0 0 auto; color:var(--muted-2); font-size:14px; padding-bottom:13px; }
   .ob-days{ font-size:12.5px; color:var(--sky-deep); font-weight:500; margin:8px 0 0; }
+  .ob-parse{ font-size:12px; color:var(--sky-deep); margin:7px 0 0; min-height:0; }
+  .ob-parse:empty{ display:none; }
 
   /* 날짜 입력이 컨테이너를 넘지 않도록 (iOS Safari 대응) */
   input[type="date"]{ min-width:0; max-width:100%; box-sizing:border-box; }
@@ -769,8 +744,7 @@
   .bottomnav{ display:flex; border-top:.5px solid rgba(0,0,0,.12);
     background:rgba(255,255,255,.88); backdrop-filter:saturate(180%) blur(20px);
     -webkit-backdrop-filter:saturate(180%) blur(20px);
-    /* iOS가 지나치게 큰 하단 안전 영역을 보고해도 탭 아래가 과하게 늘어나지 않게 합니다. */
-    padding-bottom:clamp(8px, calc(env(safe-area-inset-bottom, 0px) - 12px), 28px); z-index:600; }
+    padding-bottom:max(4px, calc(env(safe-area-inset-bottom) - 12px)); z-index:600; }
   .navbtn{ flex:1; border:none; background:none; padding:9px 4px 7px; display:flex; flex-direction:column;
     align-items:center; gap:5px; color:var(--muted-2); cursor:pointer; }
   .navbtn .icon{ width:20px; height:20px; }
@@ -848,56 +822,102 @@
       transition-duration:.01ms !important; scroll-behavior:auto !important; }
   }
 
-  /* TriviMe · 여행 시작 화면 */
-  .ob-inner{padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(28px + env(safe-area-inset-bottom,0px));}
-  .ob-heading{display:flex;align-items:center;gap:9px;margin:0 0 12px;}
-  .ob-heading .ob-mark{width:36px;height:36px;flex:0 0 36px;display:block;margin:0;border-radius:11px;box-shadow:0 3px 10px #2f93dd20;object-fit:contain;}
-  .ob-title{margin:0;font-size:clamp(17px,4.5vw,23px);line-height:1.4;letter-spacing:-.045em;word-break:keep-all;}
-  .ob-sub{font-size:14px;color:#626B78;margin:0 0 24px;line-height:1.65;word-break:keep-all;}
-  .ob-label{color:#404B5C;font-weight:600;margin-top:20px;}
-  .ob-opt{color:#737D8A;font-weight:400;margin-left:4px;}
-  .ob-input{border:1px solid #E5EAF0;background:#F6F8FA;border-radius:12px;color:var(--ink);}
-  .ob-input::placeholder{color:#798493;}
-  .ob-countries{gap:8px;}
-  .ob-c{min-height:44px;padding:10px 4px;background:#F5F7FA;border:1px solid transparent;border-radius:12px;}
-  .ob-c.on{background:#EAF6FE;color:#166CA6;border-color:#2F93DD;box-shadow:none;}
-  .ob-days{color:#276A94;line-height:1.6;}
-  .ob-go{margin-top:20px;border-radius:14px;box-shadow:0 5px 16px #2f93dd24;}
-  .ob-note{color:#626B78;font-size:12px;}
-  .ob-cancel{display:block;margin:0 0 16px auto;background:#F2F5F8;border:0;border-radius:10px;min-height:44px;padding:8px 14px;color:#46566A;}
-  .ob-cancel[hidden], .ob-error[hidden], .save-warning[hidden]{display:none;}
-  .ob-error{color:#B42318;background:#FFF0EE;border-radius:10px;padding:12px;font-size:13px;line-height:1.5;margin:16px 0 0;}
-  [aria-invalid="true"]{outline:2px solid #B42318!important;}
-  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:2px solid #1672AF;outline-offset:3px;}
-  button:disabled{opacity:.55;cursor:wait;}
-  .ob-input:focus{outline:2px solid #1672AF;}
-  .save-warning{position:fixed;z-index:2500;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(94%,490px);padding:14px;background:#FFF1E8;border:1px solid #DF9F78;border-radius:14px;color:#7C3517;font-size:13px;box-shadow:var(--shadow-float);}
-  .save-warning span{display:block;margin-bottom:8px;line-height:1.5;}
-  .save-warning button{border:1px solid #DF9F78;border-radius:8px;min-height:40px;padding:6px 12px;background:#fff;color:#7C3517;margin-right:8px;}
-  .map-unavailable{position:absolute;top:30%;left:20px;right:20px;padding:24px;background:#fff;border-radius:16px;text-align:center;line-height:1.6;font-size:14px;color:#626B78;}
-  .map-unavailable strong{color:var(--ink);}
-  .leaflet-control-attribution{font-size:10px!important;}
-  #map .leaflet-bottom.leaflet-right{bottom:270px;}
-  @media(max-width:350px){.ob-inner{padding-left:14px;padding-right:14px;}.ob-heading{gap:7px;}.ob-heading .ob-mark{width:30px;height:30px;flex-basis:30px;}.ob-title{font-size:16px;}.ob-c{font-size:12.5px;}}
+  /* ============ 시작 화면 ============ */
+  #splash{ position:fixed; inset:0; z-index:10000; overflow:hidden;
+    background:linear-gradient(165deg, #6CC0F2 0%, #4FAAE8 55%, #3A98DD 100%);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .75s cubic-bezier(.4,0,.2,1); }
+  #splash.sp-out{ opacity:0; pointer-events:none; }
+  /* 사라질 때 로고가 살짝 떠오르며 흐려집니다 */
+  #splash .sp-inner{ transition:transform .75s cubic-bezier(.4,0,.2,1), opacity .6s ease; }
+  #splash.sp-out .sp-inner{ transform:translateY(calc(-3vh - 10px)); opacity:0; }
+  .sp-inner{ position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;
+    padding:0 24px; transform:translateY(-3vh); }
+  .sp-brand{ display:flex; align-items:center; gap:14px;
+    animation:spUp .8s cubic-bezier(.2,.8,.2,1) both; }
+  .sp-icon{ height:56px; width:auto; display:block; filter:drop-shadow(0 4px 10px rgba(12,60,110,.18)); }
+  .sp-logo{ height:44px; width:auto; display:block; margin-top:4px;
+    filter:drop-shadow(0 3px 10px rgba(12,60,110,.16)); }
+  .sp-tag{ margin:22px 0 0; color:#fff; font-size:16px; font-weight:600; letter-spacing:-.02em;
+    animation:spUp .8s .18s cubic-bezier(.2,.8,.2,1) both; }
+  .sp-en{ margin:6px 0 0; color:rgba(255,255,255,.78); font-size:13px; font-weight:500;
+    letter-spacing:.01em; animation:spUp .8s .3s cubic-bezier(.2,.8,.2,1) both; }
+  .sp-flight{ width:230px; height:auto; margin-top:26px; overflow:visible;
+    animation:spFade .6s .3s ease both; }
+  @keyframes spUp{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  @keyframes spFade{ from{ opacity:0; } to{ opacity:1; } }
 
-  .quick-actions .stay-row{background:#F0F8FE;border:1px solid #DCECF8;min-height:44px;}
-  .quick-actions .stay-txt,.quick-actions .icon{color:#236A9A;}
-  .quick-actions .stay-row.set{background:#fff;}
-  .welcome-empty strong{display:block;color:#344054;font-size:16px;margin-bottom:8px;}
-  .welcome-empty p{font-size:13px;line-height:1.7;margin:0;color:#697586;}
+  /* 은은한 빛 번짐 */
+  .sp-glow{ position:absolute; border-radius:50%; pointer-events:none; z-index:1; }
+  .sp-glow-a{ width:120vw; height:120vw; right:-60vw; top:-62vw;
+    background:radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%); }
+  .sp-glow-b{ width:110vw; height:110vw; left:-55vw; bottom:-60vw;
+    background:radial-gradient(circle, rgba(255,226,140,.15) 0%, rgba(255,226,140,0) 58%); }
+
+  @media (prefers-reduced-motion: reduce){
+    .sp-brand, .sp-tag, .sp-en, .sp-flight{ animation:none; }
+  }
 </style>
 </head>
 <body>
-<div class="splash" id="splash" aria-label="TriviMe 시작 화면">
-  <div class="splash-content">
-    <div class="splash-brand" role="img" aria-label="TriviMe">
-    <img class="splash-icon" src="data:image/png;base64,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" alt="">
-    <span class="splash-wordmark"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4OTUiIGhlaWdodD0iMjQ1IiB2aWV3Qm94PSIwIDAgODk1IDI0NSIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJUcml2aU1lIGxvZ28iPgogIDx0aXRsZT5Ucml2aU1lPC90aXRsZT4KICA8ZyBmaWxsPSIjRkZGRkZGIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogIDxwYXRoIGQ9Ik0wIDAgQzMuMTQ5IDIuNDM2IDUuNzE3IDUuMDY0IDguMjM0IDguMTIxIEM4LjcxIDguNjk0IDkuMTg1IDkuMjY3IDkuNjc1IDkuODU3IEMyMi40ODMgMjUuNTc1IDMyLjU4OCA0My43NTUgNDIuODcxIDYxLjE3NiBDNDMuMjggNjEuODY4IDQzLjY4OSA2Mi41NiA0NC4xMTEgNjMuMjczIEM0NS4xNDMgNjUuMDI5IDQ2LjE2NiA2Ni43ODkgNDcuMTg4IDY4LjU1MSBDNDguOSA3MS4xNzkgNTAuNjc4IDczLjE5NiA1Mi45ODQgNzUuMzA5IEM1My41MDYgNzQuNDk1IDU0LjAyOSA3My42ODIgNTQuNTY2IDcyLjg0NCBDNTQuOTE1IDcyLjMgNTUuMjY0IDcxLjc1NyA1NS42MjQgNzEuMTk4IEM1Ni40MjQgNjkuOTUyIDU3LjIyMyA2OC43MDYgNTguMDIzIDY3LjQ2MSBDNjAuMTgyIDY0LjA5OSA2Mi4zNSA2MC43NDQgNjQuNTM5IDU3LjQwMiBDNzAuNTQzIDQ4LjIxOSA3Ni4zMTkgMzguOTE5IDgxLjk1IDI5LjUwMiBDOTkuNDMzIDAuNDUgOTkuNDMzIDAuNDUgMTEwLjA3NCAtMi4yMTUgQzExNS4yMzggLTMuMDA5IDEyMC4xOTcgLTIuOTQ5IDEyNC45ODQgLTAuNjkxIEMxMzAuNjQ4IDQuMzU3IDEzMS43MzYgMTAuMjE0IDEzMi4xODUgMTcuNjE1IEMxMzIuMjkxIDIxLjYyNiAxMzIuMzMyIDI1LjYzMiAxMzIuMzUxIDI5LjY0NCBDMTMyLjM2NSAzMS4xODIgMTMyLjM4IDMyLjcyMSAxMzIuMzk2IDM0LjI1OSBDMTMyLjQzNiAzOC40MTYgMTMyLjQ2MyA0Mi41NzQgMTMyLjQ4OCA0Ni43MzEgQzEzMi41MDkgNTAuMjEyIDEzMi41MzcgNTMuNjkzIDEzMi41NjQgNTcuMTc1IEMxMzIuNjI3IDY1LjM5NCAxMzIuNjggNzMuNjE0IDEzMi43MjcgODEuODMzIEMxMzIuNzc2IDkwLjI4NyAxMzIuODQzIDk4Ljc0MSAxMzIuOTE4IDEwNy4xOTUgQzEzMi45ODMgMTE0LjQ3NiAxMzMuMDM2IDEyMS43NTcgMTMzLjA3OSAxMjkuMDM4IEMxMzMuMTA1IDEzMy4zNzcgMTMzLjEzNSAxMzcuNzE1IDEzMy4xNzcgMTQyLjA1NCBDMTMzLjIxNyAxNDYuMTM3IDEzMy4yNDEgMTUwLjIyMSAxMzMuMjU0IDE1NC4zMDUgQzEzMy4yNjEgMTU1Ljc5NCAxMzMuMjczIDE1Ny4yODQgMTMzLjI5MiAxNTguNzc0IEMxMzMuNTQgMTc5Ljg3OSAxMzMuNTQgMTc5Ljg3OSAxMjguMzA4IDE4Ni4zOTcgQzEyNS4xOTQgMTg5LjMyOCAxMjIuMzI4IDE5MS4wOTcgMTE3Ljk4NCAxOTEuMzA5IEMxMTYuNjg1IDE5MS4zOTEgMTE1LjM4NiAxOTEuNDc0IDExNC4wNDcgMTkxLjU1OSBDMTA4LjQ5MiAxOTEuNDU0IDEwNS4xOTMgMTg5LjQ5IDEwMS4yMzQgMTg1LjYyMSBDOTYuNDAyIDE3OS4zMDggOTYuNjg2IDE3MS4zMDMgOTYuNjgxIDE2My43MTggQzk2LjY3MyAxNjIuNjg3IDk2LjY2NSAxNjEuNjU3IDk2LjY1NiAxNjAuNTk2IEM5Ni42MyAxNTcuMjEyIDk2LjYxOCAxNTMuODI5IDk2LjYwNSAxNTAuNDQ1IEM5Ni41ODkgMTQ4LjA4NyA5Ni41NzIgMTQ1LjcyOSA5Ni41NTQgMTQzLjM3MiBDOTYuNTA4IDEzNy4xOCA5Ni40NzQgMTMwLjk4OCA5Ni40NDIgMTI0Ljc5NyBDOTYuMzkgMTE0Ljg2OSA5Ni4zMjUgMTA0Ljk0MSA5Ni4yNTQgOTUuMDEzIEM5Ni4yMzEgOTEuNTQ0IDk2LjIxNCA4OC4wNzQgOTYuMTk5IDg0LjYwNSBDOTYuMTg1IDgyLjQ4NyA5Ni4xNzIgODAuMzcgOTYuMTU4IDc4LjI1MyBDOTYuMTU1IDc3LjI4NSA5Ni4xNTMgNzYuMzE3IDk2LjE1IDc1LjMyIEM5Ni4xNDMgNzQuNDM1IDk2LjEzNiA3My41NTEgOTYuMTI5IDcyLjY0IEM5Ni4xMjUgNzEuODcxIDk2LjEyMSA3MS4xMDMgOTYuMTE3IDcwLjMxMSBDOTUuOTg0IDY4LjMwOSA5NS45ODQgNjguMzA5IDk0Ljk4NCA2NS4zMDkgQzk0LjY3MyA2NS44MzYgOTQuMzYyIDY2LjM2MyA5NC4wNDIgNjYuOTA2IEM2Ny44MDcgMTExLjI2NSA2Ny44MDcgMTExLjI2NSA1NS45ODQgMTE2LjY4NCBDNTEuNjQ2IDExNy41ODcgNDguOTY4IDExNy4zOTQgNDUuMDI3IDExNS4yMzggQzMwLjAyIDEwNC45MDkgMTkuMjg3IDg0LjQ5MiAxMC4zMDQgNjkuMDI0IEM5LjY4IDY3Ljk1MiA5LjA1NyA2Ni44NzkgOC40MTQgNjUuNzc0IEM3Ljk0MiA2NC45NiA3LjQ3IDY0LjE0NyA2Ljk4NCA2My4zMDkgQzYuOTc0IDY0LjA1IDYuOTY0IDY0Ljc5MiA2Ljk1MyA2NS41NTYgQzYuNjcyIDg1Ljc0MSA2LjM3MiAxMDUuOTI2IDYuMDUxIDEyNi4xMSBDNS45OSAxMjkuOTY0IDUuOTMgMTMzLjgxOCA1Ljg3MSAxMzcuNjcxIEM1Ljc5IDE0Mi44NTcgNS42OTkgMTQ4LjA0MiA1LjU5OSAxNTMuMjI3IEM1LjU2NCAxNTUuMDU4IDUuNTMzIDE1Ni44OSA1LjUwNiAxNTguNzIyIEM1LjQ2NyAxNjEuMjM0IDUuNDE3IDE2My43NDYgNS4zNjMgMTY2LjI1OCBDNS4zNTkgMTY2LjYxMiA1LjM1OSAxNjYuNjEyIDUuMzM4IDE2OC40MDUgQzUuMTUzIDE3NS43OTIgMy45OTEgMTgyLjM0NCAtMS4xODggMTg3LjgyNCBDLTUuMTIxIDE5MS4wMTggLTkuMzE5IDE5Mi40MiAtMTQuMzgzIDE5Mi4yMTEgQy0xOS44NTkgMTkxLjI2MSAtMjMuMjM2IDE4OS4zNTggLTI3LjAxNiAxODUuMzA5IEMtMzIuNDg4IDE3Ni4wNjMgLTMxLjE1OSAxNjMuODI0IC0zMS4wNjkgMTUzLjQyNSBDLTMxLjA2MyAxNTIuMTk3IC0zMS4wNTYgMTUwLjk2OSAtMzEuMDUgMTQ5LjcwNCBDLTMxLjAzMSAxNDYuMzY5IC0zMS4wMDcgMTQzLjAzMyAtMzAuOTgxIDEzOS42OTcgQy0zMC45NTkgMTM2Ljg4NiAtMzAuOTQxIDEzNC4wNzQgLTMwLjkyMiAxMzEuMjYzIEMtMzAuODc4IDEyNC42MDUgLTMwLjgyNyAxMTcuOTQ3IC0zMC43NzQgMTExLjI5IEMtMzAuNzE5IDEwNC40OTYgLTMwLjY3NSA5Ny43MDMgLTMwLjYzNiA5MC45MDkgQy0zMC42MDIgODUuMDIgLTMwLjU2IDc5LjEzIC0zMC41MTQgNzMuMjQxIEMtMzAuNDg2IDY5Ljc1IC0zMC40NjEgNjYuMjU4IC0zMC40NDMgNjIuNzY2IEMtMzAuMzY2IDQ5LjA3OCAtMzAuMTI2IDM1LjQzMiAtMjkuMTc1IDIxLjc3NCBDLTI5LjEwNyAyMC43MDIgLTI5LjAzOCAxOS42MjkgLTI4Ljk2OCAxOC41MjQgQy0yOC40MjYgMTEuNjQgLTI3LjI0MyA2Ljk1NyAtMjIuNzAzIDEuNTU5IEMtMTYuMjAzIC0zLjg4NCAtNy4zNDcgLTQuMTIxIDAgMCBaICIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjAxLjAxNTYyNSwyNy42OTE0MDYyNSkiLz4KICA8cGF0aCBkPSJNMCAwIEMwLjUzMiAtMC4wMDMgMC41MzIgLTAuMDAzIDMuMjI2IC0wLjAxNSBDNi43MjggLTAuMDI5IDEwLjIzMSAtMC4wMjggMTMuNzMzIC0wLjAyNiBDMTYuMTgyIC0wLjAzIDE4LjYzIC0wLjAzNCAyMS4wNzkgLTAuMDM5IEMyNi4yMDYgLTAuMDQ3IDMxLjMzNCAtMC4wNDYgMzYuNDYxIC0wLjA0MSBDNDMuMDA5IC0wLjAzNSA0OS41NTYgLTAuMDUyIDU2LjEwNCAtMC4wNzUgQzYxLjE2IC0wLjA5IDY2LjIxNyAtMC4wOTEgNzEuMjc0IC0wLjA4OCBDNzMuNjg2IC0wLjA4OCA3Ni4wOTkgLTAuMDk0IDc4LjUxMiAtMC4xMDQgQzgxLjg5NyAtMC4xMTYgODUuMjgyIC0wLjEwOSA4OC42NjggLTAuMDk4IEM4OS42NSAtMC4xMDUgOTAuNjMyIC0wLjExMyA5MS42NDQgLTAuMTIxIEMxMDAuODIzIC0wLjA1MiAxMTAuOTUxIDEuMDQ4IDExOC4wOTMgNy4yNzUgQzEyMS41MTEgMTEuMTQ5IDEyMS41NDggMTQuOTM5IDEyMS4zNzggMTkuOTA0IEMxMjAuODY2IDI0LjE1NyAxMTkuMjggMjYuMzAzIDExNi4wMyAyOC45NjIgQzEwNS43NyAzMy41NDYgOTMuOTc2IDMyLjcwOSA4Mi45NjggMzIuOSBDODEuMTM0IDMyLjkzOCA3OS4zMDEgMzIuOTc3IDc3LjQ2OCAzMy4wMTcgQzczLjAxIDMzLjExMiA2OC41NTEgMzMuMTk2IDY0LjA5MyAzMy4yNzUgQzY0LjA5NSAzNC4wNTQgNjQuMDk3IDM0LjgzMyA2NC4wOTkgMzUuNjM2IEM2NC4xNTIgNjAuODk1IDY0LjAyMSA4Ni4xNTMgNjMuODA1IDExMS40MTEgQzYzLjc1NSAxMTcuMzI3IDYzLjcwOCAxMjMuMjQ0IDYzLjY3MSAxMjkuMTYgQzYzLjYzNCAxMzQuOTkxIDYzLjU4OCAxNDAuODIxIDYzLjUzNSAxNDYuNjUyIEM2My41MTYgMTQ4Ljg0NyA2My41MDEgMTUxLjA0MyA2My40ODkgMTUzLjIzOCBDNjMuNDczIDE1Ni4yODQgNjMuNDQ0IDE1OS4zMjkgNjMuNDEyIDE2Mi4zNzUgQzYzLjQwOSAxNjMuMjY0IDYzLjQwNyAxNjQuMTUyIDYzLjQwNSAxNjUuMDY4IEM2My4yOTkgMTczLjAyOSA2Mi4yODQgMTc5Ljg5NyA1Ny4wOTMgMTg2LjI3NSBDNTEuNDYyIDE5MC40MTkgNDUuODE0IDE4OS44NzYgMzkuMDkzIDE4OS4yNzUgQzM0LjgyNyAxODguMDAyIDMzLjAzNCAxODYuNTM2IDMwLjc4IDE4Mi44MzcgQzI4LjUyNSAxNzguMDc1IDI3Ljk2OCAxNzQuNjYxIDI3Ljk3MyAxNjkuNDAzIEMyNy45NzEgMTY4LjIwMiAyNy45NyAxNjcuMDAyIDI3Ljk2OCAxNjUuNzY1IEMyNy45NyAxNjUuMTA5IDI3Ljk3IDE2NS4xMDkgMjcuOTc5IDE2MS43ODUgQzI3Ljk4IDE2MC4zODYgMjcuOTc5IDE1OC45ODYgMjcuOTc5IDE1Ny41ODcgQzI3Ljk3OSAxNTMuNzg5IDI3Ljk4NCAxNDkuOTkyIDI3Ljk5MSAxNDYuMTk1IEMyNy45OTggMTQyLjIyNiAyNy45OTggMTM4LjI1NyAyNy45OTkgMTM0LjI4OCBDMjguMDAzIDEyNi43NzMgMjguMDExIDExOS4yNTcgMjguMDIxIDExMS43NDIgQzI4LjAzMiAxMDMuMTg2IDI4LjAzNyA5NC42MyAyOC4wNDIgODYuMDc0IEMyOC4wNTMgNjguNDc0IDI4LjA3IDUwLjg3NCAyOC4wOTMgMzMuMjc1IEMyNy4yOTMgMzMuMjc5IDI2LjQ5MyAzMy4yODMgMjUuNjY5IDMzLjI4OCBDMjIuMDAzIDMzLjMwNSAxOC4zMzcgMzMuMzE1IDE0LjY3MSAzMy4zMjUgQzE0LjA0MiAzMy4zMjkgMTQuMDQyIDMzLjMyOSAxMC44NTkgMzMuMzQ2IEMtMTguNDU3IDMzLjQwOCAtMTguNDU3IDMzLjQwOCAtMjUuNDU0IDI2LjgxOCBDLTI5LjEwNCAyMi42MDMgLTMwLjIzMSAxOS44ODYgLTMwLjExIDE0LjI5OCBDLTI5Ljc5NyAxMS4xNzUgLTI4Ljk2NSA5LjY1NSAtMjYuOTA3IDcuMjc1IEMtMTguNjk1IDAuNzgxIC0xMC4xMzYgLTAuMDI1IDAgMCBaICIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTQuOTA3MjI2NTYyNSwyNi43MjUzNDE3OTY4NzUpIi8+CiAgPHBhdGggZD0iTTAgMCBDOS4wMTggOS42NzMgMTIuNjU2IDIxLjc1OCAxMi40NzcgMzQuODAxIEMxMS45OTQgNDAuNjkxIDEwLjYyMyA0NS42OTcgNi45NDkgNTAuMzYzIEMtMC4xMTUgNTUuNzg1IC02LjY5NiA1Ni41NTkgLTE1LjM2MyA1Ni45ODggQy0xNi4yMDMgNTcuMDMgLTE3LjA0MyA1Ny4wNzIgLTE3LjkwOCA1Ny4xMTUgQy0zNS41NDEgNTcuOTIxIC01My4xMTQgNTcuMjAyIC03MC43MzggNTYuNDI2IEMtNzAuNDQ1IDU3Ljg2OCAtNzAuMTQ0IDU5LjMxIC02OS44NCA2MC43NSBDLTY5LjY3MyA2MS41NTMgLTY5LjUwNiA2Mi4zNTUgLTY5LjMzNCA2My4xODIgQy02OC4yOTIgNjcuMTA0IC02Ni4zOTYgNjkuMzUxIC02My4wMTYgNzEuNTQzIEMtNDguMzk5IDc5LjUwNSAtMzIuODQ0IDc2Ljk5IC0xNy41NjYgNzIuNTYxIEMtMTAuNjE2IDcwLjYxMiAtMy45NjYgNjkuNTk4IDMuMjYyIDcwLjQyNiBDNi4zMzUgNzIuMjM0IDcuNjkyIDczLjI4NiA5LjI2MiA3Ni40MjYgQzkuNzk5IDgxLjMyNSA5LjgyOCA4NS4yNyA3LjYzNyA4OS43MzggQy00LjI1NiAxMDMuMTk2IC0yMS45NTIgMTA2LjI4MSAtMzkuMTYgMTA3LjYxMyBDLTU1LjQ5NSAxMDguMTA1IC03NC42MjcgMTA0LjIyOCAtODcuMjExIDkzLjI3MyBDLTk5LjkzNCA4MC4xNjkgLTEwMy4yODYgNjMuMTAxIC0xMDMuMTU2IDQ1LjQ1OCBDLTEwMi42NTcgMjguMDA0IC05Ny45NiAxMC4wMTUgLTg1LjM2MyAtMi42OTkgQy02MC41MDYgLTI1LjQ3NCAtMjMuOTYyIC0yMi4zODIgMCAwIFogTS02My43MzggMTguNDI2IEMtNjYuNzEzIDIyLjgyOCAtNjguNzM4IDI2LjAzMiAtNjguNzM4IDMxLjQyNiBDLTYxLjQ5MyAzMS40NTEgLTU0LjI0OSAzMS40NjkgLTQ3LjAwNCAzMS40ODEgQy00NC41MzcgMzEuNDg2IC00Mi4wNyAzMS40OTMgLTM5LjYwMyAzMS41MDEgQy0zNi4wNjYgMzEuNTEzIC0zMi41MjkgMzEuNTE5IC0yOC45OTIgMzEuNTIzIEMtMjcuODgyIDMxLjUyOSAtMjYuNzcxIDMxLjUzNCAtMjUuNjI3IDMxLjUzOSBDLTI0LjYwNiAzMS41MzkgLTIzLjU4NSAzMS41MzkgLTIyLjUzMyAzMS41MzkgQy0yMi4wODIgMzEuNTQgLTIyLjA4MiAzMS41NCAtMTkuNzk1IDMxLjU0NiBDLTE3LjczOCAzMS40MjYgLTE3LjczOCAzMS40MjYgLTE2LjczOCAzMC40MjYgQy0xNi43MzggMjQuMzk0IC0xOC44MDkgMjEuNTQyIC0yMi44OTggMTcuMjE5IEMtMjguNDk3IDExLjc2MyAtMzIuNDY1IDkuMTM4IC00MC4zNjMgOS4wNTEgQy00OS42NDIgOS4xOTUgLTU3LjIwNyAxMS41OSAtNjMuNzM4IDE4LjQyNiBaICIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODU3LjczODI4MTI1LDEwOC41NzQyMTg3NSkiLz4KICA8cGF0aCBkPSJNMCAwIEM5LjU1NCAzLjg5MiAxMy42MjMgMTcuMTg0IDE3LjU2MiAyNiBDMjEuOTI3IDM1LjYxNSAyNi40NTkgNDUuMTIzIDMxLjE4OCA1NC41NjIgQzMxLjc1MiA1NS42OTIgMzIuMzE3IDU2LjgyMiAzMi44OTkgNTcuOTg2IEMzNi44NjQgNjUuODY0IDM2Ljg2NCA2NS44NjQgMzggNjcgQzM5LjkwNCA2My4yNTQgNDEuNzk4IDU5LjUwMyA0My42ODggNTUuNzUgQzQ0LjI3IDU0LjU5NCA0NC44NTIgNTMuNDM5IDQ1LjQ1MiA1Mi4yNDggQzQ4LjU4MyA0NS45OTkgNTEuNjI0IDM5LjcyMSA1NC41MTIgMzMuMzU1IEM1NC43OTYgMzIuNzMyIDU1LjA3OSAzMi4xMDkgNTUuMzcyIDMxLjQ2NyBDNTYuNzM4IDI4LjQ2MSA1OC4wODkgMjUuNDUxIDU5LjQyMSAyMi40MzEgQzYyLjU0MiAxNS41MjEgNjYuMDMxIDkuNzMxIDcxIDQgQzcxLjcyMiAzLjE1NCA3Mi40NDQgMi4zMDkgNzMuMTg4IDEuNDM4IEM3Ny45MzIgLTAuOTg3IDgyLjc5NyAtMC42OTkgODggMCBDOTIuNDE5IDIuMTMxIDk1LjQzMSA0LjgxNCA5OCA5IEMxMDEuMDE4IDIwLjQ2OCA5NS4wOTEgMzEuNzMgOTAuMTg4IDQxLjg3NSBDODkuNjEgNDMuMDkxIDg5LjAzMyA0NC4zMDcgODguNDU3IDQ1LjUyMyBDODcuMjUyIDQ4LjA2NyA4Ni4wNDIgNTAuNjA4IDg0LjgyOSA1My4xNDcgQzgzLjAzMiA1Ni45MjEgODEuMjczIDYwLjcxMiA3OS41MjMgNjQuNTA4IEM3My45NjQgNzYuNTYzIDY4LjMyNyA4OC41ODEgNjIuNDU5IDEwMC40OSBDNjEuNTkzIDEwMi4yNSA2MC43MzcgMTA0LjAxNSA1OS44ODEgMTA1Ljc3OSBDNTEuMDExIDEyMy42MTMgNTEuMDExIDEyMy42MTMgNDMgMTI4IEMzOC45MTUgMTI4Ljk2IDM1LjU5MiAxMjguODk0IDMxLjg4NyAxMjYuODEyIEMyMy4wMjggMTE5LjY1NyAxOC4yODggMTA4LjkyNiAxMy40MDYgOTguOTAyIEMxMS42MTUgOTUuMjI2IDkuNzcxIDkxLjU4MSA3LjkwNiA4Ny45NDEgQzEuMTcgNzQuNzQxIC01LjE4OCA2MS40MjYgLTExLjE4OCA0Ny44NzUgQy0xMS41MDkgNDcuMTUzIC0xMS44MzEgNDYuNDMgLTEyLjE2MyA0NS42ODYgQy0yMS40NDYgMjQuODAxIC0yMS40NDYgMjQuODAxIC0yMS4zNzUgMTUuMTg4IEMtMjEuMzgzIDE0LjEyOSAtMjEuMzkgMTMuMDcxIC0yMS4zOTggMTEuOTggQy0yMC43ODUgNy4zOTEgLTE4Ljg3MyA0LjgyOCAtMTUuNTYyIDEuNjg4IEMtMTAuMzUzIC0wLjc4IC01LjY2NiAtMC43MzQgMCAwIFogIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzOTMsODkpIi8+CiAgPHBhdGggZD0iTTAgMCBDMS4yODYgLTAuMDI4IDIuNTczIC0wLjA1NyAzLjg5OCAtMC4wODYgQzguMTk4IDAuNDQ2IDEwLjI5MyAxLjY2MSAxMy42MjUgNC4zNzUgQzE2LjY0MyA5LjAxIDE3LjYxMiAxNC4wMTQgMTguNjI1IDE5LjM3NSBDMTkuNTMyIDE4LjQ4OCAyMC40NCAxNy42MDEgMjEuMzc1IDE2LjY4OCBDMzIuMTM0IDcuNDQgNDYuMDU5IDYuNDU4IDU5LjYyNSA3LjM3NSBDNjcuNjI3IDguNTUxIDc0LjAxNCAxMS44MjEgODAuNjI1IDE2LjM3NSBDODEuMjI0IDE2Ljc3NyA4MS44MjQgMTcuMTc5IDgyLjQ0MSAxNy41OTQgQzg2LjYxMSAyMC42ODcgODkuMTU3IDI0LjQ0MiA5MC42MjUgMjkuMzc1IEM5MS4wNTggMzUuMDA2IDg5LjIzNyAzOS4wNDEgODUuNjI1IDQzLjM3NSBDODEuMDc0IDQ2LjU1MyA3Ni4zODEgNDQuOTY3IDcxLjIxNSA0NC4xNTYgQzY4LjA1MSA0My40NjggNjUuNDg3IDQyLjU5NSA2Mi41NjIgNDEuMjUgQzU1LjEwNCAzNy45OTIgNDYuOTY4IDM4LjE5NCAzOS4zNzUgNDEgQzMxLjgxMiA0NC40OTkgMjMuOTAxIDQ4Ljk2NiAxOS42MjUgNTYuMzc1IEMxOC43NzMgNjAuNTUgMTguODM0IDY0LjYzOCAxOC44OTEgNjguODg3IEMxOC44ODIgNzAuMDkxIDE4Ljg3MyA3MS4yOTYgMTguODYzIDcyLjUzNyBDMTguODM5IDc2LjM3OSAxOC44NTUgODAuMjIgMTguODc1IDg0LjA2MiBDMTguODc0IDg3Ljg4NyAxOC44NjQgOTEuNzEgMTguODQ0IDk1LjUzNCBDMTguODM0IDk3LjkwOSAxOC44MzUgMTAwLjI4MyAxOC44NSAxMDIuNjU3IEMxOC44NDUgMTEzLjg3NiAxOC42MzcgMTI2LjM2MyAxMC4yNSAxMzQuNzUgQzUuMDMxIDEzNy45ODEgLTAuMjg3IDEzOS4zNjEgLTYuMzc1IDEzOC4zNzUgQy0xMS4xMjUgMTM1LjkwOCAtMTUuMjkzIDEzMi43NzMgLTE2Ljk3NCAxMjcuNDk0IEMtMTguMzIxIDEyMS42MjYgLTE4LjY2NiAxMTYuMDY2IC0xOC42NSAxMTAuMDU3IEMtMTguNjU1IDEwOS4wNjcgLTE4LjY2IDEwOC4wNzcgLTE4LjY2NSAxMDcuMDU3IEMtMTguNjc5IDEwMy44MSAtMTguNjc4IDEwMC41NjMgLTE4LjY3NiA5Ny4zMTYgQy0xOC42OCA5NS4wNDQgLTE4LjY4NCA5Mi43NzEgLTE4LjY4OSA5MC40OTkgQy0xOC42OTYgODUuNzQ2IC0xOC42OTYgODAuOTkyIC0xOC42OTEgNzYuMjM5IEMtMTguNjg1IDcwLjE2NSAtMTguNzAyIDY0LjA5MiAtMTguNzI1IDU4LjAxOSBDLTE4Ljc0IDUzLjMyOCAtMTguNzQxIDQ4LjYzOCAtMTguNzM4IDQzLjk0OCBDLTE4LjczOCA0MS43MSAtMTguNzQzIDM5LjQ3MSAtMTguNzUzIDM3LjIzMiBDLTE4Ljc2NiAzNC4wOTYgLTE4Ljc1OSAzMC45NTkgLTE4Ljc0NyAyNy44MjMgQy0xOC43NTUgMjYuOTA5IC0xOC43NjMgMjUuOTk2IC0xOC43NyAyNS4wNTYgQy0xOC43MTEgMTcuNjM5IC0xNy41MSAxMC42ODEgLTEzLjQzOCA0LjM3NSBDLTkuMjUyIDAuMzE2IC01Ljc4MSAwLjA1OCAwIDAgWiAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwMi4zNzUsODEuNjI1KSIvPgogIDxwYXRoIGQ9Ik0wIDAgQzcuODQyIDguODU4IDUuMjkxIDI1LjAxIDUuMjY2IDM2LjA2NiBDNS4yNjcgMzguMTEyIDUuMjY5IDQwLjE1NyA1LjI3MSA0Mi4yMDMgQzUuMjc0IDQ2LjQ3MyA1LjI3IDUwLjc0NCA1LjI2MSA1NS4wMTQgQzUuMjQ5IDYwLjQ2NyA1LjI1NiA2NS45MTkgNS4yNjggNzEuMzcyIEM1LjI3NSA3NS41OSA1LjI3MyA3OS44MDggNS4yNjggODQuMDI3IEM1LjI2NiA4Ni4wMzYgNS4yNjggODguMDQ2IDUuMjczIDkwLjA1NiBDNS4yNzggOTIuODcxIDUuMjcgOTUuNjg3IDUuMjU5IDk4LjUwMiBDNS4yNjMgOTkuMzE5IDUuMjY3IDEwMC4xMzUgNS4yNzEgMTAwLjk3NiBDNS4yMDYgMTA5Ljk0OSA0LjMgMTE5LjcgLTIuMzEyIDEyNi4zMTIgQy02LjYyMiAxMjkuMDE4IC0xMC4xNSAxMjkuMzM1IC0xNS4wNjIgMTI4LjM3NSBDLTE5LjE2MyAxMjcuMTg2IC0yMS4zNzkgMTI1LjQ0NSAtMjQgMTIyIEMtMjcuMDM4IDExNS43MjEgLTI4LjA5MyAxMDkuNDc2IC0yOC4zMTYgMTAyLjUzNSBDLTI4LjMzNyAxMDEuODkgLTI4LjM1OCAxMDEuMjQ0IC0yOC4zOCAxMDAuNTc5IEMtMjguNDQ3IDk4LjQwNyAtMjguNTA2IDk2LjIzNSAtMjguNTYyIDk0LjA2MiBDLTI4LjU4MyA5My4zMDYgLTI4LjYwNCA5Mi41NDkgLTI4LjYyNSA5MS43NjkgQy0yOS4wMDYgNzcuMjE5IC0yOS4xMzQgNjIuNjY3IC0yOS4xNzYgNDguMTEzIEMtMjkuMTg0IDQ1LjcyIC0yOS4xOTQgNDMuMzI2IC0yOS4yMDggNDAuOTMzIEMtMjkuMjI2IDM3LjUyOCAtMjkuMjMgMzQuMTI0IC0yOS4yMyAzMC43MTkgQy0yOS4yMzggMjkuNzE0IC0yOS4yNDUgMjguNzA5IC0yOS4yNTIgMjcuNjczIEMtMjkuMjIyIDE4LjIwMyAtMjkuMDYgNy42OTggLTIzIDAgQy0xNS40MzggLTQuNTk2IC03LjU1IC00LjIyOCAwIDAgWiAiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU0Miw4NykiLz4KICA8cGF0aCBkPSJNMCAwIEM3Ljg2MyA4Ljg2MiA1LjMxIDI1LjE0MyA1LjMwMSAzNi4yMTUgQzUuMzA1IDM4LjI3OCA1LjMwOSA0MC4zNDEgNS4zMTQgNDIuNDA0IEM1LjMyMSA0Ni43MTMgNS4zMjEgNTEuMDIyIDUuMzE2IDU1LjMzMiBDNS4zMSA2MC44MjcgNS4zMjcgNjYuMzIxIDUuMzUgNzEuODE2IEM1LjM2NSA3Ni4wNzIgNS4zNjYgODAuMzI4IDUuMzYzIDg0LjU4NSBDNS4zNjMgODYuNjA5IDUuMzY4IDg4LjYzNCA1LjM3OCA5MC42NTkgQzUuNDkyIDExNi41ODEgNS40OTIgMTE2LjU4MSAtMC4xODggMTI0LjYyNSBDLTQuMjY0IDEyOC4wNjcgLTcuNzY3IDEyOS4xNCAtMTMuMDgyIDEyOC45MSBDLTE3Ljg0MSAxMjguMSAtMjAuODEzIDEyNi4xMTcgLTIzLjY1NCAxMjIuMjI1IEMtMjkuMDAxIDExMy4zODcgLTI4LjU0NiAxMDIuNTUzIC0yOC42ODggOTIuNTYyIEMtMjguNzE5IDkwLjkzNiAtMjguNzUyIDg5LjMxIC0yOC43ODQgODcuNjg0IEMtMjguODg3IDgyLjEyMyAtMjguOTQ3IDc2LjU2MiAtMjkgNzEgQy0yOS4wMTEgNjkuOTIyIC0yOS4wMjIgNjguODQzIC0yOS4wMzMgNjcuNzMyIEMtMjkuMTAxIDYwLjc2OSAtMjkuMTQ5IDUzLjgwNSAtMjkuMTc0IDQ2Ljg0MSBDLTI5LjE4MyA0NC41NDggLTI5LjE5NSA0Mi4yNTUgLTI5LjIwOSAzOS45NjIgQy0yOS4yMjcgMzYuNzEyIC0yOS4yMzEgMzMuNDYyIC0yOS4yMyAzMC4yMTEgQy0yOS4yMzggMjkuMjU2IC0yOS4yNDUgMjguMzAxIC0yOS4yNTIgMjcuMzE3IEMtMjkuMTg5IDguMDk5IC0yOS4xODkgOC4wOTkgLTIzIDEgQy0xNi4zMjUgLTUuMDQ5IC03LjQzOCAtNC4wODQgMCAwIFogIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzNDMsODcpIi8+CiAgPHBhdGggZD0iTTAgMCBDNC45MDYgMy4xMzEgOS42NTIgNi4yNjUgMTEuMTU2IDEyLjE1MiBDMTEuODQ0IDE2LjU3NyAxMS45MSAxOS4xMDYgOS45MzggMjMuMjAzIEM0LjY5NyAyOC45OTUgMC4zNzEgMzEuMjI2IC03LjQzOCAzMS44MjggQy0xMy4xMzQgMzAuNzUzIC0xNi44NjggMjcuOTkyIC0yMC4yNSAyMy4zMjggQy0yMi40MiAxNi45MzMgLTIyLjYzNCAxMC40NSAtMTkuODEyIDQuMjY2IEMtMTQuMzUyIC0xLjMzOSAtNy4yNTEgLTMuNDg2IDAgMCBaICIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNTM3LjQzNzUsMzAuMTcxODc1KSIvPgogIDxwYXRoIGQ9Ik0wIDAgQzUuMzU4IDMuMTM0IDkuODE1IDcuMDcxIDExLjgyIDEzLjA4NiBDMTIuMjk3IDE4LjAzOSAxMS43OTMgMjEuMzc3IDkuMTQ1IDI1LjUxMiBDNS45MTIgMjkuMzU0IDEuNzQ3IDMxLjExNiAtMy4xMTcgMzIuMDIzIEMtNy41OSAzMi4zOCAtMTEuMzA5IDMxLjMyMyAtMTUuMTggMjkuMDg2IEMtMTkuNjIzIDI0LjY0MiAtMjEuMjczIDIwLjQwNyAtMjEuNTU1IDE0LjIxMSBDLTIxLjQzMSA5LjAxIC0yMC4zNzIgNi4yMDIgLTE3LjE4IDIuMDg2IEMtMTIuMDQ0IC0xLjYxNiAtNS44ODEgLTIuNDY2IDAgMCBaICIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzM4LjE3OTY4NzUsMjkuOTE0MDYyNSkiLz4KICA8L2c+Cjwvc3ZnPgo=" alt=""></span>
+<!-- ============ 시작 화면 ============ -->
+<div id="splash" aria-hidden="true">
+  <div class="sp-inner">
+    <div class="sp-brand">
+      <img class="sp-icon" alt="" src="data:image/png;base64,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">
+      <svg class="sp-logo" viewBox="0 0 895 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TriviMe"><g fill="#FFFFFF" fill-rule="evenodd">
+  <path d="M0 0 C3.149 2.436 5.717 5.064 8.234 8.121 C8.71 8.694 9.185 9.267 9.675 9.857 C22.483 25.575 32.588 43.755 42.871 61.176 C43.28 61.868 43.689 62.56 44.111 63.273 C45.143 65.029 46.166 66.789 47.188 68.551 C48.9 71.179 50.678 73.196 52.984 75.309 C53.506 74.495 54.029 73.682 54.566 72.844 C54.915 72.3 55.264 71.757 55.624 71.198 C56.424 69.952 57.223 68.706 58.023 67.461 C60.182 64.099 62.35 60.744 64.539 57.402 C70.543 48.219 76.319 38.919 81.95 29.502 C99.433 0.45 99.433 0.45 110.074 -2.215 C115.238 -3.009 120.197 -2.949 124.984 -0.691 C130.648 4.357 131.736 10.214 132.185 17.615 C132.291 21.626 132.332 25.632 132.351 29.644 C132.365 31.182 132.38 32.721 132.396 34.259 C132.436 38.416 132.463 42.574 132.488 46.731 C132.509 50.212 132.537 53.693 132.564 57.175 C132.627 65.394 132.68 73.614 132.727 81.833 C132.776 90.287 132.843 98.741 132.918 107.195 C132.983 114.476 133.036 121.757 133.079 129.038 C133.105 133.377 133.135 137.715 133.177 142.054 C133.217 146.137 133.241 150.221 133.254 154.305 C133.261 155.794 133.273 157.284 133.292 158.774 C133.54 179.879 133.54 179.879 128.308 186.397 C125.194 189.328 122.328 191.097 117.984 191.309 C116.685 191.391 115.386 191.474 114.047 191.559 C108.492 191.454 105.193 189.49 101.234 185.621 C96.402 179.308 96.686 171.303 96.681 163.718 C96.673 162.687 96.665 161.657 96.656 160.596 C96.63 157.212 96.618 153.829 96.605 150.445 C96.589 148.087 96.572 145.729 96.554 143.372 C96.508 137.18 96.474 130.988 96.442 124.797 C96.39 114.869 96.325 104.941 96.254 95.013 C96.231 91.544 96.214 88.074 96.199 84.605 C96.185 82.487 96.172 80.37 96.158 78.253 C96.155 77.285 96.153 76.317 96.15 75.32 C96.143 74.435 96.136 73.551 96.129 72.64 C96.125 71.871 96.121 71.103 96.117 70.311 C95.984 68.309 95.984 68.309 94.984 65.309 C94.673 65.836 94.362 66.363 94.042 66.906 C67.807 111.265 67.807 111.265 55.984 116.684 C51.646 117.587 48.968 117.394 45.027 115.238 C30.02 104.909 19.287 84.492 10.304 69.024 C9.68 67.952 9.057 66.879 8.414 65.774 C7.942 64.96 7.47 64.147 6.984 63.309 C6.974 64.05 6.964 64.792 6.953 65.556 C6.672 85.741 6.372 105.926 6.051 126.11 C5.99 129.964 5.93 133.818 5.871 137.671 C5.79 142.857 5.699 148.042 5.599 153.227 C5.564 155.058 5.533 156.89 5.506 158.722 C5.467 161.234 5.417 163.746 5.363 166.258 C5.359 166.612 5.359 166.612 5.338 168.405 C5.153 175.792 3.991 182.344 -1.188 187.824 C-5.121 191.018 -9.319 192.42 -14.383 192.211 C-19.859 191.261 -23.236 189.358 -27.016 185.309 C-32.488 176.063 -31.159 163.824 -31.069 153.425 C-31.063 152.197 -31.056 150.969 -31.05 149.704 C-31.031 146.369 -31.007 143.033 -30.981 139.697 C-30.959 136.886 -30.941 134.074 -30.922 131.263 C-30.878 124.605 -30.827 117.947 -30.774 111.29 C-30.719 104.496 -30.675 97.703 -30.636 90.909 C-30.602 85.02 -30.56 79.13 -30.514 73.241 C-30.486 69.75 -30.461 66.258 -30.443 62.766 C-30.366 49.078 -30.126 35.432 -29.175 21.774 C-29.107 20.702 -29.038 19.629 -28.968 18.524 C-28.426 11.64 -27.243 6.957 -22.703 1.559 C-16.203 -3.884 -7.347 -4.121 0 0 Z " transform="translate(601.015625,27.69140625)"/>
+  <path d="M0 0 C0.532 -0.003 0.532 -0.003 3.226 -0.015 C6.728 -0.029 10.231 -0.028 13.733 -0.026 C16.182 -0.03 18.63 -0.034 21.079 -0.039 C26.206 -0.047 31.334 -0.046 36.461 -0.041 C43.009 -0.035 49.556 -0.052 56.104 -0.075 C61.16 -0.09 66.217 -0.091 71.274 -0.088 C73.686 -0.088 76.099 -0.094 78.512 -0.104 C81.897 -0.116 85.282 -0.109 88.668 -0.098 C89.65 -0.105 90.632 -0.113 91.644 -0.121 C100.823 -0.052 110.951 1.048 118.093 7.275 C121.511 11.149 121.548 14.939 121.378 19.904 C120.866 24.157 119.28 26.303 116.03 28.962 C105.77 33.546 93.976 32.709 82.968 32.9 C81.134 32.938 79.301 32.977 77.468 33.017 C73.01 33.112 68.551 33.196 64.093 33.275 C64.095 34.054 64.097 34.833 64.099 35.636 C64.152 60.895 64.021 86.153 63.805 111.411 C63.755 117.327 63.708 123.244 63.671 129.16 C63.634 134.991 63.588 140.821 63.535 146.652 C63.516 148.847 63.501 151.043 63.489 153.238 C63.473 156.284 63.444 159.329 63.412 162.375 C63.409 163.264 63.407 164.152 63.405 165.068 C63.299 173.029 62.284 179.897 57.093 186.275 C51.462 190.419 45.814 189.876 39.093 189.275 C34.827 188.002 33.034 186.536 30.78 182.837 C28.525 178.075 27.968 174.661 27.973 169.403 C27.971 168.202 27.97 167.002 27.968 165.765 C27.97 165.109 27.97 165.109 27.979 161.785 C27.98 160.386 27.979 158.986 27.979 157.587 C27.979 153.789 27.984 149.992 27.991 146.195 C27.998 142.226 27.998 138.257 27.999 134.288 C28.003 126.773 28.011 119.257 28.021 111.742 C28.032 103.186 28.037 94.63 28.042 86.074 C28.053 68.474 28.07 50.874 28.093 33.275 C27.293 33.279 26.493 33.283 25.669 33.288 C22.003 33.305 18.337 33.315 14.671 33.325 C14.042 33.329 14.042 33.329 10.859 33.346 C-18.457 33.408 -18.457 33.408 -25.454 26.818 C-29.104 22.603 -30.231 19.886 -30.11 14.298 C-29.797 11.175 -28.965 9.655 -26.907 7.275 C-18.695 0.781 -10.136 -0.025 0 0 Z " transform="translate(54.9072265625,26.725341796875)"/>
+  <path d="M0 0 C9.018 9.673 12.656 21.758 12.477 34.801 C11.994 40.691 10.623 45.697 6.949 50.363 C-0.115 55.785 -6.696 56.559 -15.363 56.988 C-16.203 57.03 -17.043 57.072 -17.908 57.115 C-35.541 57.921 -53.114 57.202 -70.738 56.426 C-70.445 57.868 -70.144 59.31 -69.84 60.75 C-69.673 61.553 -69.506 62.355 -69.334 63.182 C-68.292 67.104 -66.396 69.351 -63.016 71.543 C-48.399 79.505 -32.844 76.99 -17.566 72.561 C-10.616 70.612 -3.966 69.598 3.262 70.426 C6.335 72.234 7.692 73.286 9.262 76.426 C9.799 81.325 9.828 85.27 7.637 89.738 C-4.256 103.196 -21.952 106.281 -39.16 107.613 C-55.495 108.105 -74.627 104.228 -87.211 93.273 C-99.934 80.169 -103.286 63.101 -103.156 45.458 C-102.657 28.004 -97.96 10.015 -85.363 -2.699 C-60.506 -25.474 -23.962 -22.382 0 0 Z M-63.738 18.426 C-66.713 22.828 -68.738 26.032 -68.738 31.426 C-61.493 31.451 -54.249 31.469 -47.004 31.481 C-44.537 31.486 -42.07 31.493 -39.603 31.501 C-36.066 31.513 -32.529 31.519 -28.992 31.523 C-27.882 31.529 -26.771 31.534 -25.627 31.539 C-24.606 31.539 -23.585 31.539 -22.533 31.539 C-22.082 31.54 -22.082 31.54 -19.795 31.546 C-17.738 31.426 -17.738 31.426 -16.738 30.426 C-16.738 24.394 -18.809 21.542 -22.898 17.219 C-28.497 11.763 -32.465 9.138 -40.363 9.051 C-49.642 9.195 -57.207 11.59 -63.738 18.426 Z " transform="translate(857.73828125,108.57421875)"/>
+  <path d="M0 0 C9.554 3.892 13.623 17.184 17.562 26 C21.927 35.615 26.459 45.123 31.188 54.562 C31.752 55.692 32.317 56.822 32.899 57.986 C36.864 65.864 36.864 65.864 38 67 C39.904 63.254 41.798 59.503 43.688 55.75 C44.27 54.594 44.852 53.439 45.452 52.248 C48.583 45.999 51.624 39.721 54.512 33.355 C54.796 32.732 55.079 32.109 55.372 31.467 C56.738 28.461 58.089 25.451 59.421 22.431 C62.542 15.521 66.031 9.731 71 4 C71.722 3.154 72.444 2.309 73.188 1.438 C77.932 -0.987 82.797 -0.699 88 0 C92.419 2.131 95.431 4.814 98 9 C101.018 20.468 95.091 31.73 90.188 41.875 C89.61 43.091 89.033 44.307 88.457 45.523 C87.252 48.067 86.042 50.608 84.829 53.147 C83.032 56.921 81.273 60.712 79.523 64.508 C73.964 76.563 68.327 88.581 62.459 100.49 C61.593 102.25 60.737 104.015 59.881 105.779 C51.011 123.613 51.011 123.613 43 128 C38.915 128.96 35.592 128.894 31.887 126.812 C23.028 119.657 18.288 108.926 13.406 98.902 C11.615 95.226 9.771 91.581 7.906 87.941 C1.17 74.741 -5.188 61.426 -11.188 47.875 C-11.509 47.153 -11.831 46.43 -12.163 45.686 C-21.446 24.801 -21.446 24.801 -21.375 15.188 C-21.383 14.129 -21.39 13.071 -21.398 11.98 C-20.785 7.391 -18.873 4.828 -15.562 1.688 C-10.353 -0.78 -5.666 -0.734 0 0 Z " transform="translate(393,89)"/>
+  <path d="M0 0 C1.286 -0.028 2.573 -0.057 3.898 -0.086 C8.198 0.446 10.293 1.661 13.625 4.375 C16.643 9.01 17.612 14.014 18.625 19.375 C19.532 18.488 20.44 17.601 21.375 16.688 C32.134 7.44 46.059 6.458 59.625 7.375 C67.627 8.551 74.014 11.821 80.625 16.375 C81.224 16.777 81.824 17.179 82.441 17.594 C86.611 20.687 89.157 24.442 90.625 29.375 C91.058 35.006 89.237 39.041 85.625 43.375 C81.074 46.553 76.381 44.967 71.215 44.156 C68.051 43.468 65.487 42.595 62.562 41.25 C55.104 37.992 46.968 38.194 39.375 41 C31.812 44.499 23.901 48.966 19.625 56.375 C18.773 60.55 18.834 64.638 18.891 68.887 C18.882 70.091 18.873 71.296 18.863 72.537 C18.839 76.379 18.855 80.22 18.875 84.062 C18.874 87.887 18.864 91.71 18.844 95.534 C18.834 97.909 18.835 100.283 18.85 102.657 C18.845 113.876 18.637 126.363 10.25 134.75 C5.031 137.981 -0.287 139.361 -6.375 138.375 C-11.125 135.908 -15.293 132.773 -16.974 127.494 C-18.321 121.626 -18.666 116.066 -18.65 110.057 C-18.655 109.067 -18.66 108.077 -18.665 107.057 C-18.679 103.81 -18.678 100.563 -18.676 97.316 C-18.68 95.044 -18.684 92.771 -18.689 90.499 C-18.696 85.746 -18.696 80.992 -18.691 76.239 C-18.685 70.165 -18.702 64.092 -18.725 58.019 C-18.74 53.328 -18.741 48.638 -18.738 43.948 C-18.738 41.71 -18.743 39.471 -18.753 37.232 C-18.766 34.096 -18.759 30.959 -18.747 27.823 C-18.755 26.909 -18.763 25.996 -18.77 25.056 C-18.711 17.639 -17.51 10.681 -13.438 4.375 C-9.252 0.316 -5.781 0.058 0 0 Z " transform="translate(202.375,81.625)"/>
+  <path d="M0 0 C7.842 8.858 5.291 25.01 5.266 36.066 C5.267 38.112 5.269 40.157 5.271 42.203 C5.274 46.473 5.27 50.744 5.261 55.014 C5.249 60.467 5.256 65.919 5.268 71.372 C5.275 75.59 5.273 79.808 5.268 84.027 C5.266 86.036 5.268 88.046 5.273 90.056 C5.278 92.871 5.27 95.687 5.259 98.502 C5.263 99.319 5.267 100.135 5.271 100.976 C5.206 109.949 4.3 119.7 -2.312 126.312 C-6.622 129.018 -10.15 129.335 -15.062 128.375 C-19.163 127.186 -21.379 125.445 -24 122 C-27.038 115.721 -28.093 109.476 -28.316 102.535 C-28.337 101.89 -28.358 101.244 -28.38 100.579 C-28.447 98.407 -28.506 96.235 -28.562 94.062 C-28.583 93.306 -28.604 92.549 -28.625 91.769 C-29.006 77.219 -29.134 62.667 -29.176 48.113 C-29.184 45.72 -29.194 43.326 -29.208 40.933 C-29.226 37.528 -29.23 34.124 -29.23 30.719 C-29.238 29.714 -29.245 28.709 -29.252 27.673 C-29.222 18.203 -29.06 7.698 -23 0 C-15.438 -4.596 -7.55 -4.228 0 0 Z " transform="translate(542,87)"/>
+  <path d="M0 0 C7.863 8.862 5.31 25.143 5.301 36.215 C5.305 38.278 5.309 40.341 5.314 42.404 C5.321 46.713 5.321 51.022 5.316 55.332 C5.31 60.827 5.327 66.321 5.35 71.816 C5.365 76.072 5.366 80.328 5.363 84.585 C5.363 86.609 5.368 88.634 5.378 90.659 C5.492 116.581 5.492 116.581 -0.188 124.625 C-4.264 128.067 -7.767 129.14 -13.082 128.91 C-17.841 128.1 -20.813 126.117 -23.654 122.225 C-29.001 113.387 -28.546 102.553 -28.688 92.562 C-28.719 90.936 -28.752 89.31 -28.784 87.684 C-28.887 82.123 -28.947 76.562 -29 71 C-29.011 69.922 -29.022 68.843 -29.033 67.732 C-29.101 60.769 -29.149 53.805 -29.174 46.841 C-29.183 44.548 -29.195 42.255 -29.209 39.962 C-29.227 36.712 -29.231 33.462 -29.23 30.211 C-29.238 29.256 -29.245 28.301 -29.252 27.317 C-29.189 8.099 -29.189 8.099 -23 1 C-16.325 -5.049 -7.438 -4.084 0 0 Z " transform="translate(343,87)"/>
+  <path d="M0 0 C4.906 3.131 9.652 6.265 11.156 12.152 C11.844 16.577 11.91 19.106 9.938 23.203 C4.697 28.995 0.371 31.226 -7.438 31.828 C-13.134 30.753 -16.868 27.992 -20.25 23.328 C-22.42 16.933 -22.634 10.45 -19.812 4.266 C-14.352 -1.339 -7.251 -3.486 0 0 Z " transform="translate(537.4375,30.171875)"/>
+  <path d="M0 0 C5.358 3.134 9.815 7.071 11.82 13.086 C12.297 18.039 11.793 21.377 9.145 25.512 C5.912 29.354 1.747 31.116 -3.117 32.023 C-7.59 32.38 -11.309 31.323 -15.18 29.086 C-19.623 24.642 -21.273 20.407 -21.555 14.211 C-21.431 9.01 -20.372 6.202 -17.18 2.086 C-12.044 -1.616 -5.881 -2.466 0 0 Z " transform="translate(338.1796875,29.9140625)"/>
+  </g></svg>
     </div>
-    <p class="splash-tagline">함께 만드는 여행</p>
-    <span class="splash-progress" aria-hidden="true"></span>
+    <p class="sp-tag">함께 계획하고, 같이 떠나요.</p>
+    <p class="sp-en">Trip with me, TriviMe.</p>
+
+    <!-- 이륙하는 비행기 -->
+    <svg class="sp-flight" viewBox="0 0 260 64" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <mask id="spTrailMask">
+          <path d="M8 56 C 70 56, 120 44, 160 28 S 230 8, 252 6" fill="none" pathLength="100"
+                stroke="#fff" stroke-width="6" stroke-linecap="butt"
+                stroke-dasharray="100 100" stroke-dashoffset="100">
+            <animate attributeName="stroke-dashoffset" values="100;100;0"
+                     begin="0s" dur="2.2s" fill="freeze"
+                     calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1" keyTimes="0;0.2;1"/>
+          </path>
+        </mask>
+      </defs>
+      <!-- 활주로 -->
+      <line x1="8" y1="58.5" x2="96" y2="58.5" stroke="rgba(255,255,255,.35)" stroke-width="1.5"
+            stroke-linecap="round" stroke-dasharray="6 6"/>
+      <!-- 지나간 자리 -->
+      <path d="M8 56 C 70 56, 120 44, 160 28 S 230 8, 252 6" fill="none"
+            stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round"
+            stroke-dasharray="1 6" mask="url(#spTrailMask)"/>
+      <!-- 비행기 -->
+      <g>
+        <g transform="scale(1.25)">
+        <path d="M-9 0 L-3 -1.6 L1 -8.5 L3.6 -8.5 L2.2 -1.8 L8.6 -1.4 Q11 0 8.6 1.4 L2.2 1.8 L3.6 8.5 L1 8.5 L-3 1.6 L-9 0 Z
+                 M-8.5 -0.2 L-10.5 -4 L-8.6 -4 L-6 -0.9 Z M-8.5 0.2 L-10.5 4 L-8.6 4 L-6 0.9 Z"
+              fill="#fff"/>
+        </g>
+        <animateMotion begin="0s" dur="2.2s" fill="freeze" rotate="auto"
+                       keyPoints="0;0;1" keyTimes="0;0.2;1"
+                       calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1"
+                       path="M8 56 C 70 56, 120 44, 160 28 S 230 8, 252 6"/>
+      </g>
+    </svg>
   </div>
+  <div class="sp-glow sp-glow-a"></div>
+  <div class="sp-glow sp-glow-b"></div>
 </div>
+
 <div class="app">
 
   <!-- ============ MAP ============ -->
@@ -932,20 +952,20 @@
     <div class="sec-header">
       <div class="sec-title-row">
         <h1 id="schedTitle">일정표</h1>
-        <button class="mini-btn ghost" id="tripSetBtn" aria-expanded="false" aria-controls="tripSet"><span class="icon" data-i="pencil"></span>여행 설정</button>
+        <button class="mini-btn ghost" id="tripSetBtn"><span class="icon" data-i="pencil"></span>여행 설정</button>
       </div>
       <div class="wx-line" id="wxLine"></div>
-      <div class="quick-actions" aria-label="항공편과 숙소">
+      <div class="trip-set" id="tripSet" hidden>
         <button class="stay-row" id="flightBtn">
           <span class="icon" data-i="plane"></span>
           <span class="stay-txt" id="flightLabel">항공편 입력하기</span>
+          <span class="stay-edit">변경</span>
         </button>
         <button class="stay-row" id="stayBtn">
           <span class="icon" data-i="bed"></span>
-          <span class="stay-txt" id="stayLabel">숙소 추가하기</span>
+          <span class="stay-txt" id="stayLabel">숙소 설정하기</span>
+          <span class="stay-edit">변경</span>
         </button>
-      </div>
-      <div class="trip-set" id="tripSet" hidden>
         <button class="stay-row" id="countryBtn">
           <span class="ob-flag" id="countryFlag">🌍</span>
           <span class="stay-txt" id="countryLabel">여행지 설정</span>
@@ -954,10 +974,6 @@
         <div class="set-actions">
           <button class="mini-btn" id="editDayBtn"><span class="icon" data-i="pencil"></span>날짜 편집</button>
           <button class="mini-btn" id="addDayBtn"><span class="icon" data-i="plus"></span>날짜 추가</button>
-        </div>
-        <div class="set-actions" style="margin-top:8px">
-          <button type="button" class="mini-btn" id="scheduleShareBtn"><span class="icon" data-i="share"></span>공유 · 백업</button>
-          <button type="button" class="mini-btn" id="scheduleStatusBtn">저장 · 연결 상태</button>
         </div>
       </div>
       <div class="plan-bar" id="planBar"></div>
@@ -991,42 +1007,44 @@
   </div>
 
   <!-- 첫 방문 온보딩 -->
-  <section class="onboard" id="onboard" aria-labelledby="ob_heading" hidden>
+  <div class="onboard" id="onboard" hidden>
     <div class="ob-inner">
-      <button type="button" class="ob-cancel" id="ob_cancel" hidden>변경 취소</button>
-      <div class="ob-heading"><img class="ob-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjE1Yzc5YWUwLTQ0ZGItNDQzNC1hNjliLWE1M2RjNTlkZDk1OAAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoxmsUjhUxEhCQCAQqfWkk8gAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6NWJiMDEzNGQtM2Q2Yy00ZmUxLThmYjAtZWJjMGMxM2Y1NGY2bHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaLAUGnrfsva+9Vi0nYyNaW4AAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYILUAha5aUWm8IEUxuVOOC/Z7ZiD7Yg3ERYWgB9sBMEcVpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2h2u45BVKCLBLavnkLjb5HJAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFgg7O7gArg8HQFaXwFPl3fcXMqYx/F32Dbi5hpfcKJNtjxkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYToxNWM3OWFlMC00NGRiLTQ0MzQtYTY5Yi1hNTNkYzU5ZGQ5NTgvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDpiY2JhYWRiNC0yMWYxLTQ5YTAtYjU1Ni1kOTkwOTNjOGNiYTRyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggtQCFrlpRabwgRTG5U44L9ntmIPtiDcRFhaAH2wEwRxWiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIDSjLy1B4NsZQgCYa2LEoYGqGKSYHhcA0uCajKYAPPlVomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIEnIdojJ0ZSs3waOYRvaDNk0BsPQHQ6dJby8Gn8g/kQodGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" width="36" height="36" alt=""><h2 class="ob-title" id="ob_heading">TriviMe와 어디로 떠나세요?</h2></div>
-      <p class="ob-sub">여행지와 날짜만 정하면 준비 끝. 장소와 이동 경로를 하나의 일정에 담아보세요.</p>
+      <div class="ob-head">
+        <div class="ob-mark"><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAC0CAYAAAB2ZdXfAAAa9ElEQVR42u2de5Bc1XXuf+s8untekkASYAQo2AY7YMCJBMYOyfAID5vgwo+RQxLZDqFu6sYV8s4tPzAI37q34vg6ldyUXdS1MX7FWLJJYiwjyYAkm/CUMCIIm7eNccBIAjHTPdPT5+yz7h9nb+ZomJFmND3Tp7vPqurq0ainu88+3/6+tddeey2hsNyaXnutx2Xf9WX1zujV3z1+SZmw3DP6QnxFpU9W1mvJcWHo/X6jkagIcsDfg4aBSBzrjZW+YE9jpPF45ZTyLTz1XO2A99yxKuTWnUbWkTTru0tx+/IIKDxOHRJZs8GkN/6/hXX5xdpK4J1QrcWXl0reSg9ZEvT60EiojRpkmjupCn19AYRCoxqDx/4oSh7v6w9uGxszT/ac2fcNEfs5OuRfd90GXdcEgBXAyhOgFNm2bdA/77ztMYA++O5TEk3+oN4wl/UuLr8FT0hGY+I4IYpVEQyoCOIf9H1RA6IofhiIhKGH9ARgEkaHowcDj82ayJcqb9/4BIBuHQw4d7sRQQtgtTuotg4GYgFVv/eSU/zA/0tj+GB5cRgmtZjRuklExCDqoyKTZW/GnwOKqiqSCOr1VgJPenzGXmk0UG4Ujf9Pzzu2PDn5OxXAakOWgiFPZIPZu/WS445YEqxrNPSDlf4gGBuJSBIiUF9EvPn5fE1AjO8RVgZCRl+JIj+QG/e9UP3Eindv32vBZVJMFsBqG+dc1q1LAKp3v/OqUsX/67A/fFNt7zgIsYC/UPdIU+AYgaB3aZm4Fj1cr8V/P3DOpq+l4IfZSGMBrJYx1bWeyLrkma2Dldct6r+63Bf+XVyNqY+b2PMkaOl3SzTq6QlCr+xRHzMfeerpp7/wljWPNtx3LoCVW1AN+SIbTO3281cEi3u2lCr+KaO1ONZEvfmSvNkzmBoRobcv9Otj0YONV8YvWnzhHft0/ZDvVqsFsHIIqr23X7piYDF3lir+ydXhyHjewVd2rbJE1fQvKvn10WjX+Evx+Usu2fLSTMDlFbe6NaDqWyxbS2X/5NpIHOcVVACeiF8bjuJKb3hGeWnpzue+f8FSWbPB6Pohv2CsHNj69UP+mjUbzN7bz18xsLh3a6nsnVQdyS9TTbF6jfoWhWF9zOxq7B+7YPGFd+xTxROZOphaMNYCrf4Aandf2pagAhCPsDocxZUe/4zS4vIdet/lS2FI9NqpMVQw1rzPdBVY4z1x20hw7BHySF9/6Y3V4UZbgSqLFk2I+haHYfWVxkMD77jt11SHfPE2mMmBiIKx5tt2rg5ENphjBvRv+haV3lgbieK2BFW6VESEcPSVKOpfVHpr7a5L/lRkg9E7B4NCChfyPtywKpTVO6Phuy6+auCo3k+NDkeRCEHbXxcEY9U46l1a+aeRuy8dkvO2x7r1QHAVUjhvfhUe10H9vstWIsl2L5Rjo7qRvMSpmiDxplQJxETJE8Yvnde36vRfwjp10fmCsebLLlvli5CYxHy6srh0fFRPtFNABSAifmPMmMoRpTdJNH69yLqEnauCgrHmczavx5c1mJG733laEPgPG2MSQTpuEquivkeCJ3E9afzqEWd//xkXgigYaz5s+aAAeMInyr0+6OHnNeWbtZA4Qct9QTkw4ccA2DboFYw1T76VrCOp/fDSVV6JHUmi2snjrIp6HognDSE+o3LW5sf0WryCsebBtwJQX9dWFoWqYDr5ckWQJCGuLArLxnhXqCJctsovGKvJ46zXIlw8VK5pdVdY8U+Kxl97yKEDWSspV3yvUY8f6n2ufzW7N2jBWM0c4K2DvqwjGWXkj/uOLJ8UjRvT6aCyrOWN12PTu6T01trxtbWyrnDem2sDVQEwyhsQFBHtmmsXMfiigv5K4bw3Vw7Ssbz/giNHtXRPEPgnxVGS0CWxQlWSUsXzonHz4KgJz/Xa8yJUVNWfyWOBJUGHAcE7KYmSbpu4okZJEn3zMq8cB3kH0FQzXkQMM1xtHeI9mmfbBn3YHgdaWVvq9U1jNFa0/fcFZ7M6jI2aSm8YjIxVPxTkEEyem+nTAUhVy8Bq0pMlcvALlv+Y5j2ygFMRmdvp3z17PACP5ES/XPK1Gje6zdFIEjQo+yWpRycGOQWT+30IvB1IgKuA4y1IjgVOneF73wuMkB6l2gncCngisj0LuIxsHh7Ili9P9JGh0uhw7eikkYB03z6siIqJEkTlWGkhmF5ljElgOhU4E1gLLANOn+YtjAXjoVZe0/lZ9wJV4J+AXSLy7GSQzVQuVRERtLrj4tdJFPyXBxhUpQsXR6pQLnkL7wM4dsrKnAXTXwEnWoYqTwLQaybHQQAzFQCnsrPt828DL6rqbuAB4J9F5OeTwD8zFjO+qmoDT0ooXWkiMN5INFhgUPmOBVQ1AP4A+EPgbdOAaTYAmi1jZQF3lH2cB1ypqg8DnxWRjRnw+zNksK4P4YiwMCdu3U0REaOqpwG/bhnqtClutNcEMM0WcGr9OKz8ng+cr6o/BP4eeEhEfj5biexmC+YZUJ6IJBZQIXADcAVQaRGYDsYy/hQg+0372KuqnxeRT2bknDmvJDvYvHkElS8iiaoGqvph4EdW9ioWUIm9mQtW+GKWIPPtd4wti12jqnep6rvsZEkWOgDb1cBSVc8ylVHVC4BdwJdseMCVw/Fpj60Oz7K62u/+G8BGC7A32msMYL03SVa72lRpbnaDYylAVPUm4LvAKUCUYah2dG4dixnLYL8B3KOq14tILLLGqKqHbwQIux1aYdDE5H5VDewMPgO4GfiQlb0ECOmMzVjfMpjJyONnVPUEEUn6Fr3rJfHk66WBAOnwBL8pMYCaSm9AIzZf8poAKLHSF1vpux94v53ZSmfu7vv22mK7ur1L63veJCf/2biqV/VKHihd59irinqhB8g+b66gctKmql8BNgIlO+BBh8d0xF5jBBxPedk9qvq3OvyT7fF4YhC6zrH3fSQeN+OJ6o9lDqBy+3sJsN6ylHNeuy1IOJF3Nb7nc9V737O21HfkQBybrhkLVTQMRRrjydjL/9W/1G8CqDZYUEV2cLsx8mz3LI0S9J/llfrKjT0/QPwe6aJFooZlX0yiO6nr1/05gupbwPssqEK6eztDwBNIjDdwmidBP2bfDxC/p1uuP6osDr14LL5xyYUbt3hzBNV7M6AqDADPRw3hsWsonfinaLQ/3Znt9Dkn6hOrJKpPuNXNbBx150MVoDroIHugBn/RaYhvmcsrd3CYAVOuBP5YNXrgM5vf9ufbzt0+szpNFlSBXfHdXIDqMMC1/34LLu1EZJnKotCPRs0NF639wg8YWBXMVAoDEYmAT1hQNQpQzQRcPmhMuGINwfIL0MYekM5Kg08Lg0gwNtwYi1X/RQRl1c7YO/QfagAYVb0IuJo0RlWAalbgMpROuBJv4FRI6nRYzDiuLAokbnDjknM2PaVbBwORQ+wVqqqISAz0k+aK93dxSOHwF4siSPloKm++Dk0a0CFBeVXU9/HGRqKxyMR/B8C27QkzmDq+qvYCNzERUS9OT89+pQhqkMqxlE/8CCTjdES5LCWuHFH2k4Qblw5u+bnuWBW6ZppyELYKRSRS1f8JfLxw1ptxIwyIT+Px/030y41IaSlo3J6XompKPYEXN8zueDw5f+CFgZcY2pActFSkTWCLVXUQ+DMLqqBARnNWiuHKP8Lrez0kY23pVaQOu5eEoScayccX/damPSx/UbLdwbzpHQME+F/Wr+qCCN8C+VuAlI8iPO4K1Iy1pSQKxJX+IKy9PH5V3zkbvzNVw0xvKrayDvu5wDtI84oKtmrqKjEhWHoufu8bUDPaVuBSJepdUgqrrzTu7f/NTV+crgurN3kVaJ/7gE/Z5YsWaGi+14vfQ3Dc76UnPFXbBlR9i0vh2Eh037ivF6sO+Zy73UyzXDnAXH73xwq2mm/WMgRHXUR49MWoqeaetRyo6rXovlrkX7js7E3DXLdBp+u6KpPZCugBfgEsnvyawpppCSAktSep7/pj8PrJazazqqZMVY3vq0UvX7j8nLtHDtb5azJjuZ/PBgZevfLC5s8FVkXKRyM9K9Gknr/h1jSs0LekFNZr8b215/0Ll59z98j69fgHA9VrpFDS0oafYiKnu7B5XSEqEiwiXPEB1NSM4uUmJK+qBh/T2x/69Wp0V22vuXj55d8Z0fX4a9YcmlqDzErQqOqlbeRbOeCbKSaBl5k0+WVd8YAEf+kg/cfc6uvIU9TGg9gTbdkxOVUU1bi3LwjF92iMJx+unPW9r1SwNezXzEyvvUnP7+LAI+Z5BFNCGrB1sbWAdEcg+/Az/x/Zv9Ncslaiifg9RIsuu7lW3X9P/+t6A0AUYl3AjhaqqELseUjfUT2hUe4b2T/+3vLqW7/MtQgKbrtmRldmN5pVVY8BdgNHks8DEZMLxY6Spu98FXgxA6QE+FU7Sfo4cBsqj8VmE1AP5M7qrrVX9MrIx6N6dFW5P+ytV2OM0QjUn68GT6qagJggkLDcHzL2SqMqPjfU9ibXL3vXpuHp4lQzAZbbE7wGuJ787Qk6tvEsmHYD/0aacPhLEalNM2B9wJuBS4APk9becqeZ85ah4Y7LvVtEbtWHf+/18fjw1Ub1qvKisE/HDKNjcWK/u5+WFzu875+yoCpgVAn6ewOhx2d0f6PqiXw+Mfxj3zs2/iJ9bdoc/bC42FaBSUjL9fxFzoCVZZgdwAeAn02qADhVHQiTrQSjqiXSyoA3A2/IAFbyBSxzJTu/+DVZ/d8jSNCHLjvRJPqB+rh5T99A6SwCQUcNsUloxEmCYtJagodIMRcMqgoSlAKRIPSQHh+ihNpIfFfgs9Fo8rW+szc9B6BbBwPO3W6mi1HNdGniBv6XwJIcDbgDVQ34JPAPdtXqapPGmZXsVIzlpNGzW1TuOv+RtJ5pkCNpdN/jARE5S9ev92EDsmaCLUbvv/R3e3r846sj8VC55P2KLyz3+kOIEqKxGBGZjqEIe3wIPaLhCDz2RA3zk97+8Nbxsfipylnfu8W9duvWweDcOQJqMrAuJz0f2IwKes2Uht3A74jITx1QDqcmlSv5mKkmuBrYbP1Jk4NrdnL/MvDbIvJQeiJKFAZ9kQkfRxXhpx8qj72w9/KePm9FrWqOD0tyRdRIVCajS1WDwJOG0Zv6B8IXR0eiZ3qPWf49OfHL9QNe1gSGmg5Y1wHXWme4lJPZuxu4UESetwVHmpK4lAmt/BpwB3BETpjLTabLReTfne874bIMeex82pPVO6PXXtNQid3TvOupILKh8Zq/2bEqZNXrk8P1oWYy0L2qeoemFmtrzdjHQ3aVynwUN7N5/KjqW1X1BVWN7Oe20mJVTVT1BldoZRpqE1VEdcjXHatCXT/kH/p67Wt1yLetWebd1RFVXWT9q0oO/Cu3cHibiNzfTKaaAlwlEWmo6pXAF3PA1o41nxCRk10YaIYrvYOuEVtxzt8j3Wyu58CvMhZUnwQesFIwb3m7FlQhaT7/BiZy+lttDVXtmd21oML0j1ZchAf8iV0Nxi1kK7fhvQP4Z/vzQtzkxC4GrgGeZWYNCebzXsSpV8QlNmjdtilLrsZmHoKgHvBREXnZruDm/QZbJ74kIo8Bn7erwzywVtvnwHmkfWbysAr8KfBj66wvZGKSsY7yJtLIfh7CLSOdAKz3ZX5uFVsJ8CMR+YVlEl1gYKuIPGTB7dG6TXjninwgMzZtC6zTWwwsZzdkslgX7k6mIA4sa92UWUi0Elhv7wRg5SFFZgyoSut6KLsmTPuY6CrWSqt1ghS2kqncdsqDIvIfs2iENB/fA9IUnJeYOFTSyvvS9sDKg0kxHp1lxUAW1tmM1QrHvZhonT+QUQsd9+wKcYzidFLTgNVqJzUB3mLTWJLpdvXn2XwAVX0v6d5pq1eG2gnAauUAur25I0nzolrlyHtWileSthBu9ZHkcicA64UczBIFfrcVcmgB5aT4PfbXrd6r+1knAOsL9udWR5sHVfWIzM1e0M9X1ZWkvapbmZPmgtWfb/fFRB6yG5yfdTJwig2QLuSABpat3k16DjHKgX/V9iU5PSYaf7d0QWYH9C9ckttCsJZdKBhVPQr4oAV4kIOx6AhgfZk0TaOVhUAca70PWGNZayHSV9wW0keB1bT2UIXrlf0UsNVOrLbt0iq23PaLVgZa6V+4jqURcIaIPDmfe4eZE+DvJG3gGZGPnPdHReTU2eS859nHejoHK0N3prEX+KxNy52XuJYFbKSqy4BPO/bKwf1Q4Mls59q2BZaIDAPuNGycA6Ab4DL7nYIUB807ApZpir4M2Aq8xbJFq4Hl8v5vskzV1ttL7ss/R366TvhWll4FlwVCMEdAiTtONglUMfk4CS3W130pB+rRtBhOL+nx7hL5qd3gHPhHgb8VkY3uqLyb4YfyQTKvd4l8qOrVwF8Dx5OP4/Ud519BupXhOrF/NXNDyQlzGeAU4BZV/QpQEhFjH6qqnqr60zw8EVH72kRVl6nqRtKiIMfnRP6YxE5fmDR52tYC0kIbkao+n0MK9i0ASsBa4ExVfYC0HNEdIjJ+CMZaBpxFenbyDOA4JjaY83Tz3Jj/zE6Yti8qLHZmJ6p6KvAgE8E5ydnAT2aYH1uf5P8Bz3NgRb/TgcuBY4ATppBXcgiqn5NuKb0EC35Sad58LOfUfhX4ffLb7NJ1ylBmHiGPM6DLo8S4KjN/IyKfmc96Fa1YFTr7PvluyORZxnFF04y9MZMfxj7cFo2fY79FSAuS/NBKYEckGmY7U7ib9gjphnAeZaPTzI3xv4vI5c4t6YQLm9yZIgaus89Fiu7C+FbDwKfsxO6YTiAH9NKxK5IB0r3Dcg6d+E4yx0yPicgpnRC7mpKxMmVz6sA3WbhSQt0MLI+J2FVHuR0HsFEmfrKCdMvj9UykcxTWfN9qC2k6dJ10d6DzGCsTO/FF5DnSYretPsXTyf5VA/gfIjKaDr101DhP6T/ZbAIf+M9ihdh0c3GrfxOR97SwXsXCMdaB5CUNu0JMyG/TpnZkKgWqwPUtOkPZOmDZKHwoIt8gTV0OSTeqC5s7W4XAx0TkR3YCm0680GlDCZld9qOB20iLrlJI4pxA5QG3AldYHyvpNN/qkMCy4HIb1CtJyyjqTP6usGlDCy8Cx7gMhk4F1cF8LCeJiY1tPQtcbYFlCpzM2q8ypBH2D1lQ+Z0MqkMCy/lbpOnB/5c0GTCwNF7YzKxh/aprRGSTy7nv9IuekaTZ1YsHLCctW316Ztlc2PTmWrj8q/WrDGkvRS2A9Vp/aylwZwGuGYPqFhF5n1sQdQOoZu2EZ1qyFeCaBags42u3gGpGPtYkf8tYcO0DzgcetqAqNqsLUB0+sKYB164CXAWo5iSFB5HFO0hPwXTrnmL2sMe3ReT9brumUzJC552xpmGuC0hbwrmzgN0U63JM7QPfKkA1R2BlwOVZcJ0NfMQOsN8l4DJMxPUuFpEhmxmi3QyqOQPLzUq7r5iIyOdI4zUPZcDVif5FVvpuI21cucW5B93oUzXNx5rG78oW3dhIegrZObUB7b/H6Gp4uTOX3xaR92evvVi/NImxJrFXbAd4r5XGPyFtLhkycUq5XQHljuaHpM3ZL7H+lG+ZqgDVvN+FTO0BVV2pqv+gqlVNzahqpKqJ5t8S+12dvaCqH1XVxZOvs7CFBZg3CWD3THHj8mpm0r+/5QA1+doKm2cf6yDs5VuZFOD9ViavAhblWPqEtNjI54C7RGSbvZ4QiAsHvcXAygIsezNU9QTgB6S1qpru780xLuUDdwG/Y0tpvip7BaBa4LwfwrFXe4N8VS2LyLPAZ8nfETNXFOUaERlW1bJLzCtAlUPGmkoeSUuAPwC80YKr1azltqRuBy5yEl7AJMeMNRV7icgrwH0Zv6bV5kojbW7lxCsYa26s5cpA/hawjdZ2hcg67ADHisjz3ZSY1xGMlWEHIS35+AStD6C6vc3bgZe74cBDRwLLFckXkRdzIocuur5ZROoU/aHbUwonyeEgaXWbVuVzORlUK4MvFDLYvlKYlcNHgWdaKIdOBrcD+wsZbHNg2ZsnVg4/TetiWm4crrEyWFibM5aTRCGNwldbxJquN/YuK4HFae92B1amVe+PSQ9meCxs9qlLRrwFqFEcZescxsrI4s0tWFD49jNvsenEBVt1ELBc/5g7SduYLFQhfSeDzwP3dVIB/wJYvHqaxRORR60cLtTq0MngvzoZLFaDHSaFGfvmAsqhk8FvW0AVMthpZjugeqrap6qP2exSM48ZorF93mw/v3DaO9h5FxGpAfc6vC2Aj7XFfYUCDh0shdaB/tIC3GjXEexfMv5WYR0KLLfF8whpxoM3T068A9EW0i2coFgNdjCwMnK4F7hnnuUwAbaIyBgd2BmiANb0cnjTPMphIYNdCCwnhw8Dj9P8mJaLXW0uZLD7Qg++fb5qUmigWaebVVXPzn5WYV0ghen9Vs+GHfbTvC0el9D3HPAT+xlFn6BuAZbd4hEReQT4SRPl0Mngd0VkP+nxrkIGu4ixsk78l5voxLstnG9k/LnCugxYjkl+CLzcBDl0MvgsNqGvAFYXAiuT8bAbeIy5B0udDN5mD8oWmQzdKoUZObxxEovNRQa/VshgEXZwGQ8VVX1iDhkPLlyxyb5vkcnQzYyVqfFQJz1sMRc/ywVFCyvs1bJHoqoXWNaJ5hAcXWHfszjl3O0+FhNbPDuBJ62vNBv/yJUh2gTss8V3C/+q24GVkcP9pCeVZyuHLga2uTiMWth0cnj+HOSwkMGCsV7DWq7G+g7SOg8zlUNjX/edQgYLm5a17PMfzYK1XCbDmdn3KKxgrEnYUiGtpbVvBr6W28J5Gni6yGQogDWdHGYzHmaSD+9k8A7bnazIZCiANf33zWzxHIqxAnt9N2WAVlgBrGnlDeDuQ8ihY7InmUjoK9iqANbBV4c24+Gpg6wO3e+2ichLhQwWNhMPPrAxrQ9mOolN12TpbW4juxi5wg4FLJfxEKrqUzakkD1s4YB2m31tWIxaIYUzkUN3qDUCvj+Fn+W2cL5nX1tIYGGzlsMLLVtFUzSvPN6+tpDBwmYFLk9Ve60c6iR/a5OqloqEvkIKD1MVZZSJMkTZXjjfFZFGIYOFHZYc2ueLMk57Yh8nFDJY2FxXiD2q+qNMPvw3CxksrFmsdWXGeT+zYKvWW7vP6sTuHd4DjJJ2l3im2MIprClyaJ8fU9WvZ5mssIKx5mK+qibAZ4Bni6Pz+bD/D0GjCNH3MFKsAAAAAElFTkSuQmCC"></div>
+        <h2 class="ob-title">TriviMe와 어디로 떠나세요?</h2>
+      </div>
+      <p class="ob-sub">친구들과 여행 일정을 함께 만들고, 지도와 이동 경로를 한눈에 확인해보세요.</p>
 
-      <label class="ob-label" for="ob_title">여행 이름 <span class="ob-opt">선택</span></label>
-      <input type="text" id="ob_title" class="ob-input" placeholder="예: 제주에서 쉬어가는 주말" maxlength="24">
+      <label class="ob-label">여행 이름</label>
+      <input type="text" id="ob_title" class="ob-input" placeholder="예: 제주도 2박 3일" maxlength="24">
+      <p class="ob-parse" id="ob_parse"></p>
 
-      <div class="ob-label" id="ob_country_label">어느 나라로 떠나세요?</div>
-      <div class="ob-countries" id="ob_countries" role="group" aria-labelledby="ob_country_label"></div>
+      <label class="ob-label">나라</label>
+      <div class="ob-countries" id="ob_countries"></div>
 
-      <label class="ob-label" for="ob_city">도시 <span class="ob-opt">선택</span></label>
-      <input type="text" id="ob_city" class="ob-input" placeholder="예: 제주, 부산, 서울" maxlength="24">
+      <label class="ob-label">도시 <span class="ob-opt">선택</span></label>
+      <input type="text" id="ob_city" class="ob-input" placeholder="예: 오사카" maxlength="24">
 
       <div id="ob_dates">
         <label class="ob-label">여행 기간</label>
         <div class="date-range">
           <div class="dr-col">
-            <label class="dr-cap" for="ob_start_date">출발일</label>
-            <input type="date" id="ob_start_date" required aria-describedby="ob_error ob_days">
+            <span class="dr-cap">출발</span>
+            <input type="date" id="ob_start_date">
           </div>
           <span class="dr-tilde">~</span>
           <div class="dr-col">
-            <label class="dr-cap" for="ob_end_date">마지막 날</label>
-            <input type="date" id="ob_end_date" required aria-describedby="ob_error ob_days">
+            <span class="dr-cap">종료</span>
+            <input type="date" id="ob_end_date">
           </div>
         </div>
-        <p class="ob-days" id="ob_days" aria-live="polite"></p>
+        <p class="ob-days" id="ob_days"></p>
       </div>
 
-      <p id="ob_error" class="ob-error" role="alert" hidden></p>
-      <button type="button" class="btn-primary ob-go" id="ob_start">여행 시작하기</button>
+      <button class="btn-primary ob-go" id="ob_start">여행 시작하기</button>
       <p class="ob-note" id="ob_note"></p>
     </div>
-  </section>
+  </div>
 
   <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
 
@@ -1051,7 +1069,7 @@
     <div class="modal">
       <button class="modal-close" data-close="statusModalBg"><span class="icon" data-i="close"></span></button>
       <h2>연동 상태</h2>
-      <p class="sub">현재 사용할 수 있는 기능과 일정 저장 상태를 확인하세요.</p>
+      <p class="sub">API 키와 동기화 설정은 관리자가 <code>config.js</code>에서 설정합니다.</p>
       <div id="statusList"></div>
     </div>
   </div>
@@ -1066,8 +1084,7 @@
   </div>
 
 </div>
-<div class="save-warning" id="saveWarning" role="alert" hidden><span>이 기기에 저장하지 못했어요. 화면을 닫기 전에 백업해주세요.</span><button type="button" id="retrySave">다시 저장</button><button type="button" id="backupSave">백업</button></div>
-<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="toast" id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous"></script>
 <script src="config.js"></script>
@@ -1076,7 +1093,7 @@
 const CFG = Object.assign({
   GOOGLE_MAPS_API_KEY:"", ENABLE_DIRECTIONS:false,
   AI_PROXY_URL:"", ALLOW_PERSONAL_AI_KEY:true, OPENAI_MODEL:"luna",
-  SUPABASE_URL:"", SUPABASE_ANON_KEY:""
+  SUPABASE_URL:"", SUPABASE_ANON_KEY:"", TRIP_ID:"sapporo-2026"
 }, (window.APP_CONFIG||{}));
 
 const HAS_GMAP = !!(CFG.GOOGLE_MAPS_API_KEY||'').trim();
@@ -1085,8 +1102,8 @@ const HAS_SYNC = !!((CFG.SUPABASE_URL||'').trim() && (CFG.SUPABASE_ANON_KEY||'')
 const HAS_PROXY = !!(CFG.AI_PROXY_URL||'').trim();
 const DISABLED_MSG = 'API 비활성화 상태입니다.';
 /* ---- 여행방 ID ----
-   ?trip=xxxx 는 해당 여행을 열고, 기본 주소는 새 여행으로 시작합니다.
-   새 여행을 저장하면 고유 주소를 부여합니다. */
+   ?trip=xxxx 로 들어오면 그 방, 없으면 마지막으로 열었던 방,
+   그것도 없으면 config.js 기본값을 씁니다. 방마다 데이터가 완전히 분리돼요. */
 function randomTripId(){
   const a = 'abcdefghijkmnopqrstuvwxyz23456789';   // 헷갈리는 글자 제외
   let out = '';
@@ -1097,7 +1114,15 @@ function randomTripId(){
 }
 function resolveTripId(){
   const q = new URLSearchParams(location.search).get('trip');
-  return q && /^[a-z0-9-]{4,40}$/i.test(q) ? q : randomTripId();
+  if(q && /^[a-z0-9-]{4,40}$/i.test(q)){
+    try{ localStorage.setItem('sapporo:lastTrip', q); }catch(e){}
+    return q;
+  }
+  try{
+    const last = localStorage.getItem('sapporo:lastTrip');
+    if(last) return last;
+  }catch(e){}
+  return (CFG.TRIP_ID || 'trip-1');
 }
 const TRIP_ID = resolveTripId();
 function tripUrl(id){
@@ -1174,6 +1199,8 @@ function normalizeMode(m){ return (m==='metro'||m==='bus') ? 'transit' : (m||'wa
 const COUNTRIES = [
   { code:'KR', name:'한국',        flag:'🇰🇷', lat:37.5665, lng:126.9780, transit:'google', currency:'원' },
   { code:'JP', name:'일본',        flag:'🇯🇵', lat:35.6762, lng:139.6503, transit:'ai',     currency:'엔' },
+  /* 중국 본토는 구글 대중교통 데이터가 거의 없어 AI 추천을 씁니다 */
+  { code:'CN', name:'중국',        flag:'🇨🇳', lat:31.2304, lng:121.4737, transit:'ai',     currency:'위안' },
   { code:'TW', name:'대만',        flag:'🇹🇼', lat:25.0330, lng:121.5654, transit:'google', currency:'대만달러' },
   { code:'VN', name:'베트남',      flag:'🇻🇳', lat:21.0278, lng:105.8342, transit:'google', currency:'동' },
   { code:'TH', name:'태국',        flag:'🇹🇭', lat:13.7563, lng:100.5018, transit:'google', currency:'바트' },
@@ -1299,7 +1326,7 @@ function addPlan(day, copyCurrent){
     day.stops.filter(s=> s.plan===cur).forEach(s=>{
       const c = JSON.parse(JSON.stringify(s));
       c.id = newUid(); c.plan = np.id;
-      delete c.aiRoute; delete c.taxiFare; delete c.taxiNote;
+      delete c.aiRoute; delete c.aiRoutes; delete c.taxiFare; delete c.taxiNote;
       day.stops.push(c);
     });
     day.stops.sort((a,b)=>a.time.localeCompare(b.time));
@@ -1402,20 +1429,8 @@ function readLocal(){
   try{ const raw=localStorage.getItem(LS_TRIP); return raw? JSON.parse(raw):null; }catch(e){ return null; }
 }
 function writeLocal(){
-  try{
-    localStorage.setItem(LS_TRIP, JSON.stringify(TRIP));
-    document.getElementById('saveWarning').hidden=true;
-    return true;
-  }catch(e){ document.getElementById('saveWarning').hidden=false; return false; }
+  try{ localStorage.setItem(LS_TRIP, JSON.stringify(TRIP)); }catch(e){}
 }
-function downloadBackup(){
-  const blob=new Blob([JSON.stringify({format:'TriviMe',version:1,exportedAt:new Date().toISOString(),trip:TRIP,prep:prepState},null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob), a=document.createElement('a');
-  a.href=url; a.download=(TRIP.title||'TriviMe').replace(/[\\/:*?"<>|]/g,'_')+'-backup.json';
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),10000);
-}
-document.getElementById('retrySave').onclick=()=>{ if(writeLocal()) toast('이 기기에 저장했어요'); };
-document.getElementById('backupSave').onclick=downloadBackup;
 
 /* 덮어쓰기 전 스냅샷을 남겨둡니다 (최근 8개) */
 const LS_BACKUP = 'sapporo-backup:'+TRIP_ID;
@@ -1491,9 +1506,8 @@ async function cloudPut(){
 let syncReady = !HAS_SYNC;   // 첫 동기화 전에는 서버로 올리지 않습니다
 function markChanged(){
   TRIP.updatedAt = Date.now();
-  const saved=writeLocal();
-  if(!HAS_SYNC){ setSyncLabel(saved?'내 기기 저장':'저장 실패'); return; }
-  if(!syncReady) return;
+  writeLocal();
+  if(!HAS_SYNC || !syncReady) return;
   clearTimeout(pushTimer);
   pushTimer = setTimeout(async ()=>{
     try{ await cloudPut(); setSyncLabel('동기화됨'); }
@@ -1526,13 +1540,9 @@ async function pullRemote(quiet){
 
 /* ================= MAP ================= */
 function initLeaflet(){
-  if(!window.L){
-    document.getElementById('map').innerHTML='<div class="map-unavailable"><strong>지도를 불러오지 못했어요</strong><p>일정표와 준비사항은 계속 사용할 수 있어요.<br>인터넷 연결을 확인한 뒤 다시 열어주세요.</p></div>';
-    return;
-  }
   const c = searchCenter();
-  lmap = L.map('map', { zoomControl:false, attributionControl:true }).setView([c.lat, c.lng], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors' }).addTo(lmap);
+  lmap = L.map('map', { zoomControl:false, attributionControl:false }).setView([c.lat, c.lng], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18 }).addTo(lmap);
 }
 function pinHtml(num, active, multi, color){
   const size = active?34:27;
@@ -1656,7 +1666,6 @@ function centerOnTrip(force){
 }
 
 function renderMapForDay(){
-  if(engine==='leaflet' && !lmap) return;
   const day=currentDay(); clearMapLayers();
   if(!day){ centerOnTrip(); return; }
   const withLoc = visibleStops(day).filter(s=>!s.tbd && s.lat!=null);
@@ -1716,7 +1725,6 @@ function renderMapForDay(){
   drawRoutesForDay();
 }
 function panTo(lat,lng,zoom){
-  if(engine==='leaflet' && !lmap) return;
   const z = zoom || 14;
   if(engine==='leaflet'){
     const cur = lmap.getZoom();
@@ -1810,6 +1818,7 @@ function renderCarousel(){
     wrap.appendChild(card);
   });
   setTimeout(()=> scrollCardIntoCenter(activeStopId), 60);
+  fillGoogleTransitCards();
 }
 /* 카드 하단에 "다음 이동" 요약 (AI 추정 노선 포함) */
 function nextMoveHtml(stop, day){
@@ -1820,24 +1829,57 @@ function nextMoveHtml(stop, day){
   const mode = stopMode(stop);
   const m = MODES.find(x=>x.key===mode) || MODES[0];
 
-  let chain='';
+  let chain='', tag='', mins='', fare='';
   const sar = stopAiRoute(stop);
+
   if(mode==='transit' && sar && Array.isArray(sar.steps)){
+    // AI 추천 경로 (일본)
     const segs = sar.steps.filter(st=> !String(st.mode||'').includes('도보'));
     if(segs.length){
       chain = segs.slice(0,3).map(st=>
         `<span class="nm-line">${esc(st.line||st.mode||'')}</span>`
       ).join('<span class="nm-arrow">›</span>');
+      tag = '<span class="nm-tag">AI 추천</span>';
     }
+    if(sar.fare) fare = ` · ${esc(String(sar.fare))}`;
+    if(sar.minutes) mins = ` · 약 ${esc(String(sar.minutes))}분`;
   }
-  const fare = (mode==='transit' && sar && sar.fare) ? ` · ${esc(String(sar.fare))}` : '';
-  const mins = (mode==='transit' && sar && sar.minutes) ? ` · 약 ${esc(String(sar.minutes))}분` : '';
 
-  return `<div class="pc-next">
+  // 구글 대중교통은 비동기로 받아와서 같은 형식으로 채웁니다
+  const needGoogle = mode==='transit' && !sar && transitSource()==='google'
+    && HAS_DIR && !stop.tbd && !next.tbd && stop.lat!=null && next.lat!=null;
+
+  return `<div class="pc-next" ${needGoogle? `data-gt-from="${stop.id}" data-gt-to="${next.id}"`:''}>
       <span class="nm-head"><span class="icon">${iconSvg(m.icon)}</span>${m.label}</span>
-      ${chain? `<span class="nm-chain">${chain}</span><span class="nm-tag">AI 추정</span>`:''}
-      <span class="nm-meta">${esc(next.name)}까지${mins}${fare}</span>
+      <span class="nm-chain">${chain}</span>${tag}
+      <span class="nm-meta">${esc(next.name)}까지<span class="nm-mins">${mins}</span><span class="nm-fare">${fare}</span></span>
     </div>`;
+}
+
+/* 지도 카드에 구글 대중교통 요약(노선·시간·요금)을 채웁니다 */
+async function fillGoogleTransitCards(){
+  const day = currentDay(); if(!day) return;
+  const nodes = document.querySelectorAll('#carousel .pc-next[data-gt-from]');
+  for(const el of nodes){
+    const from = day.stops.find(x=> String(x.id)===el.dataset.gtFrom);
+    const to   = day.stops.find(x=> String(x.id)===el.dataset.gtTo);
+    if(!from || !to) continue;
+    const r = await requestRoute(from, to, 'TRANSIT');
+    if(!el.isConnected || !r || !r.ok) continue;
+    const segs = (r.steps||[]).filter(st=>st.kind==='transit');
+    const chainEl = el.querySelector('.nm-chain');
+    if(chainEl && segs.length){
+      chainEl.innerHTML = segs.slice(0,3).map(st=>{
+        const bg = st.color || 'var(--sky)';
+        const fg = st.textColor || '#fff';
+        return `<span class="nm-line" style="background:${esc(bg)};color:${esc(fg)}">${esc(st.name)}</span>`;
+      }).join('<span class="nm-arrow">›</span>');
+    }
+    const minsEl = el.querySelector('.nm-mins');
+    if(minsEl) minsEl.textContent = ` · ${fmtMin(r.mins)}`;
+    const fareEl = el.querySelector('.nm-fare');
+    if(fareEl && r.fare) fareEl.textContent = ` · ${r.fare}`;
+  }
 }
 
 function onCarouselScroll(){
@@ -1969,7 +2011,7 @@ function renderScheduleScreenInner(){
       + (stayIsOwn(dIdx)? '' : ' <span class="stay-inherit">이어받음</span>');
     stayBtn.classList.add('set');
   } else {
-    stayLb.textContent = '숙소 추가하기';
+    stayLb.textContent = '숙소 설정하기';
     stayBtn.classList.remove('set');
   }
   }
@@ -1987,7 +2029,7 @@ function renderScheduleScreenInner(){
     const hdr=document.querySelector('#screen-schedule .sec-header');
     if(hdr) hdr.appendChild(sumEl);
   }
-  if(!day){ wrap.innerHTML=`<div class="empty-note">날짜가 없어요.<br>여행 설정 → 날짜 추가에서 여행 날짜를 정해주세요.</div>`; sumEl.innerHTML=''; return; }
+  if(!day){ wrap.innerHTML=`<div class="empty-note">날짜가 없어요.<br>위의 "날짜" 버튼으로 여행 날짜를 추가해보세요.</div>`; sumEl.innerHTML=''; return; }
 
   renderWeather(day);
   renderPlanBar(day);
@@ -1998,7 +2040,7 @@ function renderScheduleScreenInner(){
   if(!list.length){
     wrap.innerHTML = day.stops.length
       ? `<div class="empty-note">이 날은 모두 '선택' 일정이에요.<br>위에서 선택 일정을 켜면 보입니다.</div>`
-      : `<div class="empty-note welcome-empty"><strong>첫 번째 장소를 담아볼까요?</strong><p>가고 싶은 식당이나 명소부터 추가해보세요.<br>항공편과 숙소는 위 버튼에서 등록할 수 있어요.</p></div>`;
+      : `<div class="empty-note">이 날은 아직 일정이 비어있어요.</div>`;
     return;
   }
 
@@ -2015,6 +2057,18 @@ function renderScheduleScreenInner(){
 }
 
 /* 표 한 줄 */
+/* 새 일정의 기본 시각 — 이 날 마지막 일정 이후로 잡습니다 */
+function nextStopTime(){
+  const day = currentDay();
+  const list = day ? visibleStops(day) : [];
+  if(!list.length) return '09:00';
+  const last = list.reduce((a,b)=> (toMinutes(b.time)||0) > (toMinutes(a.time)||0) ? b : a);
+  const base = toMinutes(last.time);
+  if(base==null) return '09:00';
+  const t = Math.min(base + 60, 23*60 + 30);               // 1시간 뒤, 자정 넘지 않게
+  return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+}
+
 /* 시각 문자열 → 분 */
 function toMinutes(t){ const m=/^(\d{1,2}):(\d{2})$/.exec(t||''); return m? (+m[1])*60+(+m[2]) : null; }
 
@@ -2076,6 +2130,7 @@ function rowEl(s, idx, prev){
 function moveBar(from, to){
   const bar=document.createElement('div');
   bar.className='tmove';
+  bar.dataset.from = String(from.id);
   const mode=stopMode(from);
   const m=MODES.find(x=>x.key===mode)||MODES[0];
   const both = !from.tbd && !to.tbd && from.lat!=null && to.lat!=null;
@@ -2599,49 +2654,103 @@ async function askAiRoute(from, to, btn, box){
 }
 
 /* 후보 3가지를 보여주고 하나를 고르게 합니다 */
+/* 각 후보가 어떤 성격인지 한 줄로 설명합니다 */
+function describeChoices(list){
+  const mins  = list.map(r=> Number(r.minutes)||null);
+  const trans = list.map(r=> r.transfers!=null? Number(r.transfers) : null);
+  const walks = list.map(r=> r.walkMinutes!=null? Number(r.walkMinutes) : null);
+  const minOf = arr=>{ const v=arr.filter(x=>x!=null); return v.length? Math.min(...v) : null; };
+  const bestMin=minOf(mins), bestTr=minOf(trans), bestWalk=minOf(walks);
+
+  return list.map((r,i)=>{
+    const tips=[];
+    if(mins[i]!=null && mins[i]===bestMin) tips.push('가장 빨라요');
+    else if(mins[i]!=null && bestMin!=null) tips.push(`최단보다 ${mins[i]-bestMin}분 더 걸려요`);
+    if(trans[i]!=null && trans[i]===bestTr) tips.push(trans[i]===0? '갈아타지 않아요' : '환승이 가장 적어요');
+    if(walks[i]!=null && walks[i]===bestWalk) tips.push('걷는 거리가 가장 짧아요');
+    return tips.slice(0,2).join(' · ');
+  });
+}
+
+/* 후보를 보여주고, 누를 때마다 아래 상세가 바뀌며 마지막으로 누른 것이 선택됩니다 */
 function renderRouteChoices(list, from, box){
+  const day = currentDay();
+  // 후보 목록도 저장해서 다시 열어도 그대로 보이게 합니다
+  setPlanField(day, from, 'aiRoutes', list);
+
   const picked = stopAiRoute(from);
-  const isSame = (a,b)=> a && b && a.label===b.label && a.minutes===b.minutes;
+  const same = (a,b)=> a && b && a.label===b.label && String(a.minutes)===String(b.minutes) && (a.summary||'')===(b.summary||'');
+  let cur = Math.max(0, list.findIndex(r=> same(r,picked)));
+  const notes = describeChoices(list);
 
   box.innerHTML = `
     <div class="rc-wrap">
-      <div class="rc-head">AI 추천 경로 <span class="rc-n">${list.length}가지</span></div>
+      <div class="rc-head">AI 추천 경로 <span class="rc-n">${list.length}가지</span>
+        <span class="rc-hint">눌러서 비교하고 마음에 드는 걸로 두세요</span></div>
       <div class="rc-list">
         ${list.map((r,i)=>`
-          <button type="button" class="rc-item ${isSame(r,picked)?'on':''}" data-i="${i}">
+          <button type="button" class="rc-item" data-i="${i}">
             <div class="rc-top">
-              <span class="rc-label">${esc(r.label || ['추천 경로','대안 1','대안 2'][i] || '대안')}</span>
+              <span class="rc-label"><span class="rc-check"></span>${esc(r.label || ['추천 경로','대안 1','대안 2'][i] || '대안')}</span>
               ${r.minutes? `<span class="rc-min">${esc(String(r.minutes))}분</span>`:''}
             </div>
+            ${notes[i]? `<div class="rc-why">${esc(notes[i])}</div>`:''}
             <div class="rc-meta">
               ${r.fare? `<span>${esc(String(r.fare))}</span>`:''}
               ${r.transfers!=null? `<span>환승 ${esc(String(r.transfers))}회</span>`:''}
               ${r.walkMinutes!=null? `<span>도보 ${esc(String(r.walkMinutes))}분</span>`:''}
             </div>
-            ${r.summary? `<div class="rc-sum">${esc(r.summary)}</div>`:''}
           </button>`).join('')}
       </div>
       <div class="rc-detail"></div>
     </div>`;
 
   const detail = box.querySelector('.rc-detail');
-  const show = (i)=>{
-    const r = list[i];
+  const paint = (i)=>{
+    cur = i;
     box.querySelectorAll('.rc-item').forEach((el,k)=> el.classList.toggle('on', k===i));
-    detail.innerHTML = renderAiRoute(r);
-    setPlanField(currentDay(), from, 'aiRoute', r);
+    detail.innerHTML = renderAiRoute(list[i]);
+  };
+  const choose = (i)=>{
+    paint(i);
+    setPlanField(currentDay(), from, 'aiRoute', list[i]);   // 마지막으로 누른 것이 선택됩니다
     markChanged();
-    renderScheduleScreen();
+    refreshLegBar(from);                                     // 창은 그대로 두고 윗줄 요약만 갱신
   };
 
   box.querySelectorAll('.rc-item').forEach(b=>{
-    b.addEventListener('click', ()=> show(Number(b.dataset.i)));
+    b.addEventListener('click', ()=> choose(Number(b.dataset.i)));
   });
 
-  // 이미 고른 게 있으면 그걸, 없으면 첫 번째를 펼쳐둡니다
-  const startIdx = Math.max(0, list.findIndex(r=> isSame(r,picked)));
-  detail.innerHTML = renderAiRoute(list[startIdx]);
-  box.querySelectorAll('.rc-item')[startIdx].classList.add('on');
+  // 처음 보여줄 때 아직 고른 게 없으면 첫 번째를 선택해둡니다
+  if(!picked){ choose(cur); } else { paint(cur); }
+}
+
+/* 펼친 창을 닫지 않고 이동 줄의 시간·요금만 다시 씁니다 */
+function refreshLegBar(from){
+  const bars = document.querySelectorAll('.tmove');
+  const r = stopAiRoute(from);
+  bars.forEach(bar=>{
+    if(bar.dataset.from !== String(from.id)) return;
+    const lb = bar.querySelector('.tm-label b');
+    if(lb && r && r.minutes) lb.textContent = `약 ${r.minutes}분`;
+    let fareEl = bar.querySelector('.tm-fare');
+    if(r && r.fare){
+      if(!fareEl){
+        fareEl = document.createElement('span'); fareEl.className='tm-fare';
+        const caret = bar.querySelector('.tm-caret');
+        if(caret) caret.before(fareEl);
+      }
+      fareEl.textContent = String(r.fare);
+    }
+    // 이 구간 칩의 '대중교통' 시간도 맞춰줍니다
+    const chip = bar.querySelector('.mins[data-mins="transit"]');
+    if(chip && r && r.minutes) chip.textContent = `약 ${r.minutes}분`;
+  });
+  const sum=document.getElementById('daySummary');
+  const d=currentDay();
+  if(sum && d) renderDaySummary(d, sum);
+  try{ renderCarousel(); }catch(e){}
 }
 
 function renderTaxiFare(fare, note){
@@ -2848,7 +2957,7 @@ async function fillLegDetail(from,to,legEl,km){
             <span class="icon">${iconSvg('star')}</span>${saved? 'AI 경로 다시 받기':'AI로 경로 추천'}
           </button>`:''}
         </div>
-        <div class="ai-route-box">${saved? renderAiRoute(saved):''}</div>
+        <div class="ai-route-box"></div>
         <button type="button" class="rd-why" data-why>
           거리 기반 추정 ${est} · 왜 노선이 안 나오나요?
         </button>
@@ -2861,6 +2970,11 @@ async function fillLegDetail(from,to,legEl,km){
       const btn = detailEl.querySelector('[data-ai-route]');
       const box = detailEl.querySelector('.ai-route-box');
       if(btn) btn.addEventListener('click', ()=> askAiRoute(from,to,btn,box));
+
+      // 받아둔 후보가 있으면 3가지를 그대로, 예전 방식으로 하나만 있으면 그것만 보여줍니다
+      const savedList = planField(currentDay(), from, 'aiRoutes');
+      if(Array.isArray(savedList) && savedList.length) renderRouteChoices(savedList, from, box);
+      else if(saved) box.innerHTML = renderAiRoute(saved);
 
       metaEl.innerHTML = `직선거리 약 ${km.toFixed(1)}km`
         + (anyReal? ' · 도보·차량은 구글 경로 기준' : '');
@@ -3087,31 +3201,31 @@ function openFlightForm(){
 }
 
 async function saveFlights(){
-  const button=document.getElementById('fl_save');
-  if(!button || button.disabled) return;
   const v=id=>document.getElementById(id).value.trim();
-  // Capture all fields before awaiting location search; the form may be closed meanwhile.
-  const fields={ in:{no:v('fi_no'),airport:v('fi_ap'),time:document.getElementById('fi_use').checked?v('fi_time'):''},
-    out:{no:v('fo_no'),airport:v('fo_ap'),time:document.getElementById('fo_use').checked?v('fo_time'):''} };
-  if(!fields.in.time && !fields.out.time){ toast('도착편 또는 출발편의 사용을 선택해주세요.'); return; }
-  if(Object.values(fields).some(f=>f.time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(f.time))){ toast('항공편 시각을 올바르게 입력해주세요.'); return; }
-  const trip=TRIP, prev=trip.flights||{};
-  button.disabled=true; button.textContent='저장 중…'; button.setAttribute('aria-busy','true');
-  const mk=async(f,old)=>{
-    if(!f.time) return null;
-    const o={...f};
-    if(old && old.airport===f.airport && old.lat!=null){ o.lat=old.lat; o.lng=old.lng; o.place=old.place; }
-    else if(f.airport){ const at=await boundedLocation(f.airport); if(at){o.lat=at[0];o.lng=at[1];o.place=f.airport;} }
+  const inTime  = document.getElementById('fi_use').checked ? v('fi_time') : '';
+  const outTime = document.getElementById('fo_use').checked ? v('fo_time') : '';
+  if(!inTime && !outTime){ alert('도착 또는 출발 시각을 하나 이상 입력해주세요.'); return; }
+
+  const prev = TRIP.flights || {};
+  const mk = async (no, ap, time, old)=>{
+    if(!time) return null;
+    const o = { no, airport:ap, time };
+    if(old && old.airport===ap && old.lat!=null){ o.lat=old.lat; o.lng=old.lng; o.place=old.place; }
+    else if(ap){
+      const at = await resolveStation(ap);          // 공항 좌표 찾기
+      if(at){ o.lat=at[0]; o.lng=at[1]; o.place=ap; }
+    }
     return o;
   };
-  try{
-    const [incoming,outgoing]=await Promise.all([mk(fields.in,prev.in),mk(fields.out,prev.out)]);
-    if(TRIP!==trip || document.getElementById('fl_save')!==button) return;
-    TRIP.flights={in:incoming,out:outgoing};
-    ensureFlightStops(); markChanged(); closeDayForm(); activeStopId=null;
-    refreshAll(); renderScheduleScreen(); toast('항공편을 저장했어요');
-  }catch(e){ console.error('[항공편 저장]',e); toast('항공편을 저장하지 못했어요. 다시 시도해주세요.'); }
-  finally{button.disabled=false;button.textContent='저장';button.removeAttribute('aria-busy');}
+
+  TRIP.flights = {
+    in:  await mk(v('fi_no'), v('fi_ap'), inTime,  prev.in),
+    out: await mk(v('fo_no'), v('fo_ap'), outTime, prev.out)
+  };
+  ensureFlightStops(); markChanged();
+  closeDayForm(); activeStopId=null;
+  refreshAll(); renderScheduleScreen();
+  toast('항공편을 저장했어요');
 }
 
 function clearFlights(){
@@ -3221,7 +3335,7 @@ function openStayForm(){
         <button class="geo-btn" id="f_geoSearch"><span class="icon">${iconSvg('search')}</span>검색</button>
       </div>
       <div class="geo-results" id="f_geoResults"></div>
-      <p class="hint" id="f_geoStatus">${st.lat!=null? `현재 위치: ${esc(shortPlace(st.place||st.name))}` : '숙소 이름을 검색한 뒤 결과를 선택하거나 지도에서 위치를 찍어주세요.'}</p>
+      <p class="hint" id="f_geoStatus">${st.lat!=null? `현재 위치: ${esc(shortPlace(st.place||st.name))}` : '두 글자 이상 입력하면 후보가 바로 떠요.'}</p>
       <button type="button" class="link-btn" id="f_pickMap">지도에서 직접 찍기</button>
       <div id="f_miniMap" class="mini-map" style="display:none;"></div>
       <div class="form-actions">
@@ -3237,6 +3351,7 @@ function openStayForm(){
   document.getElementById('f_geoSearch').addEventListener('click', ()=> doGeoSearch(false));
   document.getElementById('f_geoQuery').addEventListener('input', onGeoInput);
   document.getElementById('f_pickMap').addEventListener('click', toggleMiniMap);
+  document.getElementById('f_aiNote').addEventListener('click', aiFillNote);
   document.getElementById('s_save').addEventListener('click', saveStay);
   document.getElementById('s_cancel').addEventListener('click', ()=> closeDayForm());
   const cl=document.getElementById('s_clear');
@@ -3871,7 +3986,7 @@ async function doGeoSearch(isLive){
       }
       if(g.status==='REQUEST_DENIED'){
         rs.innerHTML='';
-        st.innerHTML='지금은 장소 검색을 이용할 수 없어요. 잠시 후 다시 시도하거나 <b>지도에서 직접 찍기</b>로 위치를 선택해주세요.';
+        st.innerHTML='장소 검색이 거부됐어요(REQUEST_DENIED). Google Cloud Console에서 <b>Places API</b>가 사용 설정되어 있는지, 키의 API 제한사항에 포함되어 있는지 확인해주세요.';
         return;
       }
       if(g.status==='ZERO_RESULTS'){
@@ -3900,7 +4015,6 @@ async function doGeoSearch(isLive){
 /* ---------- 지도에서 직접 찍기 ---------- */
 let miniMap=null, miniMarker=null;
 function toggleMiniMap(){
-  if(!window.L){ toast('지도를 불러오지 못했어요. 위치 검색을 이용해주세요.'); return; }
   const box=document.getElementById('f_miniMap');
   const st=document.getElementById('f_geoStatus');
   if(!box) return;
@@ -3911,8 +4025,8 @@ function toggleMiniMap(){
   const c0 = searchCenter();
   const center = geoPicked ? [geoPicked.lat, geoPicked.lng] : [c0.lat, c0.lng];
   if(!miniMap){
-    miniMap = L.map(box, { zoomControl:true, attributionControl:true }).setView(center, 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'}).addTo(miniMap);
+    miniMap = L.map(box, { zoomControl:true, attributionControl:false }).setView(center, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(miniMap);
     miniMap.on('click', async e=>{
       const {lat,lng}=e.latlng;
       if(miniMarker) miniMap.removeLayer(miniMarker);
@@ -4033,7 +4147,7 @@ function refreshAll(){
 function switchScreen(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  document.querySelectorAll('.navbtn').forEach(b=>{ b.classList.toggle('active', b.dataset.screen===name); if(b.dataset.screen===name) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.screen===name));
   const dock=document.getElementById('dayDock');
   if(dock) dock.hidden = (name==='prep');
   if(name==='map'){
@@ -4041,7 +4155,7 @@ function switchScreen(name){
     renderPlanBarMap();
     try{ renderMapForDay(); }catch(err){ console.error('[지도 렌더]', err); }
     renderCarousel();
-    setTimeout(()=>{ if(engine==='leaflet' && lmap) lmap.invalidateSize(); },60);
+    setTimeout(()=>{ if(engine==='leaflet') lmap.invalidateSize(); },60);
   }
   if(name==='schedule'){ closeForm(); closeDayForm(); if(HAS_DIR){ for(const k in routeCache) delete routeCache[k]; } renderScheduleScreen(); }
   if(name==='prep'){ renderPrep(); }
@@ -4053,47 +4167,29 @@ document.getElementById('addStopBtn').addEventListener('click', ()=>{
   const fa=getFormArea();
   document.querySelector('.list-body').appendChild(fa);
   document.querySelectorAll('.trow.open').forEach(r=>r.classList.remove('open'));
-  openForm(null);
+  openForm(null, { time: nextStopTime() });
 });
 document.getElementById('addDayBtn').addEventListener('click', ()=> openDayForm('add'));
 document.getElementById('editDayBtn').addEventListener('click', ()=> openDayForm('edit'));
 document.getElementById('stayBtn').addEventListener('click', openStayForm);
 document.getElementById('flightBtn').addEventListener('click', openFlightForm);
-document.getElementById('countryBtn').addEventListener('click', ()=> showChangeCountry());
+document.getElementById('countryBtn').addEventListener('click', ()=>{
+  const co = tripCountry();
+  const name = prompt(`여행지 도시를 입력하세요 (나라: ${co.name})\n나라를 바꾸려면 아래에 "나라"라고 입력하세요.`,
+                      (TRIP.country && TRIP.country.city) || '');
+  if(name===null) return;
+  if(name.trim()==='나라'){ obPicked = co.code; showChangeCountry(); return; }
+  setTripCity(name.trim());
+});
 document.getElementById('tripSetBtn').addEventListener('click', ()=>{
   const box=document.getElementById('tripSet');
   box.hidden = !box.hidden;
-  document.getElementById('tripSetBtn').setAttribute('aria-expanded',String(!box.hidden));
   document.getElementById('tripSetBtn').classList.toggle('on', !box.hidden);
 });
 document.getElementById('carousel').addEventListener('scroll', onCarouselScroll, {passive:true});
 window.addEventListener('resize', setCarouselMetrics);
 document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', ()=> document.getElementById(b.dataset.close).classList.remove('open')));
 document.querySelectorAll('.modal-bg').forEach(bg=> bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); }));
-
-/* 모달 접근성: 제목, 초점 유지, Escape 닫기 */
-document.querySelectorAll('.modal-bg').forEach(bg=>{
-  const modal=bg.querySelector('.modal'); if(!modal) return;
-  modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.tabIndex=-1;
-  const heading=modal.querySelector('h2,h3');
-  if(heading){heading.id=bg.id+'Title';modal.setAttribute('aria-labelledby',heading.id);}
-  let opened=false, previous=null;
-  new MutationObserver(()=>{
-    const now=bg.classList.contains('open'); if(now===opened) return; opened=now;
-    if(now){previous=document.activeElement; (modal.querySelector('input,button')||modal).focus();}
-    else if(previous && previous.isConnected) previous.focus();
-  }).observe(bg,{attributes:true,attributeFilter:['class']});
-});
-document.addEventListener('keydown',event=>{
-  const dialog=document.querySelector('.modal-bg.open'); if(!dialog) return;
-  if(event.key==='Escape'){dialog.classList.remove('open');event.preventDefault();return;}
-  if(event.key!=='Tab') return;
-  const items=[...dialog.querySelectorAll('button,input,select,textarea,a[href],[tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
-  if(!items.length){event.preventDefault();return;}
-  const first=items[0],last=items[items.length-1];
-  if(event.shiftKey && (document.activeElement===first || !dialog.contains(document.activeElement))){last.focus();event.preventDefault();}
-  else if(!event.shiftKey && (document.activeElement===last || !dialog.contains(document.activeElement))){first.focus();event.preventDefault();}
-});
 
 /* ================= STATUS ================= */
 document.getElementById('statusBtn').addEventListener('click', ()=>{
@@ -4109,14 +4205,11 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
   ).join('')
     + (lastDirStatus && lastDirStatus!=='OK' && lastDirStatus!=='ZERO_RESULTS'
         ? `<p class="hint err-hint">최근 경로 조회 응답: <code>${esc(lastDirStatus)}</code><br>${dirStatusMsg(lastDirStatus)}</p>` : '')
-    + `<p class="hint">실시간 공유가 꺼져 있으면 일정은 이 브라우저에만 저장돼요. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 공유 링크나 백업 파일을 보관해주세요.</p>`
+    + `<p class="hint">비활성화된 기능은 <code>config.js</code>에 값을 입력하면 자동으로 켜집니다. 지도 키가 없으면 기본 지도(OpenStreetMap)로 표시됩니다.</p>`
     + backupListHtml();
   bindBackupButtons();
   document.getElementById('statusModalBg').classList.add('open');
 });
-
-document.getElementById('scheduleShareBtn').onclick=()=>document.getElementById('shareBtn').click();
-document.getElementById('scheduleStatusBtn').onclick=()=>document.getElementById('statusBtn').click();
 
 /* ================= SHARE ================= */
 document.getElementById('shareBtn').addEventListener('click', ()=>{
@@ -4125,7 +4218,7 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
   if(HAS_SYNC){
     panel.innerHTML=`
       <p class="sub">이 주소를 친구들에게 보내세요. 한 사람이 일정을 고치면 모두의 화면에 반영돼요.</p>
-      <div class="share-box"><input id="shareUrl" readonly value="${esc(base)}"><button id="copyBtn">복사</button></div>
+      <div class="share-box"><input id="shareUrl" readonly value="${base}"><button id="copyBtn">복사</button></div>
       <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
       <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
       <p class="hint">새 여행을 만들면 별도의 링크가 생기고, 그 링크를 받은 사람만 그 일정을 함께 봅니다.</p>
@@ -4135,16 +4228,15 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
     const url = base + '#trip=' + encodeTrip();
     panel.innerHTML=`
       <p class="sub">현재 일정을 담은 링크예요. 친구가 이 링크를 열면 지금 이 일정이 그대로 보여요.</p>
-      <div class="share-box"><input id="shareUrl" readonly value="${esc(url)}"><button id="copyBtn">복사</button></div>
+      <div class="share-box"><input id="shareUrl" readonly value="${url}"><button id="copyBtn">복사</button></div>
       <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
       <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
       <p class="hint">새 여행을 만들면 별도의 링크가 생기고, 그 링크를 받은 사람만 그 일정을 함께 봅니다.</p>
       <p class="hint">지금은 <b>실시간 공유가 꺼져 있어요.</b> 이 링크는 보내는 순간의 일정을 복사해 전달하는 방식이라,
       이후 각자 수정한 내용은 서로에게 반영되지 않아요.<br>
-      수정한 일정을 보내려면 링크를 다시 공유해주세요.</p>
+      함께 편집하려면 관리자가 <code>config.js</code>의 동기화 설정을 채워야 합니다. (README 참고)</p>
       <p class="hint">휴대폰에서 열고 <b>홈 화면에 추가</b>하면 앱처럼 쓸 수 있어요.</p>`;
   }
-  const backup=document.createElement('button'); backup.type='button'; backup.className='btn-ghost'; backup.style.cssText='width:100%;margin-top:8px'; backup.textContent='여행 백업 파일 다운로드'; backup.onclick=downloadBackup; panel.appendChild(backup);
   const ntBtn = document.getElementById('newTripBtn');
   if(ntBtn) ntBtn.addEventListener('click', ()=>{
     if(!confirm('새 여행을 만들까요? 새 주소가 열리고, 지금 일정은 이 링크에 그대로 남습니다.')) return;
@@ -4170,7 +4262,7 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
   document.getElementById('copyBtn').addEventListener('click', async ()=>{
     const inp=document.getElementById('shareUrl');
     try{ await navigator.clipboard.writeText(inp.value); toast('링크를 복사했어요'); }
-    catch(e){ inp.focus(); inp.select(); try{ if(!document.execCommand('copy')) throw new Error('copy'); toast('링크를 복사했어요'); }catch(err){ toast('링크를 길게 눌러 직접 복사해주세요'); } }
+    catch(e){ inp.select(); document.execCommand('copy'); toast('링크를 복사했어요'); }
   });
   document.getElementById('shareModalBg').classList.add('open');
 });
@@ -4216,7 +4308,7 @@ function openAiModal(){
   if(mode==='off'){
     panel.innerHTML=`<div class="disabled-box">
       <div class="dtitle">${DISABLED_MSG}</div>
-      <div class="ddesc">AI 추천은 아직 준비 중이에요.<br>장소를 직접 검색해서 일정에 추가할 수 있어요.</div></div>`;
+      <div class="ddesc">AI 장소 추천을 사용하려면 관리자가 <code>config.js</code>의<br><code>AI_PROXY_URL</code>을 설정해야 합니다.</div></div>`;
   }
   else if(mode==='needkey'){
     panel.innerHTML=`<div class="disabled-box" style="text-align:left;">
@@ -4366,7 +4458,7 @@ window.addEventListener('error', (e)=>{
   // 알려도 도움이 안 되고 대개 화면에는 지장이 없어 콘솔에만 남깁니다.
   const m = String(e.message||'');
   if(!m || m.startsWith('Script error')) return;
-  if(typeof toast==='function') toast('작업을 완료하지 못했어요. 잠시 후 다시 시도해주세요.');
+  if(typeof toast==='function') toast('오류가 발생했어요: '+m.slice(0,60));
 });
 window.addEventListener('unhandledrejection', (e)=>{
   console.error('[비동기 오류]', e.reason);
@@ -4478,6 +4570,17 @@ function needOnboarding(){
   return !(TRIP && TRIP.country && TRIP.country.code);
 }
 
+/* 나라에 따른 대중교통 안내 문구 */
+function obTransitNote(co){
+  if(!co) return '';
+  if(co.transit==='ai'){
+    const josa = /[가-힣]$/.test(co.name) && ((co.name.charCodeAt(co.name.length-1)-0xAC00)%28) ? '은' : '는';
+    return `${co.name}${josa} 구글이 대중교통 경로를 제공하지 않아서, 대중교통은 AI 추천으로 안내해요.`;
+  }
+  if(co.code==='KR') return '국내 여행이라 준비물도 내국인 기준으로 맞춰드려요.';
+  return '대중교통 경로는 구글 지도 기준으로 안내해요.';
+}
+
 function showOnboarding(editMode){
   const box = document.getElementById('onboard');
   const list = document.getElementById('ob_countries');
@@ -4492,61 +4595,129 @@ function showOnboarding(editMode){
     obPicked = tripCountry().code;
   } else {
     box.querySelector('.ob-title').textContent = 'TriviMe와 어디로 떠나세요?';
-    box.querySelector('.ob-sub').textContent = '여행지와 날짜만 정하면 준비 끝. 장소와 이동 경로를 하나의 일정에 담아보세요.';
+    box.querySelector('.ob-sub').textContent = '친구들과 여행 일정을 함께 만들고, 지도와 이동 경로를 한눈에 확인해보세요.';
     document.getElementById('ob_start').textContent = '여행 시작하기';
     const today = new Date();
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()+2);
     const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     document.getElementById('ob_start_date').value = localIso(today);
     document.getElementById('ob_end_date').value = localIso(end);
+    delete document.getElementById('ob_end_date').dataset.touched;
+    delete document.getElementById('ob_city').dataset.touched;
     bindObDates();
+    bindTitleAutofill();
   }
   document.getElementById('ob_dates').hidden = !!editMode;
   box.dataset.edit = editMode? '1':'';
-  document.getElementById('ob_cancel').hidden = !editMode;
-  document.getElementById('ob_cancel').onclick = ()=>{ box.hidden=true; document.getElementById('countryBtn').focus(); };
-  document.getElementById('ob_error').hidden = true;
-  ['ob_start_date','ob_end_date'].forEach(id=>document.getElementById(id).removeAttribute('aria-invalid'));
 
   list.innerHTML = COUNTRIES.map(c=>`
-    <button type="button" class="ob-c ${c.code===obPicked?'on':''}" data-c="${c.code}" aria-pressed="${c.code===obPicked}">
+    <button type="button" class="ob-c ${c.code===obPicked?'on':''}" data-c="${c.code}">
       <span class="ob-flag">${c.flag}</span>${esc(c.name)}
     </button>`).join('');
 
   list.querySelectorAll('[data-c]').forEach(b=>{
     b.addEventListener('click', ()=>{
       obPicked = b.dataset.c;
-      list.querySelectorAll('.ob-c').forEach(x=>{ x.classList.remove('on'); x.setAttribute('aria-pressed','false'); });
-      b.classList.add('on'); b.setAttribute('aria-pressed','true');
-      updateObCountry();
+      list.querySelectorAll('.ob-c').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      const co = countryOf(obPicked);
+      document.getElementById('ob_note').textContent = obTransitNote(co);
     });
   });
 
   document.getElementById('ob_start').onclick = startTrip;
-  updateObCountry();
+  document.getElementById('ob_note').textContent = obTransitNote(countryOf(obPicked));
   box.hidden = false;
-  box.scrollTop = 0;
 }
 
-function updateObCountry(){
-  const samples = {KR:'제주, 부산, 서울', JP:'도쿄, 오사카, 후쿠오카', TW:'타이베이', VN:'다낭', TH:'방콕', SG:'싱가포르', HK:'홍콩', US:'뉴욕', FR:'파리', IT:'로마', ES:'바르셀로나', GB:'런던', DE:'베를린', AU:'시드니', ETC:'여행할 도시'};
-  document.getElementById('ob_city').placeholder = '예: '+samples[obPicked];
-  document.getElementById('ob_title').placeholder = obPicked==='KR' ? '예: 제주에서 쉬어가는 주말' : '예: 함께 떠나는 '+countryOf(obPicked).name+' 여행';
-  document.getElementById('ob_note').textContent = HAS_SYNC
-    ? '일정을 만든 후 공유 메뉴에서 친구에게 링크를 보낼 수 있어요.'
-    : '일정은 이 브라우저에 저장돼요. 공유 메뉴에서 링크와 백업 파일을 보관할 수 있어요.';
+/* 여행 이름에서 도시·나라·기간을 읽어냅니다.  예) "제주도 2박 3일" → 한국 · 제주 · 3일 */
+const CITY_HINTS = [
+  // 한국
+  ['제주','KR','제주'],['제주도','KR','제주'],['서귀포','KR','서귀포'],['부산','KR','부산'],['강릉','KR','강릉'],
+  ['속초','KR','속초'],['여수','KR','여수'],['경주','KR','경주'],['전주','KR','전주'],['서울','KR','서울'],
+  ['인천','KR','인천'],['대구','KR','대구'],['통영','KR','통영'],['남해','KR','남해'],['양양','KR','양양'],
+  ['가평','KR','가평'],['포항','KR','포항'],['거제','KR','거제'],['대전','KR','대전'],['광주','KR','광주'],
+  // 일본
+  ['도쿄','JP','도쿄'],['오사카','JP','오사카'],['교토','JP','교토'],['후쿠오카','JP','후쿠오카'],
+  ['삿포로','JP','삿포로'],['홋카이도','JP','삿포로'],['오키나와','JP','나하'],['나고야','JP','나고야'],
+  ['나라','JP','나라'],['고베','JP','고베'],['요코하마','JP','요코하마'],['하코네','JP','하코네'],
+  ['유후인','JP','유후인'],['벳부','JP','벳부'],['가나자와','JP','가나자와'],['히로시마','JP','히로시마'],
+  // 중국
+  ['상하이','CN','상하이'],['베이징','CN','베이징'],['칭다오','CN','칭다오'],['청두','CN','청두'],
+  ['광저우','CN','광저우'],['시안','CN','시안'],['항저우','CN','항저우'],['장자제','CN','장자제'],
+  ['하얼빈','CN','하얼빈'],['선전','CN','선전'],['마카오','CN','마카오'],['쑤저우','CN','쑤저우'],
+  // 그 외
+  ['타이베이','TW','타이베이'],['대만','TW','타이베이'],['가오슝','TW','가오슝'],
+  ['다낭','VN','다낭'],['하노이','VN','하노이'],['호치민','VN','호치민'],['나트랑','VN','나트랑'],['푸꾸옥','VN','푸꾸옥'],
+  ['방콕','TH','방콕'],['치앙마이','TH','치앙마이'],['푸켓','TH','푸켓'],
+  ['싱가포르','SG','싱가포르'],['홍콩','HK','홍콩'],
+  ['뉴욕','US','뉴욕'],['하와이','US','호놀룰루'],['LA','US','로스앤젤레스'],['샌프란시스코','US','샌프란시스코'],
+  ['파리','FR','파리'],['니스','FR','니스'],['로마','IT','로마'],['피렌체','IT','피렌체'],['베네치아','IT','베네치아'],
+  ['밀라노','IT','밀라노'],['바르셀로나','ES','바르셀로나'],['마드리드','ES','마드리드'],
+  ['런던','GB','런던'],['베를린','DE','베를린'],['뮌헨','DE','뮌헨'],['시드니','AU','시드니'],['멜버른','AU','멜버른']
+];
+
+function parseTripTitle(title){
+  const t = String(title||'');
+  const out = {};
+
+  // "2박 3일", "2박3일", "3일" 모두 이해합니다
+  let m = /(\d+)\s*박\s*(\d+)\s*일/.exec(t);
+  if(m) out.days = Math.max(1, +m[2]);
+  else if((m = /(\d+)\s*박/.exec(t))) out.days = +m[1] + 1;
+  else if((m = /(\d+)\s*일/.exec(t))) out.days = Math.max(1, +m[1]);
+  if(/당일/.test(t)) out.days = 1;
+
+  // 가장 긴 이름부터 맞춰서 '제주도'가 '제주'보다 먼저 잡히게
+  const hit = CITY_HINTS.slice().sort((a,b)=>b[0].length-a[0].length)
+                .find(([k])=> t.includes(k));
+  if(hit){ out.country = hit[1]; out.city = hit[2]; }
+  return out;
 }
-function obError(message, id){
-  const el=document.getElementById('ob_error'); el.textContent=message; el.hidden=false;
-  if(id){ const input=document.getElementById(id); input.setAttribute('aria-invalid','true'); input.focus(); }
+
+/* 여행 이름을 입력하는 동안 아래 칸들을 채워줍니다 (직접 바꾼 칸은 건드리지 않음) */
+function bindTitleAutofill(){
+  const titleEl = document.getElementById('ob_title');
+  const cityEl  = document.getElementById('ob_city');
+  const f = document.getElementById('ob_start_date');
+  const t = document.getElementById('ob_end_date');
+  if(!titleEl) return;
+
+  // 사용자가 직접 손댄 칸은 자동으로 바꾸지 않습니다
+  [cityEl, t].forEach(el=>{ if(el) el.addEventListener('input', ()=> el.dataset.touched='1'); });
+  if(t) t.addEventListener('change', ()=> t.dataset.touched='1');
+
+  titleEl.oninput = ()=>{
+    const p = parseTripTitle(titleEl.value);
+
+    if(p.country && p.country !== obPicked){
+      obPicked = p.country;
+      document.querySelectorAll('#ob_countries .ob-c').forEach(b=>
+        b.classList.toggle('on', b.dataset.c===obPicked));
+      const note = document.getElementById('ob_note');
+      const co = countryOf(obPicked);
+      if(note) note.textContent = obTransitNote(co);
+    }
+    if(p.city && cityEl && !cityEl.dataset.touched) cityEl.value = p.city;
+
+    if(p.days && f && t && f.value && !t.dataset.touched){
+      const d = new Date(f.value+'T12:00:00'); d.setDate(d.getDate()+p.days-1);
+      t.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      if(typeof f.onchange==='function') f.onchange();
+    }
+
+    const hint = document.getElementById('ob_parse');
+    if(hint){
+      const bits=[];
+      if(p.country) bits.push(countryOf(p.country).name);
+      if(p.city) bits.push(p.city);
+      if(p.days) bits.push(p.days===1? '당일' : `${p.days}일`);
+      hint.textContent = bits.length? `${bits.join(' · ')}로 맞춰뒀어요` : '';
+    }
+  };
 }
-async function boundedLocation(name){
-  let timer;
-  try{ return await Promise.race([resolveStation(name), new Promise(resolve=>{timer=setTimeout(()=>resolve(null),5000);})]); }
-  catch(e){ return null; }
-  finally{ clearTimeout(timer); }
-}
-/* 출발·종료 날짜와 여행 일수 */
+
+/* 출발·종료 날짜를 서로 맞춰주고 일수를 보여줍니다 */
 function bindObDates(){
   const f = document.getElementById('ob_start_date');
   const t = document.getElementById('ob_end_date');
@@ -4554,16 +4725,19 @@ function bindObDates(){
   if(!f || !t) return;
 
   const upd = ()=>{
-    document.getElementById('ob_error').hidden=true;
-    f.removeAttribute('aria-invalid'); t.removeAttribute('aria-invalid');
     if(f.value){
       t.min = f.value;                                  // 종료일은 출발일 이후만
+      const p = parseTripTitle((document.getElementById('ob_title')||{}).value);
+      if(p.days && !t.dataset.touched){
+        const d = new Date(f.value+'T12:00:00'); d.setDate(d.getDate()+p.days-1);
+        t.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      }
       if(!t.value || t.value < f.value) t.value = f.value;
     }
     if(note){
       const n = daySpan(f.value, t.value);
       note.textContent = (f.value && t.value)
-        ? (n>90 ? '최대 90일까지 설정할 수 있어요' : n>1 ? `${n-1}박 ${n}일 · 일정은 나중에도 바꿀 수 있어요` : '당일치기 · 하루를 알차게 계획해보세요')
+        ? (n>1 ? `${n}일 일정으로 시작해요` : '당일치기로 시작해요')
         : '';
     }
   };
@@ -4573,18 +4747,7 @@ function bindObDates(){
 }
 
 async function startTrip(){
-  const button=document.getElementById('ob_start');
-  if(button.disabled) return;
-  const label=button.textContent; button.disabled=true; button.textContent='여행을 준비하고 있어요…'; button.setAttribute('aria-busy','true');
-  document.getElementById('ob_error').hidden=true;
-  const controls=[...document.querySelectorAll('#onboard input, #ob_countries button, #ob_cancel')];
-  controls.forEach(el=>el.disabled=true);
-  try{ await commitTrip(); }
-  catch(e){ console.error('[여행 생성]',e); obError('여행을 열지 못했어요. 입력한 내용을 확인하고 다시 시도해주세요.'); }
-  finally{ controls.forEach(el=>el.disabled=false); button.disabled=false; button.textContent=label; button.removeAttribute('aria-busy'); const invalid=document.querySelector('#onboard [aria-invalid="true"]'); if(invalid) invalid.focus(); }
-}
-async function commitTrip(){
-  const title = document.getElementById('ob_title').value.trim() || `${document.getElementById('ob_city').value.trim() || countryOf(obPicked).name} 여행`;
+  const title = document.getElementById('ob_title').value.trim() || '우리 여행';
   const city  = document.getElementById('ob_city').value.trim();
   const co    = countryOf(obPicked);
   const box   = document.getElementById('onboard');
@@ -4595,7 +4758,7 @@ async function commitTrip(){
     TRIP.country = { code:co.code, name:co.name, city, lat:co.lat, lng:co.lng };
     if(city){
       try{
-        const at = await boundedLocation(`${city} ${co.name}`);
+        const at = await resolveStation(`${city} ${co.name}`);
         if(at){ TRIP.country.lat = at[0]; TRIP.country.lng = at[1]; }
       }catch(e){}
     }
@@ -4615,12 +4778,12 @@ async function commitTrip(){
   const validDate = (date, iso) => !isNaN(date) &&
     `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}` === iso;
   if(!validDate(startDate, startIso) || !validDate(endDate, endIso)){
-    obError('출발일과 마지막 날을 모두 입력해주세요.', !validDate(startDate,startIso)?'ob_start_date':'ob_end_date'); return;
+    alert('여행 시작일과 종료일을 입력해주세요.'); return;
   }
   const utcDay = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
   const count = Math.round((utcDay(endDate)-utcDay(startDate))/86400000)+1;
   if(count<1 || count>90){
-    obError(count<1 ? '마지막 날은 출발일보다 빠를 수 없어요.' : '여행 기간은 최대 90일까지 설정할 수 있어요.', 'ob_end_date');
+    alert(count<1 ? '종료일은 시작일보다 빠를 수 없어요.' : '여행 기간은 최대 90일까지 설정할 수 있어요.');
     return;
   }
 
@@ -4634,7 +4797,7 @@ async function commitTrip(){
   // 도시를 적었으면 그 좌표를 지도 중심으로 씁니다
   if(city){
     try{
-      const at = await boundedLocation(`${city} ${co.name}`);
+      const at = await resolveStation(`${city} ${co.name}`);
       if(at){ TRIP.country.lat = at[0]; TRIP.country.lng = at[1]; }
     }catch(e){}
   }
@@ -4647,20 +4810,16 @@ async function commitTrip(){
   }
 
   activeDayId = TRIP.days[0].id;
-  // 기본 주소에서 만든 여행은 이후 새로고침해도 같은 여행을 열 수 있게 합니다.
-  if(!new URLSearchParams(location.search).get('trip')) history.replaceState(null, '', tripUrl());
   markChanged();
   document.getElementById('onboard').hidden = true;
   refreshAll(); switchScreen('schedule');
-  if(engine==='leaflet' && lmap) lmap.setView([TRIP.country.lat, TRIP.country.lng], 11);
+  if(engine==='leaflet') lmap.setView([TRIP.country.lat, TRIP.country.lng], 11);
   toast(`${co.name} 여행을 만들었어요`);
 }
 
 /* ================= INIT ================= */
 async function init(){
   mountIcons();
-  document.querySelectorAll('button[title]').forEach(b=>b.setAttribute('aria-label',b.title));
-  document.querySelectorAll('.modal-close').forEach(b=>b.setAttribute('aria-label','닫기'));
   document.getElementById('aiFabIcon').innerHTML=iconSvg('star');
   initLeaflet();
   loadPrep();
@@ -4670,9 +4829,8 @@ async function init(){
   if(m){
     const shared = decodeTrip(m[1]);
     if(shared && shared.days){
-      const existing=readLocal(); if(existing) pushBackup(existing,'공유 일정 불러오기 전');
       TRIP = shared; writeLocal();
-      history.replaceState(null,'',tripUrl());
+      history.replaceState(null,'',location.pathname);
       setTimeout(()=> toast('공유받은 일정을 불러왔어요'), 400);
     }
   } else {
@@ -4685,8 +4843,7 @@ async function init(){
   TRIP.days.forEach(d=> d.stops.forEach(st=>{ if(st.mode) st.mode = normalizeMode(st.mode); }));
   sortDays();
   // 여행 기간 중이면 오늘 날짜를 자동으로 펼칩니다
-  const now = new Date();
-  const todayIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const todayIso = new Date().toISOString().slice(0,10);
   const todayDay = TRIP.days.find(d=> d.iso === todayIso);
   activeDayId = todayDay ? todayDay.id : (TRIP.days.length? TRIP.days[0].id : null);
   setSyncLabel(HAS_SYNC? '동기화 중...' : '내 기기 저장');
@@ -4695,7 +4852,7 @@ async function init(){
   if(!aiUsable()) document.getElementById('aiFab').classList.add('off');
 
   refreshAll();
-  switchScreen('schedule');
+  switchScreen('map');
 
   // 2) 서버 내용을 먼저 받아온 뒤에 자동 보정을 적용합니다
   //    (순서가 바뀌면 오래된 내 사본이 서버를 덮어써서 일정이 사라질 수 있어요)
@@ -4723,23 +4880,28 @@ async function init(){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
   }
 }
-const splashStartedAt = performance.now();
-function finishSplash(){
-  const splash = document.getElementById('splash');
-  if(!splash) return;
-  setTimeout(()=>{
-    splash.classList.add('hide');
-    setTimeout(()=> splash.remove(), 420);
-  }, Math.max(0, 1700 - (performance.now() - splashStartedAt)));
-}
-init().catch(err=>{
-  console.error('[시작 오류]',err);
-  const panel=document.createElement('div'); panel.className='map-unavailable'; panel.style.zIndex='2600'; panel.setAttribute('role','alert');
-  const title=document.createElement('strong'); title.textContent='여행을 불러오지 못했어요';
-  const description=document.createElement('p'); description.textContent='저장된 일정은 삭제하지 않았어요. 인터넷 연결을 확인하고 다시 시도해주세요.';
-  const retry=document.createElement('button'); retry.className='btn-primary'; retry.textContent='다시 열기'; retry.onclick=()=>location.reload();
-  panel.append(title,description,retry); document.querySelector('.app').appendChild(panel);
-}).finally(finishSplash);
+init();
+</script>
+<script>
+/* 시작 화면 — 앱을 켤 때마다 잠깐 보여주고 부드럽게 사라집니다 */
+(function(){
+  const el = document.getElementById('splash');
+  if(!el) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SHOW_MS = reduce ? 900 : 2450;     // 비행이 끝나고(2.2초) 로고를 한 박자 본 뒤 사라집니다
+  const start = performance.now();
+  function hide(){
+    const wait = Math.max(0, SHOW_MS - (performance.now() - start));
+    setTimeout(()=>{
+      el.classList.add('sp-out');
+      setTimeout(()=>{ el.remove(); }, 800);
+    }, wait);
+  }
+  if(document.readyState === 'complete') hide();
+  else window.addEventListener('load', hide, { once:true });
+  // 네트워크가 느려도 3초를 넘기지 않도록
+  setTimeout(()=>{ if(el.isConnected && !el.classList.contains('sp-out')){ el.classList.add('sp-out'); setTimeout(()=>el.remove(),800); } }, 4000);
+})();
 </script>
 </body>
 </html>
