@@ -48,9 +48,13 @@
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   button, .trow, .place-card, .prep-item, .geo-result{ touch-action:manipulation; }
-  html,body{margin:0;padding:0;height:100%;}
+  html,body{ margin:0; padding:0; height:100%; width:100%; }
+  html{ overflow:hidden; }
   body{ background:#FFFFFF; color:var(--ink); font-family:var(--font-body);
-    -webkit-font-smoothing:antialiased; overscroll-behavior:none; }
+    -webkit-font-smoothing:antialiased;
+    /* 가로 흔들림(바운스) 방지 */
+    overflow:hidden; overscroll-behavior:none; overscroll-behavior-x:none;
+    position:fixed; inset:0; touch-action:pan-y; }
   button{ font-family:inherit; letter-spacing:-.01em;
     transition:opacity .18s var(--ease), background .2s var(--ease), color .2s var(--ease), transform .2s var(--ease); }
   button:active{ opacity:.55; }
@@ -74,9 +78,10 @@
 
   /* 지도 핀 */
   .pin-wrap{ transition:transform .18s ease; }
-  .app{ max-width:520px; margin:0 auto; height:100vh; height:100dvh;
+  .app{ max-width:520px; margin:0 auto; width:100%;
+    height:100%; height:100dvh;
     background:var(--paper); display:flex; flex-direction:column;
-    position:relative; overflow:hidden; }
+    position:relative; overflow:hidden; overscroll-behavior:contain; }
   @media (min-width:560px){
     body{ background:#DCDCE0; }
     .app{ box-shadow:0 0 48px rgba(0,0,0,.18); }
@@ -85,7 +90,8 @@
   .icon svg{ width:100%; height:100%; }
   /* .icon 래퍼 없이 직접 넣은 svg도 부모 크기를 넘지 않도록 */
   span > svg:only-child{ max-width:100%; max-height:100%; }
-  .screen{ flex:1; min-height:0; display:none; flex-direction:column; position:relative; }
+  .screen{ flex:1; min-height:0; display:none; flex-direction:column; position:relative;
+    overflow-x:hidden; overscroll-behavior-y:contain; }
   .screen.active{ display:flex; }
 
   /* ===== MAP ===== */
@@ -155,7 +161,7 @@
   .ai-fab.off{ background:#fff; color:var(--muted-2); }
   .ai-fab.off .icon{ color:var(--muted-2); }
 
-  .carousel{ display:flex; gap:9px; overflow-x:auto; scroll-snap-type:x mandatory;
+  .carousel{ display:flex; gap:9px; overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory;
     padding:6px 0 2px; -ms-overflow-style:none; scrollbar-width:none; }
   .carousel::-webkit-scrollbar{ display:none; }
   .carousel::before, .carousel::after{ content:''; flex:0 0 var(--edge); }
@@ -327,7 +333,7 @@
   .set-actions .mini-btn{ flex:1; justify-content:center; }
 
   /* 안(案) 선택 */
-  .plan-bar{ display:flex; gap:6px; align-items:center; overflow-x:auto; scrollbar-width:none; }
+  .plan-bar{ display:flex; gap:6px; align-items:center; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; }
   .plan-bar.map-plan{ align-self:flex-start; max-width:100%;
     background:rgba(255,255,255,.78); backdrop-filter:saturate(180%) blur(18px);
     -webkit-backdrop-filter:saturate(180%) blur(18px);
@@ -359,7 +365,7 @@
     backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px);
     border-top:.5px solid rgba(0,0,0,.08); padding:8px 14px 7px; }
   .day-dock[hidden]{ display:none; }
-  .sched-days{ display:flex; gap:7px; overflow-x:auto; scrollbar-width:none; }
+  .sched-days{ display:flex; gap:7px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; }
   .sched-days::-webkit-scrollbar{ display:none; }
   .sched-days .daychip{ box-shadow:none; }
   .list-body{ padding:14px 16px 16px; }
@@ -377,6 +383,14 @@
   .trow:active{ background:var(--fill); }
   .trow.open{ background:var(--tint); }
   .trow.optional{ background:#FCFCFD; }
+  /* 이동 시간이 부족한 일정 */
+  .trow.tight::after{ background:#F6D9D9; }
+  .tight-badge{ display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; border-radius:50%; background:#E23B3B; color:#fff;
+    font-size:11px; font-weight:700; margin-left:5px; vertical-align:middle; line-height:1; }
+  .tight-msg{ font-size:11.5px; color:#C62F2F; margin-top:3px; line-height:1.45; }
+  .tight-msg b{ font-weight:700; }
+
   .trow.now{ background:var(--sun-soft); }
   .trow.now .tc-time{ color:var(--sun-deep); font-weight:700; }
   .trow.now::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--sun); }
@@ -455,7 +469,7 @@
   .leg .rail{ flex:0 0 22px; display:flex; justify-content:center; }
   .leg .rail span{ width:2px; background:var(--line-2); border-radius:2px; min-height:16px; }
   .leg .legbody{ flex:1; padding:8px 0 8px 2px; }
-  .leg .modes{ display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .leg .modes{ display:flex; gap:6px; overflow-x:auto; overscroll-behavior-x:contain; padding-bottom:2px; scrollbar-width:none; }
   .leg .modes::-webkit-scrollbar{ display:none; }
   .mode{ flex:0 0 auto; display:flex; align-items:center; gap:6px;
     border:none; background:var(--fill); color:var(--muted);
@@ -630,6 +644,21 @@
     box-shadow:0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.07); }
   .form-card h3{ font-size:17px; margin:0; font-weight:600; letter-spacing:-.02em; }
   .fc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  /* 기간 선택 — 출발과 종료를 한 줄에 */
+  .date-range{ display:flex; align-items:flex-end; gap:8px; width:100%; }
+  .dr-col{ flex:1 1 0; min-width:0; }
+  .dr-cap{ display:block; font-size:11px; color:var(--muted-2); margin-bottom:5px; }
+  .date-range input[type="date"]{
+    display:block; width:100%; min-width:0; max-width:100%; box-sizing:border-box;
+    padding:12px 8px; border:none; border-radius:11px; background:var(--fill);
+    font-family:inherit; font-size:15px; letter-spacing:-.02em; text-align:center;
+    -webkit-appearance:none; appearance:none; }
+  .date-range input[type="date"]::-webkit-date-and-time-value{ text-align:center; }
+  .dr-tilde{ flex:0 0 auto; color:var(--muted-2); font-size:14px; padding-bottom:13px; }
+  .ob-days{ font-size:12.5px; color:var(--sky-deep); font-weight:500; margin:8px 0 0; }
+
+  /* 날짜 입력이 컨테이너를 넘지 않도록 (iOS Safari 대응) */
+  input[type="date"]{ min-width:0; max-width:100%; box-sizing:border-box; }
   .fc-close{ flex:0 0 30px; width:30px; height:30px; border:none; background:transparent;
     border-radius:8px; color:var(--muted-2); font-size:15px; cursor:pointer; margin:-4px -6px -4px 0;
     display:flex; align-items:center; justify-content:center; }
@@ -701,7 +730,7 @@
   .bottomnav{ display:flex; border-top:.5px solid rgba(0,0,0,.12);
     background:rgba(255,255,255,.88); backdrop-filter:saturate(180%) blur(20px);
     -webkit-backdrop-filter:saturate(180%) blur(20px);
-    padding-bottom:env(safe-area-inset-bottom); z-index:600; }
+    padding-bottom:max(4px, calc(env(safe-area-inset-bottom) - 12px)); z-index:600; }
   .navbtn{ flex:1; border:none; background:none; padding:9px 4px 7px; display:flex; flex-direction:column;
     align-items:center; gap:5px; color:var(--muted-2); cursor:pointer; }
   .navbtn .icon{ width:20px; height:20px; }
@@ -792,7 +821,7 @@
       <div class="topbar">
         <div class="mark"><span class="icon" data-i="navMap"></span></div>
         <div class="tt">
-          <h1 id="tripTitle">삿포로 여행</h1>
+          <h1 id="tripTitle">여행 일정</h1>
           <div class="tsub" id="syncBadge"><i></i><span id="syncLabel">내 기기 저장</span></div>
         </div>
         <button class="head-btn" id="shareBtn" title="공유"><span class="icon" data-i="share"></span></button>
@@ -853,7 +882,7 @@
   <div class="screen" id="screen-prep">
     <div class="sec-header">
       <div class="sec-title-row">
-        <h1><span class="h1-emoji">🛂</span>여행 준비물</h1>
+        <h1><span class="h1-emoji" id="prepEmoji">🧳</span>여행 준비물</h1>
         <button class="mini-btn" id="prepAiBtn"><span class="icon" data-i="star"></span>AI 맞춤</button>
       </div>
       <div class="wx-line" id="prepSub"></div>
@@ -877,19 +906,28 @@
       <p class="ob-sub">친구들과 여행 일정을 함께 만들고, 지도와 이동 경로를 한눈에 확인해보세요.</p>
 
       <label class="ob-label">여행 이름</label>
-      <input type="text" id="ob_title" class="ob-input" placeholder="예: 삿포로 3박4일" maxlength="24">
+      <input type="text" id="ob_title" class="ob-input" placeholder="예: 오사카 3박4일" maxlength="24">
 
       <label class="ob-label">나라</label>
       <div class="ob-countries" id="ob_countries"></div>
 
       <label class="ob-label">도시 <span class="ob-opt">선택</span></label>
-      <input type="text" id="ob_city" class="ob-input" placeholder="예: 삿포로" maxlength="24">
+      <input type="text" id="ob_city" class="ob-input" placeholder="예: 오사카" maxlength="24">
 
       <div id="ob_dates">
-        <label class="ob-label" for="ob_start_date">여행 시작일</label>
-        <input type="date" id="ob_start_date" class="ob-input">
-        <label class="ob-label" for="ob_end_date">여행 종료일</label>
-        <input type="date" id="ob_end_date" class="ob-input">
+        <label class="ob-label">여행 기간</label>
+        <div class="date-range">
+          <div class="dr-col">
+            <span class="dr-cap">출발</span>
+            <input type="date" id="ob_start_date">
+          </div>
+          <span class="dr-tilde">~</span>
+          <div class="dr-col">
+            <span class="dr-cap">종료</span>
+            <input type="date" id="ob_end_date">
+          </div>
+        </div>
+        <p class="ob-days" id="ob_days"></p>
       </div>
 
       <button class="btn-primary ob-go" id="ob_start">여행 시작하기</button>
@@ -1065,7 +1103,7 @@ const COUNTRIES = [
   { code:'ETC',name:'그 외',       flag:'🌍', lat:0,       lng:0,        transit:'google', currency:'현지 통화' }
 ];
 function countryOf(code){ return COUNTRIES.find(c=>c.code===code) || COUNTRIES[0]; }
-function tripCountry(){ return countryOf(TRIP && TRIP.country ? TRIP.country.code : 'JP'); }
+function tripCountry(){ return countryOf(TRIP && TRIP.country ? TRIP.country.code : 'ETC'); }
 /* 이 여행의 대중교통 처리 방식 */
 function transitSource(){ return tripCountry().transit; }
 /* 지도·검색의 기준 좌표 */
@@ -1073,67 +1111,62 @@ function tripCenter(){
   const c = TRIP && TRIP.country;
   if(c && c.lat!=null && (c.lat!==0 || c.lng!==0)) return { lat:c.lat, lng:c.lng };
   const co = tripCountry();
+  if(co.lat===0 && co.lng===0) return { lat:37.5665, lng:126.9780 };   /* '그 외' 선택 시 바다로 가지 않도록 */
   return { lat:co.lat, lng:co.lng };
 }
 
 function defaultTrip(){
-  let u = 1;
   return {
-    title: "삿포로 여행",
-    country: { code:'JP', name:'일본', city:'삿포로', lat:43.0618, lng:141.3545 },
-    stay: { name:"DAITO residence 중앙구역소앞", place:"삿포로 주오구 미나미3조니시",
-            lat:43.054739, lng:141.3399746 },
+    title: "",
+    country: null,        /* 온보딩에서 정합니다 */
     nextUid: 100,
     nextDayId: 10,
     updatedAt: 0,
-    days: [
-      { id:1, iso:"2026-09-19", label:"시내 구경", stops:[
-        {id:u++, time:"14:00", name:"신치토세 공항 도착", note:"홋카이도에서의 첫 발", cat:"이동", place:"치토세시 비비", lat:42.7791317, lng:141.6866364, rating:4.3, ratingCount:"1.9만", mode:'transit'},
-        {id:u++, time:"15:00", name:"공항 라멘 골목 점심", note:"이치겐, 테시카가, 에비소바 중 선택", cat:"식사", place:"신치토세공항 3F 라멘도조", lat:42.7879688, lng:141.680236, rating:4.0, ratingCount:"1.3천", mode:'transit'},
-        {id:u++, time:"16:00", name:"숙소 체크인", note:"DAITO residence 중앙구역소앞", cat:"숙소", place:"삿포로 주오구 미나미3조니시", lat:43.054739, lng:141.3399746, rating:5.0, ratingCount:"1", mode:'walk'},
-        {id:u++, time:"17:00", name:"오도리공원 산책", note:"쇼핑 및 시내 구경", cat:"관광", place:"삿포로 주오구 오도리니시", lat:43.0607521, lng:141.3544308, rating:4.5, ratingCount:"3.8천", mode:'walk'},
-        {id:u++, time:"20:00", name:"라마이에서 저녁", note:"삿포로식 수프카레, 숙소 근처", cat:"식사", place:"삿포로 주오구 미나미4조니시", lat:43.054725, lng:141.3434414, rating:4.4, ratingCount:"2.6천", mode:'walk'},
-        {id:u++, time:"22:00", name:"개인 정비 시간", note:"숙소에서 휴식", cat:"휴식", place:"DAITO residence", lat:43.054739, lng:141.3399746}
-      ]},
-      { id:2, iso:"2026-09-20", label:"비에이 투어", stops:[
-        {id:u++, time:"08:00", name:"비에이 투어 출발", note:"숙소에서 픽업, 비에이로 이동", cat:"이동", place:"DAITO residence", lat:43.054739, lng:141.3399746, mode:'car'},
-        {id:u++, time:"09:00", name:"비에이 패치워크 로드", note:"청의 호수, 시로히게 폭포 등 코스", cat:"관광", place:"가미카와군 비에이초 시로가네", lat:43.4748188, lng:142.6387709, rating:4.6, ratingCount:"27", mode:'walk'},
-        {id:u++, time:"13:00", name:"투어 중 점심", note:"현지 식당, 메뉴 미정", cat:"식사", place:"비에이초 일대", lat:43.4748188, lng:142.6387709, mode:'car'},
-        {id:u++, time:"19:00", name:"마사진에서 저녁", note:"징기스칸, 스스키노 본점, 예약 필요", cat:"식사", place:"삿포로 주오구 미나미4조니시 5", lat:43.0556536, lng:141.3513021, rating:4.8, ratingCount:"3.2천", mode:'walk'},
-        {id:u++, time:"21:00", name:"숙소 복귀", note:"2차 후 개인 정비 시간", cat:"휴식", place:"DAITO residence", lat:43.054739, lng:141.3399746}
-      ]},
-      { id:3, iso:"2026-09-21", label:"시내 구경 2", stops:[
-        {id:u++, time:"07:00", name:"골드짐 투어 (선택)", note:"위치 미정, 정해지면 추가 예정", cat:"선택", tbd:true, mode:'walk'},
-        {id:u++, time:"09:00", name:"오도리공원, 기념품 쇼핑", note:"삿포로 TV타워 일대", cat:"관광", place:"삿포로 주오구 오도리니시", lat:43.0607521, lng:141.3544308, rating:4.5, ratingCount:"3.8천", mode:'walk'},
-        {id:u++, time:"10:00", name:"니조 시장", note:"신선 수산물 시장 구경", cat:"관광", place:"삿포로 주오구 미나미3조히가시", lat:43.058299, lng:141.358446, rating:3.8, ratingCount:"1.4만", mode:'walk'},
-        {id:u++, time:"11:00", name:"카이센동 점심", note:"오이소 또는 돈베이", cat:"식사", place:"니조시장 내", lat:43.0585776, lng:141.3589332, rating:4.1, ratingCount:"1.7천", mode:'transit'},
-        {id:u++, time:"13:00", name:"공항으로 이동", note:"신치토세 공항, 귀국", cat:"이동", place:"치토세시 비비", lat:42.7791317, lng:141.6866364, rating:4.3, ratingCount:"1.9만"}
-      ]}
-    ]
+    days: []
   };
 }
 
-const PREP = [
-  { group:"필수 서류 & 앱", items:[
-    {t:"비짓재팬웹 등록", d:"입국심사와 세관신고를 온라인으로 미리 등록해두면 공항에서 QR코드로 빠르게 통과할 수 있어요."},
-    {t:"여권 유효기간 확인", d:"출국일 기준 여권 만료일이 충분히 남아있는지 확인하세요."},
-    {t:"항공권, 숙소 예약 확인서 저장", d:"오프라인에서도 볼 수 있게 스크린샷이나 PDF로 저장해두면 좋아요."}
+/* 기본 준비물 — 나라가 정해지면 AI 맞춤으로 바꿀 수 있습니다 */
+const PREP_ABROAD = [
+  { group:"서류 & 예약", items:[
+    {t:"여권 유효기간 확인", d:"출국일 기준으로 남은 기간이 충분한지 확인하세요. 나라에 따라 6개월 이상을 요구하기도 해요."},
+    {t:"비자·전자입국신고 확인", d:"목적지에 따라 사전 등록이 필요할 수 있어요. 여행 전에 미리 확인해두세요."},
+    {t:"항공권·숙소 예약 확인서 저장", d:"오프라인에서도 볼 수 있게 스크린샷이나 PDF로 저장해두면 좋아요."}
   ]},
   { group:"통신 & 결제", items:[
-    {t:"eSIM 또는 포켓와이파이 예약", d:"공항에서 수령하는 포켓와이파이나 도착 즉시 개통되는 eSIM 중 선택하세요."},
-    {t:"엔화 환전", d:"공항보다 시내 환전소나 은행 환율이 나은 경우가 많아요."},
-    {t:"해외 결제 가능 카드 확인", d:"수수료가 낮은 카드로 해외 결제와 ATM 인출이 가능한지 확인하세요."}
+    {t:"eSIM 또는 로밍 준비", d:"현지 도착 즉시 쓸 수 있게 미리 개통하거나 로밍을 신청하세요."},
+    {t:"현지 통화 환전", d:"공항보다 시내 환전소나 은행 환율이 나은 경우가 많아요."},
+    {t:"해외 결제 카드 확인", d:"수수료가 낮은 카드로 해외 결제와 ATM 인출이 가능한지 확인하세요."}
   ]},
-  { group:"여행자 보험 & 건강", items:[
+  { group:"보험 & 건강", items:[
     {t:"여행자보험 가입", d:"카드에 자동 가입 혜택이 있는지 먼저 확인하고 부족하면 별도로 가입하세요."},
     {t:"상비약 챙기기", d:"감기약, 소화제, 멀미약, 반창고 등 기본 상비약을 준비하세요."}
   ]},
-  { group:"짐 & 날씨 대비", items:[
-    {t:"일교차 대비 겉옷 준비", d:"9월 하순 삿포로는 아침저녁으로 12에서 14도까지 내려가요. 얇은 바람막이나 가디건을 챙기세요."},
-    {t:"우산 또는 우비 준비", d:"9월은 비가 종종 내리는 시기예요."},
-    {t:"보조배터리 & 멀티 어댑터", d:"일본은 한국과 같은 콘센트지만 여유로 챙기면 좋아요."}
+  { group:"짐 챙기기", items:[
+    {t:"날씨에 맞는 옷차림", d:"출발 전 현지 예보를 확인하고 일교차에 대비한 겉옷을 챙기세요."},
+    {t:"충전기 & 멀티 어댑터", d:"현지 콘센트 규격을 확인하고 보조배터리도 챙기세요."}
   ]}
 ];
+
+const PREP_DOMESTIC = [
+  { group:"예약 확인", items:[
+    {t:"교통편 예매 확인", d:"KTX·고속버스·항공 예매 내역과 좌석을 확인하세요."},
+    {t:"숙소 예약 확인", d:"체크인 시간과 주차 가능 여부를 미리 확인해두면 편해요."}
+  ]},
+  { group:"챙길 것", items:[
+    {t:"신분증", d:"숙소 체크인과 렌터카 수령에 필요해요."},
+    {t:"충전기 & 보조배터리", d:"이동이 많은 날엔 보조배터리가 특히 요긴해요."},
+    {t:"상비약", d:"두통약, 소화제, 밴드 정도면 충분해요."}
+  ]},
+  { group:"현지 준비", items:[
+    {t:"날씨 확인하고 옷차림 정하기", d:"산이나 바다 근처는 시내보다 쌀쌀할 수 있어요."},
+    {t:"교통·주차 확인", d:"렌터카라면 주차장을, 대중교통이라면 막차 시간을 확인해두세요."}
+  ]}
+];
+
+function basePrep(){
+  return (tripCountry().code === 'KR') ? PREP_DOMESTIC : PREP_ABROAD;
+}
 
 /* ================= STATE ================= */
 let TRIP = defaultTrip();
@@ -1394,7 +1427,8 @@ async function pullRemote(quiet){
 
 /* ================= MAP ================= */
 function initLeaflet(){
-  lmap = L.map('map', { zoomControl:false, attributionControl:false }).setView([43.06,141.35], 9);
+  const c = searchCenter();
+  lmap = L.map('map', { zoomControl:false, attributionControl:false }).setView([c.lat, c.lng], 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18 }).addTo(lmap);
 }
 function pinHtml(num, active, multi, color){
@@ -1505,11 +1539,24 @@ function refreshMarkerStyles(){
   }
 }
 
+/* 일정에 좌표가 없을 때 여행지 중심을 비춥니다 */
+let centeredOnce = false;
+function centerOnTrip(force){
+  const c = searchCenter();
+  if(!c) return;
+  if(centeredOnce && !force) return;
+  centeredOnce = true;
+  try{
+    if(engine==='leaflet' && lmap) lmap.setView([c.lat, c.lng], 11, {animate:false});
+    else if(engine==='google' && gmap){ gmap.setCenter(c); gmap.setZoom(11); }
+  }catch(e){}
+}
+
 function renderMapForDay(){
   const day=currentDay(); clearMapLayers();
-  if(!day) return;
+  if(!day){ centerOnTrip(); return; }
   const withLoc = visibleStops(day).filter(s=>!s.tbd && s.lat!=null);
-  if(!withLoc.length) return;
+  if(!withLoc.length){ centerOnTrip(); return; }
   // 같은 좌표에 여러 일정이 있으면 핀 하나로 묶고, 지금 보고 있는 카드의 번호를 보여줍니다
   const groups=[];
   withLoc.forEach((s,i)=>{
@@ -1584,7 +1631,7 @@ function bootGoogleMaps(){
       document.getElementById('map').style.display='none';
       document.getElementById('gmap').style.display='block';
       gmap=new google.maps.Map(document.getElementById('gmap'),{
-        center:{lat:43.06,lng:141.35}, zoom:9, disableDefaultUI:true, gestureHandling:'greedy',
+        center:searchCenter(), zoom:11, disableDefaultUI:true, gestureHandling:'greedy',
         styles:[{featureType:'poi',elementType:'labels',stylers:[{visibility:'simplified'}]},
                 {featureType:'transit',elementType:'labels',stylers:[{visibility:'off'}]}]
       });
@@ -1855,7 +1902,7 @@ function renderScheduleScreenInner(){
 
   list.forEach((s,i)=>{
     const idx=withLoc.indexOf(s);
-    tbl.appendChild(rowEl(s, idx));
+    tbl.appendChild(rowEl(s, idx, list[i-1]));
     const next=list[i+1];
     if(next) tbl.appendChild(moveBar(s, next));
   });
@@ -1863,22 +1910,45 @@ function renderScheduleScreenInner(){
 }
 
 /* 표 한 줄 */
-function rowEl(s, idx){
+/* 시각 문자열 → 분 */
+function toMinutes(t){ const m=/^(\d{1,2}):(\d{2})$/.exec(t||''); return m? (+m[1])*60+(+m[2]) : null; }
+
+/* 앞 일정에서 이동 시간을 빼면 이 일정에 늦는지 확인합니다 */
+function tightInfo(prev, cur){
+  if(!prev || !cur) return null;
+  const a = toMinutes(prev.time), b = toMinutes(cur.time);
+  if(a==null || b==null) return null;
+  const known = knownLegMinutes(prev, cur);
+  if(!known) return null;
+  const gap = b - a;                       // 두 일정 사이 확보된 시간
+  if(gap < 0) return null;                 // 시간이 뒤집힌 경우는 건드리지 않음
+  const need = known.mins;
+  if(gap >= need) return null;
+  return { short: need - gap, need, gap, src: known.src };
+}
+
+function rowEl(s, idx, prev){
   const el=document.createElement('div');
   el.className='trow'+(s.opt?' optional':'');
   el.dataset.id=s.id;
   const sub=[s.cat];
   if(s.place) sub.push(s.place);
   const cc = s.tbd ? '#C4C4C8' : catC(s.cat);
+
+  const tight = tightInfo(prev, s);
+  if(tight) el.classList.add('tight');
+
   el.innerHTML=`
     <div class="tc-num" style="background:${cc}">${idx>=0? idx+1:'?'}</div>
     <div class="tc-time">${esc(fmtClock(s.time))}</div>
     <div class="tc-main">
       <div class="tc-name">${esc(s.name)}
+        ${tight? `<span class="tight-badge" title="이동 시간 부족">!</span>`:''}
         ${s.opt? '<span class="mini-badge opt">선택</span>':''}
         ${s.stay? '<span class="mini-badge stay">숙소</span>':''}
         ${s.flight? `<span class="mini-badge fl">${s.flight==='in'?'입국':'출국'}</span>`:''}</div>
       <div class="tc-sub">${esc(sub.join(' · '))}</div>
+      ${tight? `<div class="tight-msg">앞 일정에서 ${fmtMin(tight.need)} 걸리는데 ${fmtMin(tight.gap)}밖에 없어요 · <b>${fmtMin(tight.short)} 부족</b></div>`:''}
     </div>
     <span class="tc-caret">›</span>`;
   // 오늘이면서 지금 시각에 해당하는 일정을 강조합니다
@@ -2028,7 +2098,7 @@ async function renderWeather(day){
   if(!el) return;
   if(!day || !day.iso){ el.innerHTML=''; return; }
 
-  // 그 날 첫 장소 좌표 (없으면 삿포로 중심)
+  // 그 날 첫 장소 좌표 (없으면 여행지 중심)
   const spot = (day.stops||[]).find(x=>!x.tbd && x.lat!=null);
   const c = searchCenter();
   const lat = spot? spot.lat : c.lat;
@@ -2879,7 +2949,7 @@ function openFlightForm(){
       <label class="first">편명</label>
       <input type="text" id="fi_no" value="${esc(fin.no||'')}" placeholder="예: LJ231">
       <label>도착 공항</label>
-      <input type="text" id="fi_ap" value="${esc(fin.airport||'신치토세 공항')}" placeholder="신치토세 공항">
+      <input type="text" id="fi_ap" value="${esc(fin.airport||'')}" placeholder="예: 간사이 공항">
       <label>착륙 시각</label>
       ${timeFieldHtml('fi_time', fin.time||'14:00')}
 
@@ -2889,7 +2959,7 @@ function openFlightForm(){
       <label class="first">편명</label>
       <input type="text" id="fo_no" value="${esc(fout.no||'')}" placeholder="예: LJ232">
       <label>출발 공항</label>
-      <input type="text" id="fo_ap" value="${esc(fout.airport||'신치토세 공항')}" placeholder="신치토세 공항">
+      <input type="text" id="fo_ap" value="${esc(fout.airport||'')}" placeholder="예: 간사이 공항">
       <label>출발 시각</label>
       ${timeFieldHtml('fo_time', fout.time||'18:00')}
 
@@ -3039,7 +3109,7 @@ function openStayForm(){
         ${own? '' : '<br>지금은 이전 날 설정을 이어받고 있어요. 여기서 바꾸면 이후 날짜에도 이어집니다.'}
       </p>
       <label class="first">숙소 이름</label>
-      <input type="text" id="f_name" value="${st.name? esc(st.name):''}" placeholder="예: DAITO residence 중앙구역소앞">
+      <input type="text" id="f_name" value="${st.name? esc(st.name):''}" placeholder="숙소 이름">
       <label>위치 검색</label>
       <div class="geo-row">
         <input type="text" id="f_geoQuery" placeholder="숙소 이름이나 주소" value="${st.name? esc(st.name):''}">
@@ -3121,18 +3191,51 @@ function openDayForm(mode){
   const defIso = editing? editing.iso : nextSuggestedIso();
   getFormArea().innerHTML=`
     <div class="form-card">
-      <h3>${editing? '날짜 편집':'날짜 추가'}</h3>
-      <label class="first">날짜</label>
-      <input type="date" id="d_iso" value="${defIso}">
-      <label>이 날의 테마</label>
-      <input type="text" id="d_label" value="${editing? esc(editing.label):''}" placeholder="예: 오타루 당일치기">
-      <div class="form-actions">
+      <div class="fc-head">
+        <h3>${editing? '날짜 편집':'날짜 추가'}</h3>
+        <button type="button" class="fc-close" id="d_close" aria-label="닫기">✕</button>
+      </div>
+      ${editing? `
+        <label class="first">날짜</label>
+        <input type="date" id="d_iso" value="${defIso}">
+      ` : `
+        <label class="first">기간</label>
+        <div class="date-range">
+          <div class="dr-col">
+            <span class="dr-cap">출발</span>
+            <input type="date" id="d_from" value="${defIso}">
+          </div>
+          <span class="dr-tilde">~</span>
+          <div class="dr-col">
+            <span class="dr-cap">종료</span>
+            <input type="date" id="d_to" value="${defIso}">
+          </div>
+        </div>
+        <p class="hint" id="d_range">하루만 추가하려면 두 날짜를 같게 두세요.</p>
+      `}
+      <label>${editing? '이 날의 테마' : '테마 (모든 날에 적용)'}</label>
+      <input type="text" id="d_label" value="${editing? esc(editing.label):''}" placeholder="예: 시내 구경">
+      <div class="form-actions sticky">
         <button class="btn-primary" id="d_save">${editing? '저장':'추가'}</button>
         <button class="btn-ghost" id="d_cancel">취소</button>
         ${editing? '<button class="btn-ghost btn-danger" id="d_delete">이 날 삭제</button>':''}
       </div>
       ${editing? '<p class="hint">날짜를 삭제하면 그 날의 일정도 함께 사라져요.</p>':''}
     </div>`;
+
+  if(!editing){
+    const f=document.getElementById('d_from'), t=document.getElementById('d_to');
+    const note=document.getElementById('d_range');
+    const upd=()=>{
+      if(t.value && f.value && t.value < f.value) t.value = f.value;
+      const n = daySpan(f.value, t.value);
+      note.textContent = n>1 ? `${n}일이 한 번에 추가됩니다.` : '하루만 추가하려면 두 날짜를 같게 두세요.';
+    };
+    f.addEventListener('change', ()=>{ if(!t.value || t.value < f.value) t.value=f.value; upd(); });
+    t.addEventListener('change', upd);
+    upd();
+  }
+  document.getElementById('d_close').addEventListener('click', ()=> closeDayForm());
   document.getElementById('d_save').addEventListener('click', ()=> saveDay(editing));
   document.getElementById('d_cancel').addEventListener('click', ()=>{ closeDayForm(); });
   if(editing) document.getElementById('d_delete').addEventListener('click', ()=> deleteDay(editing));
@@ -3145,19 +3248,47 @@ function nextSuggestedIso(){
   return d.toISOString().slice(0,10);
 }
 function closeDayForm(){ dayFormOpen=false; const a=document.getElementById('formArea'); if(a) a.innerHTML=''; }
+/* 두 날짜 사이의 일수 (양 끝 포함) */
+function daySpan(a,b){
+  if(!a || !b) return 1;
+  const d1=new Date(a+'T00:00:00'), d2=new Date(b+'T00:00:00');
+  if(isNaN(d1)||isNaN(d2)) return 1;
+  return Math.max(1, Math.round((d2-d1)/86400000)+1);
+}
+
 function saveDay(editing){
-  const iso=document.getElementById('d_iso').value;
-  const label=document.getElementById('d_label').value.trim() || '일정';
-  if(!iso){ alert('날짜를 선택해주세요.'); return; }
-  if(editing){ editing.iso=iso; editing.label=label; }
-  else {
-    const nd={ id:TRIP.nextDayId++, iso, label, stops:[] };
-    TRIP.days.push(nd); activeDayId=nd.id;
+  const label=document.getElementById('d_label').value.trim();
+
+  if(editing){
+    const iso=document.getElementById('d_iso').value;
+    if(!iso){ alert('날짜를 선택해주세요.'); return; }
+    editing.iso=iso; editing.label=label || editing.label || '일정';
+  } else {
+    const from=document.getElementById('d_from').value;
+    const to  =document.getElementById('d_to').value || from;
+    if(!from){ alert('출발 날짜를 선택해주세요.'); return; }
+
+    const n = daySpan(from, to);
+    if(n > 60){ alert('한 번에 60일까지만 추가할 수 있어요.'); return; }
+
+    const exist = new Set(TRIP.days.map(d=>d.iso));
+    let added = 0, first = null;
+    for(let i=0;i<n;i++){
+      const d = new Date(from+'T00:00:00'); d.setDate(d.getDate()+i);
+      const iso = d.toISOString().slice(0,10);
+      if(exist.has(iso)) continue;                 // 이미 있는 날짜는 건너뜁니다
+      const nd = { id:TRIP.nextDayId++, iso,
+                   label: label || `${TRIP.days.length+added+1}일차`, stops:[] };
+      TRIP.days.push(nd); added++;
+      if(!first) first = nd;
+    }
+    if(!added){ toast('이미 있는 날짜예요'); closeDayForm(); return; }
+    activeDayId = first.id;
   }
   sortDays(); ensureStayStarts(); markChanged(); closeDayForm();
   activeStopId=null;
   refreshAll(); renderScheduleScreen();
-  toast(editing? '날짜를 수정했어요':'날짜를 추가했어요');
+  toast(editing? '날짜를 수정했어요' : `${TRIP.days.length}일 일정이 되었어요`);
 }
 function deleteDay(day){
   if(TRIP.days.length<=1){ alert('마지막 날짜는 삭제할 수 없어요.'); return; }
@@ -3186,6 +3317,16 @@ function openForm(stopId, prefill){
       ${pf.afterName? `<p class="hint" style="margin:-6px 0 14px;"><b>${esc(pf.afterName)}</b> 다음, <b>${esc(pf.beforeName)}</b> 앞에 들어갑니다.</p>`:''}
       <label class="first">이름</label>
       <input type="text" id="f_name" value="${ed? esc(ed.name):''}" placeholder="장소 이름">
+      <label>위치 검색</label>
+      <div class="geo-row">
+        <input type="text" id="f_geoQuery" placeholder="장소 이름이나 주소" value="${ed&&!ed.tbd? esc(ed.name):''}">
+        <button class="geo-btn" id="f_geoSearch"><span class="icon">${iconSvg('search')}</span>검색</button>
+      </div>
+      <div class="geo-results" id="f_geoResults"></div>
+      <p class="hint" id="f_geoStatus">${ed&&!ed.tbd? '기존 위치가 저장되어 있어요. 다시 검색하면 위치가 바뀌어요.':'두 글자 이상 입력하면 후보가 바로 떠요.'}</p>
+      <button type="button" class="link-btn" id="f_pickMap">지도에서 직접 찍기</button>
+      <div id="f_miniMap" class="mini-map" style="display:none;"></div>
+
       <label>시간</label>
       ${timeFieldHtml('f_time', ed? ed.time : (pf.time||'09:00'))}
       <label>상태</label>
@@ -3203,16 +3344,6 @@ function openForm(stopId, prefill){
           </button>`).join('')}
       </div>
       <input type="hidden" id="f_cat" value="${ed? ed.cat : '관광'}">
-      <label>위치 검색</label>
-      <div class="geo-row">
-        <input type="text" id="f_geoQuery" placeholder="예: 오도리공원 삿포로" value="${ed&&!ed.tbd? esc(ed.name):''}">
-        <button class="geo-btn" id="f_geoSearch"><span class="icon">${iconSvg('search')}</span>검색</button>
-      </div>
-      <div class="geo-results" id="f_geoResults"></div>
-      <p class="hint" id="f_geoStatus">${ed&&!ed.tbd? '기존 위치가 저장되어 있어요. 다시 검색하면 위치가 바뀌어요.':'두 글자 이상 입력하면 후보가 바로 떠요.'}</p>
-      <button type="button" class="link-btn" id="f_pickMap">지도에서 직접 찍기</button>
-      <div id="f_miniMap" class="mini-map" style="display:none;"></div>
-
       <div class="lbl-row">
         <label style="margin:0;">메모</label>
         <button type="button" class="ai-mini" id="f_aiNote">
@@ -3335,8 +3466,8 @@ function closeForm(){
    3순위: Photon (오타·부분 일치에 관대함)
    그래도 못 찾으면 지도에서 직접 찍기                              */
 
-const SAPPORO = { lat:43.0618, lng:141.3545 };   /* 기본값 (여행 국가가 정해지면 tripCenter를 씁니다) */
-function searchCenter(){ try{ return tripCenter(); }catch(e){ return SAPPORO; } }
+const FALLBACK_CENTER = { lat:37.5665, lng:126.9780 };   /* 여행지가 정해지기 전 임시 기준점 */
+function searchCenter(){ try{ return tripCenter(); }catch(e){ return FALLBACK_CENTER; } }
 let placesService=null, acService=null, acToken=null, searchTimer=null, searchSeq=0;
 
 function ensurePlaces(){
@@ -3672,7 +3803,8 @@ function toggleMiniMap(){
   box.style.display = opening ? 'block' : 'none';
   if(!opening) return;
 
-  const center = geoPicked ? [geoPicked.lat, geoPicked.lng] : [SAPPORO.lat, SAPPORO.lng];
+  const c0 = searchCenter();
+  const center = geoPicked ? [geoPicked.lat, geoPicked.lng] : [c0.lat, c0.lng];
   if(!miniMap){
     miniMap = L.map(box, { zoomControl:true, attributionControl:false }).setView(center, 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(miniMap);
@@ -3746,12 +3878,14 @@ function loadPrep(){ try{ prepState=JSON.parse(localStorage.getItem(LS_PREP)||'{
 function savePrep(){ try{ localStorage.setItem(LS_PREP, JSON.stringify(prepState)); }catch(e){} }
 /* 이 여행에 적용할 준비물 목록 (AI로 맞춤 생성하면 TRIP.prep 에 저장됩니다) */
 function prepList(){
-  return (TRIP && Array.isArray(TRIP.prep) && TRIP.prep.length) ? TRIP.prep : PREP;
+  return (TRIP && Array.isArray(TRIP.prep) && TRIP.prep.length) ? TRIP.prep : basePrep();
 }
 
 function renderPrep(){
   const wrap=document.getElementById('prepGroups'); if(!wrap) return;
   wrap.innerHTML='';
+  const em=document.getElementById('prepEmoji');
+  if(em) em.textContent = (tripCountry().code==='KR') ? '🧳' : '🛂';
   const sub=document.getElementById('prepSub');
   if(sub){
     const co=tripCountry(), city=(TRIP.country&&TRIP.country.city)||'';
@@ -4095,7 +4229,7 @@ function addSuggestion(item){
   document.getElementById('f_name').value=item.name;
   document.getElementById('f_note').value=item.reason||'';
   document.getElementById('f_cat').value = Object.keys(CATS).includes(item.category)? item.category:'관광';
-  document.getElementById('f_geoQuery').value=item.name+' 삿포로';
+  document.getElementById('f_geoQuery').value = item.name + ' ' + ((TRIP.country&&TRIP.country.city)||tripCountry().name);
 }
 
 /* 예상치 못한 오류를 조용히 넘기지 않도록 */
@@ -4151,16 +4285,24 @@ async function generatePrep(){
     if(aiMode()==='proxy'){
       const res = await fetch(CFG.AI_PROXY_URL, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ type:'prep', country:co.name, city, period, currency:co.currency })
+        body: JSON.stringify({ type:'prep', country:co.name, city, period,
+          currency:co.currency, domestic: co.code==='KR' })
       });
       if(!res.ok) throw new Error('proxy '+res.status);
       const j = await res.json();
       groups = j.prep || j.groups || j;
     } else {
-      const sys = '너는 해외여행 준비를 돕는 도우미야. 목적지 나라에 맞는 준비물·서류·현지 사정을 한국인 여행자 기준으로 정리해. 반드시 JSON 배열만 출력하고 다른 텍스트는 쓰지마. 형식: [{"group":"분류명","items":[{"t":"할 일 제목","d":"한 줄 설명"}]}] 분류는 4개 내외, 각 분류에 항목 2~4개.';
-      const usr = `나라: ${co.name}\n도시: ${city}\n기간: ${period}\n통화: ${co.currency}\n\n`
-        + `입국 서류·비자·전자입국신고, 통신(eSIM/로밍), 결제와 환전, 교통카드, 전압과 콘센트 규격, `
-        + `현지 치안이나 문화적 주의사항, 그 계절 날씨에 맞는 옷차림을 고려해서 만들어줘.`;
+      const domestic = co.code==='KR';
+      const sys = domestic
+        ? '너는 국내여행 준비를 돕는 도우미야. 한국에 사는 사람이 국내로 여행 가는 상황이니 여권·비자·환전·로밍·해외 결제·여행자보험처럼 해외에만 해당하는 항목은 절대 넣지 마. 대신 교통편 예매, 숙소 확인, 현지 날씨와 옷차림, 주차나 대중교통, 지역 특산물이나 축제처럼 국내여행에 실제로 필요한 것만 정리해. 반드시 JSON 배열만 출력하고 다른 텍스트는 쓰지마. 형식: [{"group":"분류명","items":[{"t":"할 일 제목","d":"한 줄 설명"}]}] 분류는 3~4개, 각 분류에 항목 2~4개.'
+        : '너는 해외여행 준비를 돕는 도우미야. 목적지 나라에 맞는 준비물·서류·현지 사정을 한국인 여행자 기준으로 정리해. 반드시 JSON 배열만 출력하고 다른 텍스트는 쓰지마. 형식: [{"group":"분류명","items":[{"t":"할 일 제목","d":"한 줄 설명"}]}] 분류는 4개 내외, 각 분류에 항목 2~4개.';
+      const usr = domestic
+        ? `여행지: ${city || '국내'}\n기간: ${period}\n\n`
+          + `교통편 예매와 확인, 숙소 체크인, 그 계절 현지 날씨와 옷차림, 주차나 대중교통 막차, `
+          + `그 지역에서 놓치면 아쉬운 것들을 고려해서 만들어줘.`
+        : `나라: ${co.name}\n도시: ${city}\n기간: ${period}\n통화: ${co.currency}\n\n`
+          + `입국 서류·비자·전자입국신고, 통신(eSIM/로밍), 결제와 환전, 교통카드, 전압과 콘센트 규격, `
+          + `현지 치안이나 문화적 주의사항, 그 계절 날씨에 맞는 옷차림을 고려해서 만들어줘.`;
       const res = await fetch('https://api.openai.com/v1/chat/completions',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+personalKey()},
@@ -4222,11 +4364,15 @@ function showOnboarding(editMode){
     document.getElementById('ob_start').textContent = '변경 저장';
     obPicked = tripCountry().code;
   } else {
+    box.querySelector('.ob-title').textContent = 'TriviMe와 어디로 떠나세요?';
+    box.querySelector('.ob-sub').textContent = '친구들과 여행 일정을 함께 만들고, 지도와 이동 경로를 한눈에 확인해보세요.';
+    document.getElementById('ob_start').textContent = '여행 시작하기';
     const today = new Date();
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()+2);
     const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     document.getElementById('ob_start_date').value = localIso(today);
     document.getElementById('ob_end_date').value = localIso(end);
+    bindObDates();
   }
   document.getElementById('ob_dates').hidden = !!editMode;
   box.dataset.edit = editMode? '1':'';
@@ -4254,6 +4400,30 @@ function showOnboarding(editMode){
   box.hidden = false;
 }
 
+/* 출발·종료 날짜를 서로 맞춰주고 일수를 보여줍니다 */
+function bindObDates(){
+  const f = document.getElementById('ob_start_date');
+  const t = document.getElementById('ob_end_date');
+  const note = document.getElementById('ob_days');
+  if(!f || !t) return;
+
+  const upd = ()=>{
+    if(f.value){
+      t.min = f.value;                                  // 종료일은 출발일 이후만
+      if(!t.value || t.value < f.value) t.value = f.value;
+    }
+    if(note){
+      const n = daySpan(f.value, t.value);
+      note.textContent = (f.value && t.value)
+        ? (n>1 ? `${n}일 일정으로 시작해요` : '당일치기로 시작해요')
+        : '';
+    }
+  };
+  f.onchange = upd;
+  t.onchange = upd;
+  upd();
+}
+
 async function startTrip(){
   const title = document.getElementById('ob_title').value.trim() || '우리 여행';
   const city  = document.getElementById('ob_city').value.trim();
@@ -4273,7 +4443,7 @@ async function startTrip(){
     markChanged();
     box.hidden = true; box.dataset.edit='';
     refreshAll(); renderScheduleScreen();
-    if(engine==='leaflet') lmap.setView([TRIP.country.lat, TRIP.country.lng], 11);
+    centeredOnce=false; centerOnTrip(true);
     toast(`${co.name}${city? ' · '+city:''}로 바꿨어요`);
     return;
   }
