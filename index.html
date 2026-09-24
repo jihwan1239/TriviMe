@@ -951,7 +951,7 @@
   .ob-countries{gap:8px;}
   .ob-c{min-height:44px;padding:10px 4px;background:#F5F7FA;border:1px solid transparent;border-radius:12px;}
   .ob-c.on{background:#EAF6FE;color:#166CA6;border-color:#2F93DD;box-shadow:none;}
-  .ob-days{color:#276A94;line-height:1.6;}
+  .ob-days{color:#798493;font-size:11px;line-height:1.5;margin-top:6px;}
   .ob-go{margin-top:20px;border-radius:14px;box-shadow:0 5px 16px #2f93dd24;}
   .ob-note{color:#626B78;font-size:12px;}
   .ob-cancel{display:block;margin:0 0 16px auto;background:#F2F5F8;border:0;border-radius:10px;min-height:44px;padding:8px 14px;color:#46566A;}
@@ -975,7 +975,8 @@
   .quick-actions .stay-row.set{background:#fff;}
   .welcome-empty strong{display:block;color:#344054;font-size:16px;margin-bottom:8px;}
   .welcome-empty p{font-size:13px;line-height:1.7;margin:0;color:#697586;}
-  .ob-inferred{min-height:18px;margin:6px 0 0;color:#246C9D;font-size:12px;line-height:1.5;}
+  .ob-inferred{margin:6px 0 0;color:#246C9D;font-size:12px;line-height:1.5;}
+  .ob-inferred:empty{display:none;}
   .nm-live{display:block;margin-top:6px;font-size:11px;color:#426177;line-height:1.5;}
   .nm-actual{display:grid;gap:3px;}
   .nm-source{font-size:10px;color:#74818E;}
@@ -5154,7 +5155,7 @@ function showOnboarding(editMode){
     const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     obCityAuto=''; obEndEdited=false; obCountryEdited=false;
     document.getElementById('ob_title').value=''; document.getElementById('ob_city').value='';
-    document.getElementById('ob_inferred').textContent='예시처럼 도시와 기간을 적으면 아래 항목을 자동으로 채워요.';
+    document.getElementById('ob_inferred').textContent='';
     document.getElementById('ob_start_date').value = localIso(today);
     document.getElementById('ob_end_date').value = localIso(end);
     bindObDates();
@@ -5216,7 +5217,7 @@ function inferTripFromTitle(){
   const end=document.getElementById('ob_end_date');
   const hint=document.getElementById('ob_inferred');
   const m=/^(.+?)\s+(\d{1,2})\s*박\s*(\d{1,2})\s*일(?:\s*여행)?$/.exec(title);
-  if(!m){hint.textContent='예시처럼 도시와 기간을 적으면 아래 항목을 자동으로 채워요.';return;}
+  if(!m){hint.textContent='';return;}
   const city=m[1].trim().replace(/\s*여행$/,'');
   const nights=Number(m[2]),days=Number(m[3]);
   if(!city || city.length>24 || days<1 || days>90 || nights+1!==days){hint.textContent='여행 이름의 박·일 수가 맞는지 확인해주세요.';return;}
@@ -5245,13 +5246,13 @@ function inferTripFromTitle(){
       date.setDate(date.getDate()+days-1);
       end.value=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
       end.min=start.value;
-      document.getElementById('ob_days').textContent=`${nights}박 ${days}일 · 마지막 날을 자동 입력했어요`;
+      document.getElementById('ob_days').textContent='일정은 나중에 변경할 수 있어요';
     }
   }
   syncObRangeLabel();
   hint.textContent=(cityInput.value===city && !obEndEdited)
-    ? `${city} · ${nights}박 ${days}일을 자동 입력했어요. 아래에서 변경할 수 있어요.`
-    : '여행 이름을 참고했어요. 직접 선택한 도시와 날짜가 우선 적용돼요.';
+    ? '도시와 기간을 자동으로 채웠어요.'
+    : '직접 선택한 도시와 날짜를 유지했어요.';
 }
 document.getElementById('ob_title').addEventListener('input',inferTripFromTitle);
 document.getElementById('ob_city').addEventListener('input',()=>{obCityAuto='';});
@@ -5273,7 +5274,7 @@ function bindObDates(){
     if(note){
       const n = daySpan(f.value, t.value);
       note.textContent = (f.value && t.value)
-        ? (n>90 ? '최대 90일까지 설정할 수 있어요' : n>1 ? `${n-1}박 ${n}일 · 일정은 나중에도 바꿀 수 있어요` : '당일치기 · 하루를 알차게 계획해보세요')
+        ? (n>90 ? '최대 90일까지 설정할 수 있어요' : '일정은 나중에 변경할 수 있어요')
         : '';
     }
   };
