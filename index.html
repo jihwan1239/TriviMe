@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#5CB8EC" />
+<meta name="color-scheme" content="light" />
 <meta name="application-name" content="TriviMe" />
 <meta name="description" content="친구들과 여행 일정과 이동 경로를 함께 만들고 공유하는 모바일 여행 플래너" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -619,6 +620,7 @@
   .ios-install-guide{ margin:0 0 24px; padding:14px 16px; background:var(--sky-soft);
     border:1px solid #D5EAF9; border-radius:12px; font-size:12.5px; line-height:1.65; }
   .ios-install-guide[hidden]{ display:none; }
+  .ios-install-guide [hidden]{ display:none; }
   .ios-install-guide summary{ font-weight:700; color:var(--sky-deep); cursor:pointer; }
   .ios-install-guide p{ margin:9px 0 0; }
   .ios-install-guide ol{ padding-left:19px; margin:9px 0 0; }
@@ -963,6 +965,49 @@
   .ob-range-toggle:focus-visible,.ob-range-panel button:focus-visible{outline:2px solid var(--sky);outline-offset:2px;}
   .ob-calendar-actions button:disabled{opacity:.45;cursor:default;}
 
+  /* 조작 영역에만 유리 질감을 더하고 본문은 선명하게 유지합니다. */
+  :root{ color-scheme:light; }
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  input, select, textarea{ font-family:var(--font-body); color:var(--ink); }
+  button{ -webkit-appearance:none; appearance:none; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea{
+    -webkit-appearance:none; appearance:none; }
+  .form-card select{ -webkit-appearance:none; appearance:none; padding-right:38px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%2353667A' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; }
+  .topbar, .bottomnav, .modal{ background:#F8FBFF; }
+  .topbar{ border:1px solid rgba(255,255,255,.95);
+    box-shadow:inset 0 1px 0 #fff, 0 8px 24px rgba(38,69,98,.12); }
+  .bottomnav{ flex-shrink:0; padding-left:8px; padding-right:8px;
+    border-top:1px solid #E2EAF2; box-shadow:0 -4px 18px rgba(42,68,94,.04); }
+  .navbtn{ position:relative; color:#657487; border-radius:18px; margin:4px 2px;
+    min-height:48px; padding-top:5px; padding-bottom:5px; }
+  .navbtn.active{ color:#176C9F; background:linear-gradient(145deg,#E1F2FF,#F1F8FF);
+    box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px #D3E8F8; }
+  .navbtn.active .lb{ font-weight:700; }
+  .modal-bg{ background:rgba(22,39,58,.36); }
+  .modal{ border:1px solid rgba(255,255,255,.9); border-bottom:0;
+    border-radius:24px 24px 0 0; box-shadow:0 -12px 48px rgba(23,48,75,.16);
+    padding-bottom:calc(26px + env(safe-area-inset-bottom,0px));
+    max-height:86vh; max-height:86dvh; overscroll-behavior:contain; }
+  .modal h2{ padding-right:44px; }
+  .modal-close{ top:16px; right:12px; width:44px; height:44px;
+    border-radius:50%; background:#EDF2F8; color:#53667A; }
+  .modal-close:active{ background:#DAE8F4; }
+  .form-card input, .form-card select, .form-card textarea{ border:1px solid #E2E8F0; background-color:#F3F6FA; }
+  .modal input, .modal textarea{ font-size:16px; }
+  .form-card input:focus, .form-card select:focus, .form-card textarea:focus{
+    outline:2px solid #2F93DD; outline-offset:1px; background-color:#fff; }
+  @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .topbar, .bottomnav{ background:linear-gradient(135deg,rgba(255,255,255,.93),rgba(237,247,255,.84));
+      -webkit-backdrop-filter:blur(18px) saturate(140%); backdrop-filter:blur(18px) saturate(140%); }
+    .modal{ background:rgba(250,252,255,.97);
+      -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); }
+  }
+  @media (prefers-reduced-transparency:reduce){
+    .topbar, .bottomnav, .modal{ background:#F8FBFF;
+      -webkit-backdrop-filter:none; backdrop-filter:none; }
+  }
 </style>
 </head>
 <body>
@@ -1134,7 +1179,7 @@
       <p class="ob-sub">여행지와 날짜만 정하면 준비 끝. 장소와 이동 경로를 하나의 일정에 담아보세요.</p>
       <details class="ios-install-guide" id="iosInstallGuide" hidden>
         <summary>iPhone에서 앱처럼 사용하기</summary>
-        <p id="kakaoInstallStep" hidden><b>카카오톡 링크로 들어왔다면:</b> 화면 오른쪽 아래의 공유 버튼을 눌러 <b>Safari로 열기</b>를 선택하세요. 메뉴 위치가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
+        <p id="kakaoInstallStep" hidden><b>카카오톡으로 링크를 받았다면:</b> 화면 오른쪽 아래의 공유 버튼을 눌러 <b>Safari로 열기</b>를 선택하세요. 메뉴 위치가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
         <ol><li>Safari에서 TriviMe를 엽니다.</li><li>Safari의 공유 버튼 → <b>홈 화면에 추가</b>를 누릅니다.</li><li><b>웹 앱으로 열기</b>를 켜고 추가합니다.</li></ol>
         <p>친구가 보낸 여행 링크는 홈 화면 웹앱에 자동으로 옮겨지지 않을 수 있어요. 링크를 복사한 뒤 웹앱의 <b>내 여행 목록 → 공유 링크 열기</b>에 붙여넣으면 그 여행을 열 수 있습니다.</p>
       </details>
@@ -1217,9 +1262,9 @@
       <label class="ob-label" for="tripLibraryLink">공유받은 여행 링크 열기</label>
       <div class="trip-link-row"><input type="url" id="tripLibraryLink" inputmode="url" placeholder="친구에게 받은 TriviMe 링크 붙여넣기"><button type="button" class="btn-primary" id="tripLibraryOpen">열기</button></div>
       <p class="trip-library-hint">홈 화면 웹앱은 카카오톡에서 열린 링크를 자동으로 가져오지 못할 수 있어요. 받은 주소를 복사해 여기에 붙여넣으면 됩니다.</p>
-      <details class="ios-install-guide" id="tripLibraryIosGuide" style="margin-top:18px">
-        <summary>아이폰 웹앱 추가 · 카카오톡 공유 링크 안내</summary>
-        <p>카카오톡으로 링크를 받았다면 화면 오른쪽 아래 공유 버튼 → <b>Safari로 열기</b>를 선택하세요. 메뉴가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
+      <details class="ios-install-guide" id="tripLibraryIosGuide" style="margin-top:18px" hidden>
+        <summary>아이폰에서 웹앱 추가하기</summary>
+        <p id="tripLibraryKakaoStep" hidden>카카오톡으로 링크를 받았다면 화면 오른쪽 아래 공유 버튼 → <b>Safari로 열기</b>를 선택하세요. 메뉴가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
         <p>Safari에서 공유 → <b>홈 화면에 추가</b> → <b>웹 앱으로 열기</b>를 선택하면 됩니다. 이미 웹앱을 설치했다면 링크를 복사해서 위 <b>공유받은 여행 링크 열기</b>에 붙여넣으세요.</p>
       </details>
     </div>
@@ -4294,7 +4339,13 @@ function showShareTip(){
   document.getElementById('shareBtn').setAttribute('aria-describedby','shareTipText');
 }
 document.getElementById('shareTipClose').onclick=dismissShareTip;
+function isIOSDevice(){
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isKakaoBrowser(){ return /KAKAOTALK/i.test(navigator.userAgent); }
 function openTripLibrary(){
+  document.getElementById('tripLibraryIosGuide').hidden=!isIOSDevice();
+  document.getElementById('tripLibraryKakaoStep').hidden=!isKakaoBrowser();
   const list=document.getElementById('tripLibraryList');
   const trips=localTrips();
   const dateLabel=(time)=>{
@@ -4364,11 +4415,11 @@ document.getElementById('iosInlineClose').onclick=()=>{
   try{localStorage.setItem('trivime:ios-guide-dismissed','1');}catch(e){}
 };
 function showIosGuideForExistingTrip(){
-  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
+  const isIOS=isIOSDevice();
   const installed=navigator.standalone===true || window.matchMedia?.('(display-mode: standalone)').matches;
   let dismissed=false;try{dismissed=localStorage.getItem('trivime:ios-guide-dismissed')==='1';}catch(e){}
   if(!isIOS || installed || dismissed) return;
-  const kakao=/KAKAOTALK/i.test(navigator.userAgent);
+  const kakao=isKakaoBrowser();
   document.getElementById('iosInlineText').textContent=kakao
     ? '카카오톡에서 받은 링크는 오른쪽 아래 공유 버튼 → Safari로 열기를 선택하세요. Safari에서는 공유 → 홈 화면에 추가로 앱처럼 쓸 수 있어요. 이미 앱을 설치했다면 링크를 복사해 내 여행 목록에서 여세요.'
     : 'Safari의 공유 → 홈 화면에 추가 → 웹 앱으로 열기로 앱처럼 사용할 수 있어요. 공유받은 여행은 내 여행 목록에 링크를 붙여넣어 열 수 있습니다.';
@@ -4854,12 +4905,11 @@ function showOnboarding(editMode){
   const box = document.getElementById('onboard');
   const list = document.getElementById('ob_countries');
   if(!box || !list) return;
-  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
-  const isKakao=/KAKAOTALK/i.test(navigator.userAgent);
+  const isIOS=isIOSDevice();
   const guide=document.getElementById('iosInstallGuide');
-  guide.hidden=!!editMode;
+  guide.hidden=!!editMode || !isIOS;
   guide.open=!editMode && isIOS;
-  document.getElementById('kakaoInstallStep').hidden=!isKakao;
+  document.getElementById('kakaoInstallStep').hidden=!isKakaoBrowser();
   document.getElementById('ob_saved_trips').hidden=!!editMode || !localTrips().length;
 
   if(editMode){
