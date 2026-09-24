@@ -198,6 +198,12 @@
     font:inherit; font-size:13px; }
   .trip-link-row button{ flex:0 0 auto; }
   .trip-library-hint{ font-size:12px; line-height:1.6; color:var(--muted); margin:8px 0 0; }
+  #ob_saved_trips[hidden], .ob-share-link[hidden]{ display:none; }
+  .ob-share-link{ margin:0 0 24px; padding:16px; background:#F5F9FD;
+    border:1px solid #DCEBF6; border-radius:14px; }
+  .ob-share-link .ob-label{ display:block; margin:0; }
+  .ob-share-link .trip-link-row input{ background:#fff; font-size:16px; }
+  .ob-share-link .trip-link-row button{ min-width:64px; }
 
   .daybar{ display:flex; gap:7px; overflow-x:auto; padding:2px 1px 4px;
     -ms-overflow-style:none; scrollbar-width:none; }
@@ -1311,9 +1317,14 @@
         <summary>iPhone에서 앱처럼 사용하기</summary>
         <p id="kakaoInstallStep" hidden><b>카카오톡으로 링크를 받았다면:</b> 화면 오른쪽 아래의 공유 버튼을 눌러 <b>Safari로 열기</b>를 선택하세요. 메뉴 위치가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
         <ol><li>Safari에서 TriviMe를 엽니다.</li><li>Safari의 공유 버튼 → <b>홈 화면에 추가</b>를 누릅니다.</li><li><b>웹 앱으로 열기</b>를 켜고 추가합니다.</li></ol>
-        <p>친구가 보낸 여행 링크는 홈 화면 웹앱에 자동으로 옮겨지지 않을 수 있어요. 링크를 복사한 뒤 웹앱의 <b>내 여행 목록 → 공유 링크 열기</b>에 붙여넣으면 그 여행을 열 수 있습니다.</p>
+        <p>친구가 보낸 여행 링크는 홈 화면 웹앱에 자동으로 옮겨지지 않을 수 있어요. 링크를 복사한 뒤 <b>공유받은 여행 링크 열기</b>에 붙여넣으면 그 여행을 열 수 있습니다.</p>
       </details>
       <button type="button" class="mini-btn" id="ob_saved_trips" hidden style="width:100%;margin-bottom:20px">이미 만든 여행 목록 보기</button>
+      <div class="ob-share-link" id="ob_share_link" hidden>
+        <label class="ob-label" for="ob_shared_trip_link">공유받은 여행 링크 열기</label>
+        <div class="trip-link-row"><input type="url" id="ob_shared_trip_link" inputmode="url" autocomplete="url" placeholder="친구에게 받은 TriviMe 링크 붙여넣기"><button type="button" class="btn-primary" id="ob_open_shared_trip">열기</button></div>
+        <p class="trip-library-hint">친구가 보낸 여행이 있다면 링크를 붙여넣어 바로 열어보세요.</p>
+      </div>
 
       <label class="ob-label" for="ob_title">여행 이름 <span class="ob-opt">선택</span></label>
       <input type="text" id="ob_title" class="ob-input" placeholder="예 : 제주도 2박 3일" maxlength="24" aria-describedby="ob_inferred">
@@ -4564,7 +4575,7 @@ function openTripLibrary(){
     }catch(e){toast('삭제하지 못했어요. 저장 공간을 확인해주세요.');return;}
     if(id===TRIP_ID){ location.assign(`${location.origin}${location.pathname}`); return; }
     openTripLibrary();
-    document.getElementById('ob_saved_trips').hidden=!localTrips().length;
+    updateOnboardingTripActions();
     toast('이 기기의 여행 목록에서 삭제했어요.');
   }));
   document.getElementById('tripLibraryModalBg').classList.add('open');
@@ -4574,8 +4585,12 @@ document.getElementById('scheduleTripsTopBtn').onclick=openTripLibrary;
 document.getElementById('scheduleTripsBtn').onclick=openTripLibrary;
 document.getElementById('ob_saved_trips').onclick=openTripLibrary;
 document.getElementById('tripLibraryNew').onclick=()=>location.assign(tripUrl(randomTripId()));
-function openSharedTripLink(){
-  const input=document.getElementById('tripLibraryLink');
+function updateOnboardingTripActions(editMode=false){
+  const hasTrips=localTrips().length>0;
+  document.getElementById('ob_saved_trips').hidden=!!editMode || !hasTrips;
+  document.getElementById('ob_share_link').hidden=!!editMode || hasTrips;
+}
+function openSharedTripLink(input=document.getElementById('tripLibraryLink')){
   const raw=input.value.trim();
   let url;
   try{ url=new URL(raw); }catch(e){}
@@ -4592,8 +4607,10 @@ function openSharedTripLink(){
   if(id===TRIP_ID){ history.replaceState(null,'',url.href); location.reload(); }
   else location.assign(url.href);
 }
-document.getElementById('tripLibraryOpen').onclick=openSharedTripLink;
+document.getElementById('tripLibraryOpen').onclick=()=>openSharedTripLink();
 document.getElementById('tripLibraryLink').addEventListener('keydown',e=>{if(e.key==='Enter') openSharedTripLink();});
+document.getElementById('ob_open_shared_trip').onclick=()=>openSharedTripLink(document.getElementById('ob_shared_trip_link'));
+document.getElementById('ob_shared_trip_link').addEventListener('keydown',e=>{if(e.key==='Enter') openSharedTripLink(e.currentTarget);});
 document.getElementById('iosInlineTrips').onclick=openTripLibrary;
 document.getElementById('iosInlineClose').onclick=()=>{
   document.getElementById('iosInlineGuide').hidden=true;
@@ -5098,7 +5115,7 @@ function showOnboarding(editMode){
   guide.hidden=!!editMode || !isIOS;
   guide.open=!editMode && isIOS;
   document.getElementById('kakaoInstallStep').hidden=!isKakaoBrowser();
-  document.getElementById('ob_saved_trips').hidden=!!editMode || !localTrips().length;
+  updateOnboardingTripActions(editMode);
 
   if(editMode){
     box.querySelector('.ob-title').textContent = '여행지 바꾸기';
