@@ -610,6 +610,7 @@
   .ob-flag{ font-size:15px; }
   .ob-c.on{ background:var(--sky-soft); color:var(--sky-deep); font-weight:600;
     box-shadow:inset 0 0 0 1.5px var(--sky); }
+  .ob-c[data-c="ETC"]{ grid-column:1 / -1; }
   .ob-go{ width:100%; margin-top:28px; padding:16px; font-size:16px; }
   .ob-note{ font-size:12px; color:var(--muted); line-height:1.6; margin-top:12px; text-align:center; }
 
@@ -1271,6 +1272,7 @@ function normalizeMode(m){ return (m==='metro'||m==='bus') ? 'transit' : (m||'wa
 const COUNTRIES = [
   { code:'KR', name:'한국',        flag:'🇰🇷', lat:37.5665, lng:126.9780, transit:'google', currency:'원' },
   { code:'JP', name:'일본',        flag:'🇯🇵', lat:35.6762, lng:139.6503, transit:'ai',     currency:'엔' },
+  { code:'CN', name:'중국',        flag:'🇨🇳', lat:39.9042, lng:116.4074, transit:'google', currency:'위안' },
   { code:'TW', name:'대만',        flag:'🇹🇼', lat:25.0330, lng:121.5654, transit:'google', currency:'대만달러' },
   { code:'VN', name:'베트남',      flag:'🇻🇳', lat:21.0278, lng:105.8342, transit:'google', currency:'동' },
   { code:'TH', name:'태국',        flag:'🇹🇭', lat:13.7563, lng:100.5018, transit:'google', currency:'바트' },
@@ -1285,6 +1287,8 @@ const COUNTRIES = [
   { code:'AU', name:'호주',        flag:'🇦🇺', lat:-33.8688,lng:151.2093, transit:'google', currency:'호주달러' },
   { code:'ETC',name:'그 외',       flag:'🌍', lat:0,       lng:0,        transit:'google', currency:'현지 통화' }
 ];
+/* 나라 목록은 간결하게 유지하되, 기존 여행에 저장된 국가 정보는 계속 지원합니다. */
+const FEATURED_COUNTRY_CODES = new Set(['KR','JP','CN','TW','VN','TH','SG','HK','US','FR','IT','AU']);
 function countryOf(code){ return COUNTRIES.find(c=>c.code===code) || COUNTRIES[0]; }
 function tripCountry(){ return countryOf(TRIP && TRIP.country ? TRIP.country.code : 'ETC'); }
 /* 이 여행의 대중교통 처리 방식 */
@@ -4666,12 +4670,13 @@ function showOnboarding(editMode){
     box.querySelector('.ob-title').textContent = 'TriviMe와 어디로 떠나세요?';
     box.querySelector('.ob-sub').textContent = '여행지와 날짜만 정하면 준비 끝. 장소와 이동 경로를 하나의 일정에 담아보세요.';
     document.getElementById('ob_start').textContent = '여행 시작하기';
+    obPicked = 'KR';
     const today = new Date();
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate()+2);
     const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     obCityAuto=''; obEndEdited=false; obCountryEdited=false;
     document.getElementById('ob_title').value=''; document.getElementById('ob_city').value='';
-    document.getElementById('ob_inferred').textContent='';
+    document.getElementById('ob_inferred').textContent='예시처럼 도시와 기간을 적으면 아래 항목을 자동으로 채워요.';
     document.getElementById('ob_start_date').value = localIso(today);
     document.getElementById('ob_end_date').value = localIso(end);
     bindObDates();
@@ -4683,7 +4688,7 @@ function showOnboarding(editMode){
   document.getElementById('ob_error').hidden = true;
   ['ob_start_date','ob_end_date'].forEach(id=>document.getElementById(id).removeAttribute('aria-invalid'));
 
-  list.innerHTML = COUNTRIES.map(c=>`
+  list.innerHTML = COUNTRIES.filter(c=> FEATURED_COUNTRY_CODES.has(c.code) || c.code==='ETC' || (editMode && c.code===obPicked)).map(c=>`
     <button type="button" class="ob-c ${c.code===obPicked?'on':''}" data-c="${c.code}" aria-pressed="${c.code===obPicked}">
       <span class="ob-flag">${c.flag}</span>${esc(c.name)}
     </button>`).join('');
@@ -4706,9 +4711,10 @@ function showOnboarding(editMode){
 }
 
 function updateObCountry(){
-  const samples = {KR:'제주, 부산, 서울', JP:'도쿄, 오사카, 후쿠오카', TW:'타이베이', VN:'다낭', TH:'방콕', SG:'싱가포르', HK:'홍콩', US:'뉴욕', FR:'파리', IT:'로마', ES:'바르셀로나', GB:'런던', DE:'베를린', AU:'시드니', ETC:'여행할 도시'};
-  document.getElementById('ob_city').placeholder = '예: '+samples[obPicked];
-  document.getElementById('ob_title').placeholder = obPicked==='KR' ? '예 : 제주도 2박 3일' : '예: 함께 떠나는 '+countryOf(obPicked).name+' 여행';
+  const samples = {KR:'제주, 부산, 서울', JP:'도쿄, 오사카, 후쿠오카', CN:'상하이, 베이징, 칭다오', TW:'타이베이', VN:'다낭', TH:'방콕', SG:'싱가포르', HK:'홍콩', US:'뉴욕', FR:'파리', IT:'로마', ES:'바르셀로나', GB:'런던', DE:'베를린', AU:'시드니', ETC:'리스본'};
+  const titleExamples = {KR:'제주도 2박 3일', JP:'오사카 2박 3일', CN:'상하이 2박 3일', TW:'타이베이 2박 3일', VN:'다낭 3박 4일', TH:'방콕 3박 4일', SG:'싱가포르 2박 3일', HK:'홍콩 2박 3일', US:'뉴욕 4박 5일', FR:'파리 4박 5일', IT:'로마 4박 5일', ES:'바르셀로나 4박 5일', GB:'런던 4박 5일', DE:'베를린 4박 5일', AU:'시드니 4박 5일', ETC:'리스본 3박 4일'};
+  document.getElementById('ob_city').placeholder = '예: '+(samples[obPicked]||'여행할 도시');
+  document.getElementById('ob_title').placeholder = '예: '+(titleExamples[obPicked]||'리스본 3박 4일');
   document.getElementById('ob_note').textContent = HAS_SYNC
     ? '일정을 만든 후 공유 메뉴에서 친구에게 링크를 보낼 수 있어요.'
     : '일정은 이 브라우저에 저장돼요. 공유 메뉴에서 링크와 백업 파일을 보관할 수 있어요.';
@@ -4732,12 +4738,27 @@ function inferTripFromTitle(){
   const end=document.getElementById('ob_end_date');
   const hint=document.getElementById('ob_inferred');
   const m=/^(.+?)\s+(\d{1,2})\s*박\s*(\d{1,2})\s*일(?:\s*여행)?$/.exec(title);
-  if(!m){hint.textContent='';return;}
+  if(!m){hint.textContent='예시처럼 도시와 기간을 적으면 아래 항목을 자동으로 채워요.';return;}
   const city=m[1].trim().replace(/\s*여행$/,'');
   const nights=Number(m[2]),days=Number(m[3]);
   if(!city || city.length>24 || days<1 || days>90 || nights+1!==days){hint.textContent='여행 이름의 박·일 수가 맞는지 확인해주세요.';return;}
-  if(!obCountryEdited && /^(제주도?|서울|부산|강릉|속초|경주|여수|전주|인천|대구|광주|대전|울산|춘천|남해)$/.test(city) && obPicked!=='KR'){
-    obPicked='KR';document.querySelectorAll('#ob_countries .ob-c').forEach(b=>{const on=b.dataset.c==='KR';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});updateObCountry();
+  const cityCountryHints = {
+    KR:/^(제주도?|서울|부산|강릉|속초|경주|여수|전주|인천|대구|광주|대전|울산|춘천|남해)$/,
+    JP:/^(도쿄|오사카|후쿠오카|삿포로|교토|오키나와|나고야)$/,
+    CN:/^(상하이|상해|베이징|북경|칭다오|광저우|선전|청두|시안)$/,
+    TW:/^(타이베이|가오슝|타이중)$/,
+    VN:/^(다낭|하노이|호찌민|호치민|나트랑|푸꾸옥)$/,
+    TH:/^(방콕|치앙마이|푸켓|푸껫)$/,
+    SG:/^싱가포르$/, HK:/^홍콩$/,
+    US:/^(뉴욕|로스앤젤레스|라스베이거스|샌프란시스코)$/,
+    FR:/^(파리|니스)$/, IT:/^(로마|밀라노|피렌체|베네치아)$/,
+    AU:/^(시드니|멜버른|브리즈번)$/
+  };
+  const inferredCountry = Object.keys(cityCountryHints).find(code=>cityCountryHints[code].test(city));
+  if(!obCountryEdited && inferredCountry && obPicked!==inferredCountry){
+    obPicked=inferredCountry;
+    document.querySelectorAll('#ob_countries .ob-c').forEach(b=>{const on=b.dataset.c===inferredCountry;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});
+    updateObCountry();
   }
   if(!cityInput.value.trim() || cityInput.value===obCityAuto){cityInput.value=city;obCityAuto=city;}
   if(!obEndEdited && start.value){
