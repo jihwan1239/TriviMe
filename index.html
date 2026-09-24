@@ -1027,6 +1027,94 @@
     .topbar, .bottomnav, .modal{ background:#F8FBFF;
       -webkit-backdrop-filter:none; backdrop-filter:none; }
   }
+
+  /* ============ 사용 가이드 ============ */
+  .guide{ position:fixed; inset:0; z-index:5000; opacity:0; transition:opacity .35s ease; }
+  .guide[hidden]{ display:none; }
+  .guide.show{ opacity:1; }
+
+  /* 하이라이트 구멍 — 바깥은 은은하게 어둡게, 테두리엔 빛나는 링 */
+  .gd-hole{ position:fixed; border-radius:16px; pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(12,22,38,.46);
+    transition:left .45s cubic-bezier(.32,.72,0,1), top .45s cubic-bezier(.32,.72,0,1),
+               width .45s cubic-bezier(.32,.72,0,1), height .45s cubic-bezier(.32,.72,0,1),
+               border-radius .45s ease; }
+  .gd-hole::before{ content:''; position:absolute; inset:-3px; border-radius:inherit;
+    border:2px solid rgba(255,255,255,.95);
+    box-shadow:0 0 0 4px rgba(108,192,242,.35), 0 0 24px rgba(108,192,242,.55); }
+  .gd-hole::after{ content:''; position:absolute; inset:-3px; border-radius:inherit;
+    border:2px solid rgba(108,192,242,.9); animation:gdPulse 1.8s cubic-bezier(.2,.8,.2,1) infinite; }
+  @keyframes gdPulse{ 0%{ opacity:.9; transform:scale(1); } 100%{ opacity:0; transform:scale(1.14); } }
+  .gd-hole.center{ width:0 !important; height:0 !important; left:50% !important; top:46% !important; }
+  .gd-hole.center::before, .gd-hole.center::after{ display:none; }
+
+  /* 유리 카드 */
+  .gd-card{ position:fixed; left:16px; right:16px; max-width:440px; margin:0 auto;
+    padding:14px 16px 14px; border-radius:22px; overflow:visible;
+    background:linear-gradient(160deg, rgba(255,255,255,.82), rgba(255,255,255,.66));
+    -webkit-backdrop-filter:blur(26px) saturate(190%); backdrop-filter:blur(26px) saturate(190%);
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow:0 18px 48px rgba(8,20,40,.28), 0 1px 0 rgba(255,255,255,.8) inset;
+    transition:top .45s cubic-bezier(.32,.72,0,1); }
+  .gd-card.pop{ animation:gdPop .5s cubic-bezier(.2,.9,.25,1.1) both; }
+  @keyframes gdPop{ from{ opacity:0; transform:translateY(var(--gd-from, 10px)) scale(.96); }
+                    to{ opacity:1; transform:none; } }
+
+  /* 진행 막대 */
+  .gd-progress{ height:3px; border-radius:3px; background:rgba(47,147,221,.14);
+    overflow:hidden; margin:0 2px 11px; }
+  .gd-progress span{ display:block; height:100%; width:0; border-radius:3px;
+    background:linear-gradient(90deg, var(--sky), var(--sun));
+    transition:width .5s cubic-bezier(.32,.72,0,1); }
+
+  .gd-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .gd-step{ font-size:11.5px; font-weight:700; color:var(--sky-deep);
+    font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+  .gd-skip{ border:none; background:none; color:rgba(60,66,76,.62); font-size:12.5px; cursor:pointer; padding:4px 2px; }
+
+  /* 단계가 바뀔 때 글이 살짝 밀려 들어옵니다 */
+  .gd-content.swap{ animation:gdSwap .38s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes gdSwap{ from{ opacity:0; transform:translateX(var(--gd-dir, 12px)); } to{ opacity:1; transform:none; } }
+  .gd-title{ margin:2px 0 5px; font-size:17px; font-weight:700; letter-spacing:-.025em; color:#16202E; }
+  .gd-body{ margin:0; font-size:13.5px; line-height:1.6; color:rgba(40,48,60,.82); letter-spacing:-.01em; }
+
+  .gd-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; }
+  .gd-never{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:rgba(60,66,76,.72); cursor:pointer; }
+  .gd-never input{ appearance:none; -webkit-appearance:none; width:18px; height:18px; margin:0; border-radius:6px;
+    border:1.5px solid rgba(60,66,76,.35); background:rgba(255,255,255,.6); display:grid; place-items:center;
+    transition:background .2s, border-color .2s; cursor:pointer; }
+  .gd-never input:checked{ background:var(--sky); border-color:var(--sky); }
+  .gd-never input:checked::after{ content:''; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0;
+    transform:rotate(45deg) translate(-1px,-1px); }
+  .gd-nav{ display:flex; gap:6px; }
+  .gd-prev, .gd-next{ border:none; border-radius:12px; padding:9px 15px; font-size:13.5px; font-weight:600; cursor:pointer;
+    transition:transform .15s ease, opacity .2s, background .2s; }
+  .gd-prev:active, .gd-next:active{ transform:scale(.96); opacity:1; }
+  .gd-prev{ background:rgba(120,130,145,.14); color:#1D2733; }
+  .gd-prev[disabled]{ opacity:0; pointer-events:none; }
+  .gd-next{ background:linear-gradient(135deg, #4FAAE8, #2F8FD8); color:#fff; min-width:68px;
+    box-shadow:0 4px 12px rgba(47,147,221,.35); }
+
+  /* 말풍선 꼬리도 같은 유리 */
+  .gd-arrow{ position:absolute; width:14px; height:14px; left:50%; margin-left:-7px; transform:rotate(45deg);
+    background:rgba(255,255,255,.78); -webkit-backdrop-filter:blur(26px); backdrop-filter:blur(26px);
+    border:1px solid rgba(255,255,255,.7); border-radius:3px;
+    transition:left .45s cubic-bezier(.32,.72,0,1); }
+  /* 반투명 카드 안쪽으로 겹치는 절반은 잘라내 이음새가 보이지 않게 합니다 */
+  .gd-arrow.up{ top:-7px; border-right:none; border-bottom:none;
+    clip-path:polygon(0 0, 100% 0, 0 100%); }
+  .gd-arrow.down{ bottom:-7px; border-left:none; border-top:none; background:rgba(255,255,255,.68);
+    clip-path:polygon(100% 0, 100% 100%, 0 100%); }
+  .gd-arrow.none{ display:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .guide, .gd-hole, .gd-card, .gd-arrow, .gd-progress span{ transition:none; }
+    .gd-card.pop, .gd-content.swap, .gd-hole::after{ animation:none; }
+  }
+  .guide-again .icon{ width:14px; height:14px; }
+  @media (prefers-reduced-motion: reduce){
+    .gd-hole, .gd-card{ transition:none; } .gd-card.enter{ animation:none; }
+  }
 </style>
 </head>
 <body>
@@ -1159,6 +1247,8 @@
           <button type="button" class="mini-btn" id="scheduleStatusBtn">저장 · 연결 상태</button>
         </div>
         <button type="button" class="mini-btn" id="scheduleTripsBtn" style="width:100%;margin-top:8px">내 여행 목록 · 다른 여행 열기</button>
+        <button type="button" class="mini-btn guide-again" id="guideAgainBtn" style="width:100%;margin-top:8px">
+          <span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
       </div>
       <div class="plan-bar" id="planBar"></div>
       <div class="day-summary" id="daySummary"></div>
@@ -1235,6 +1325,30 @@
   </section>
 
   <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
+
+  <!-- ============ 사용 가이드 ============ -->
+  <div class="guide" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gdTitle">
+    <div class="gd-hole" id="gdHole"></div>
+    <div class="gd-card" id="gdCard">
+      <div class="gd-progress"><span id="gdBar"></span></div>
+      <div class="gd-top">
+        <span class="gd-step" id="gdStep">1 / 10</span>
+        <button type="button" class="gd-skip" id="gdSkip">건너뛰기</button>
+      </div>
+      <div class="gd-content" id="gdContent">
+        <h3 class="gd-title" id="gdTitle"></h3>
+        <p class="gd-body" id="gdBody"></p>
+      </div>
+      <div class="gd-foot">
+        <label class="gd-never"><input type="checkbox" id="gdNever"><span>다시 보지 않기</span></label>
+        <div class="gd-nav">
+          <button type="button" class="gd-prev" id="gdPrev">이전</button>
+          <button type="button" class="gd-next" id="gdNext">다음</button>
+        </div>
+      </div>
+      <span class="gd-arrow" id="gdArrow"></span>
+    </div>
+  </div>
 
   <div class="bottomnav">
     <button class="navbtn active" data-screen="schedule"><span class="icon" data-i="navList"></span><span class="lb">일정표</span></button>
@@ -4378,6 +4492,7 @@ function dismissShareTip(){
   hideShareTip();
 }
 function showShareTip(){
+  if(window.__gdRunning) return;          // 사용 가이드가 보이는 동안에는 띄우지 않습니다
   if(shareTipDismissed || needOnboarding() || !document.getElementById('onboard').hidden) return;
   document.getElementById('shareTipText').textContent = HAS_SYNC
     ? '링크를 공유해 친구들과 여행 일정을 함께 계획해보세요.'
@@ -5248,6 +5363,7 @@ async function commitTrip(){
   refreshAll(); switchScreen('schedule');
   if(engine==='leaflet' && lmap) lmap.setView([TRIP.country.lat, TRIP.country.lng], 11);
   toast(`${co.name} 여행을 만들었어요`);
+  scheduleGuide();                   // 처음 만든 여행이면 가이드를 이어서 보여줍니다
 }
 
 /* ================= INIT ================= */
@@ -5315,6 +5431,7 @@ async function init(){
 
   pushBackup(TRIP, '앱 시작');
   const fixed = ensureFlightStops() | ensureStayStarts();
+  scheduleGuide();
   if(fixed){ refreshAll(); }
   if(HAS_SYNC && !TRIP.updatedAt) markChanged();
 
@@ -5323,6 +5440,222 @@ async function init(){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
   }
 }
+
+/* ================= 사용 가이드 =================
+   처음 한 번 버튼마다 짧게 설명합니다.
+   - '다시 보지 않기'를 체크하고 닫거나, 끝까지 보면 다음부터 뜨지 않아요.
+   - 체크하지 않고 건너뛰면 다음에 앱을 열 때 다시 보여줍니다.
+   - 여행 설정 > '사용 가이드 다시 보기'로 언제든 다시 볼 수 있어요. */
+const GUIDE_KEY = 'trivime:guideDone:v1';
+function guideDone(){ try{ return localStorage.getItem(GUIDE_KEY)==='1'; }catch(e){ return false; } }
+function setGuideDone(){ try{ localStorage.setItem(GUIDE_KEY,'1'); }catch(e){} }
+
+const GUIDE_STEPS = [
+  { screen:'schedule', target:null,
+    title:'TriviMe에 오신 걸 환영해요',
+    body:'주요 기능을 30초 만에 짚어드릴게요. 언제든 건너뛸 수 있어요.' },
+  { screen:'schedule', target:'#daybar',
+    title:'날짜 넘기기',
+    body:'아래 칩으로 여행 날짜를 옮겨 다녀요. 일정표와 지도가 같은 날짜를 함께 보여줘요.' },
+  { screen:'schedule', target:'#planBar',
+    title:'1안 · 2안으로 비교하기',
+    body:'＋로 다른 계획을 만들어 비교할 수 있어요. 선택된 안을 한 번 더 누르면 이름을 바꿀 수 있어요.' },
+  { screen:'schedule', target:'.trow',
+    title:'일정 고치기',
+    body:'일정을 누르면 시간, 장소, 메모를 바로 수정할 수 있어요.' },
+  { screen:'schedule', target:'.tmove',
+    title:'이동수단과 소요 시간',
+    body:'이 줄을 펼쳐 도보, 대중교통, 택시 중에 고르면 걸리는 시간과 요금을 알려줘요. 시간이 빠듯하면 빨간 느낌표로 알려드려요.' },
+  { screen:'schedule', target:'#addStopBtn',
+    title:'장소 추가',
+    body:'새로운 장소는 여기서 넣어요. 일정 사이에 끼워 넣고 싶다면 구간의 ＋ 일정 추가를 눌러도 돼요.' },
+  { screen:'schedule', target:'#tripSetBtn',
+    title:'여행 설정',
+    body:'항공편, 숙소, 여행지, 날짜는 여기서 바꿔요. 이 가이드도 여기서 다시 볼 수 있어요.' },
+  { screen:'map', target:'.navbtn[data-screen="map"]',
+    title:'지도로 동선 보기',
+    body:'하루 일정을 지도 위 핀과 선으로 한눈에 확인할 수 있어요.' },
+  { screen:'map', target:'#aiFab',
+    title:'AI 장소 추천',
+    body:'지금 동선에 어울리는 카페나 명소를 AI가 추천해줘요.' },
+  { screen:'map', target:'#shareBtn',
+    title:'친구와 함께 짜기',
+    body:'링크를 보내면 친구들과 같은 일정을 함께 보고 고칠 수 있어요.' },
+  { screen:'prep', target:'#prepAiBtn',
+    title:'여행 준비물',
+    body:'여행지와 기간에 맞는 준비물 목록을 AI가 만들어줘요. 체크한 항목은 내 기기에만 저장돼요.' },
+  { screen:'schedule', target:null,
+    title:'준비 끝!',
+    body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정의 사용 가이드 다시 보기에서 언제든 다시 볼 수 있어요.' }
+];
+
+let gdSteps = [], gdIdx = 0, gdRunning = false, gdDir = 1;
+
+function gdVisible(el){
+  if(!el) return false;
+  const r = el.getBoundingClientRect();
+  if(r.width < 2 || r.height < 2) return false;
+  const cs = getComputedStyle(el);
+  return cs.visibility!=='hidden' && cs.display!=='none';
+}
+function gdFind(step){
+  if(!step.target) return null;
+  const els = document.querySelectorAll(step.target);
+  for(const el of els){ if(gdVisible(el)) return el; }
+  return null;
+}
+
+async function gdGoto(i){
+  gdIdx = i;
+  const step = gdSteps[i];
+  const cur = document.querySelector('.screen.active');
+  if(step.screen && (!cur || cur.id !== 'screen-'+step.screen)){
+    switchScreen(step.screen);
+    await new Promise(r=> setTimeout(r, 380));
+  }
+  let el = gdFind(step);
+  if(el){
+    el.scrollIntoView({ block:'center', behavior:'instant' in document.documentElement.style ? 'instant' : 'auto' });
+    await new Promise(r=> setTimeout(r, 120));
+    el = gdFind(step) || el;
+  }
+  gdPaint(el, step);
+}
+
+function gdPaint(el, step){
+  const hole = document.getElementById('gdHole');
+  const card = document.getElementById('gdCard');
+  const arrow = document.getElementById('gdArrow');
+  const vh = window.innerHeight, vw = window.innerWidth;
+
+  document.getElementById('gdStep').textContent = `${gdIdx+1} / ${gdSteps.length}`;
+  document.getElementById('gdTitle').textContent = step.title;
+  document.getElementById('gdBody').textContent = step.body;
+  document.getElementById('gdPrev').disabled = gdIdx===0;
+  document.getElementById('gdNext').textContent = gdIdx===gdSteps.length-1 ? '시작하기' : '다음';
+  document.getElementById('gdBar').style.width = `${((gdIdx+1)/gdSteps.length)*100}%`;
+
+  // 글은 진행 방향으로 살짝 밀려 들어옵니다
+  const content = document.getElementById('gdContent');
+  content.style.setProperty('--gd-dir', gdDir>=0 ? '14px' : '-14px');
+  content.classList.remove('swap'); void content.offsetWidth; content.classList.add('swap');
+
+  if(!el){
+    // 대상이 없는 단계는 화면 가운데 카드로
+    hole.classList.add('center');
+    arrow.className = 'gd-arrow none';
+    card.style.top = Math.max(80, vh*0.5 - card.offsetHeight/2) + 'px';
+    if(!card.dataset.shown) gdPopCard('14px');
+    return;
+  }
+  hole.classList.remove('center');
+  const r = el.getBoundingClientRect();
+  const pad = 6;
+  const L = Math.max(4, r.left - pad), T = Math.max(4, r.top - pad);
+  const W = Math.min(vw - L - 4, r.width + pad*2), H = r.height + pad*2;
+  Object.assign(hole.style, { left:L+'px', top:T+'px', width:W+'px', height:H+'px' });
+
+  // 카드는 공간이 넓은 쪽에 붙입니다
+  const ch = card.offsetHeight;
+  const firstPaint = !card.dataset.shown;
+  const below = vh - (T+H), above = T;
+  let top, dir;
+  if(below >= ch + 20 || below >= above){ top = T + H + 14; dir='up'; }
+  else { top = T - ch - 14; dir='down'; }
+  top = Math.min(Math.max(12, top), vh - ch - 12);
+  card.style.top = top + 'px';
+
+  // 화살표를 대상 가운데에 맞춥니다
+  const cr = card.getBoundingClientRect();
+  const cx = Math.min(Math.max(r.left + r.width/2, cr.left + 22), cr.right - 22);
+  arrow.className = 'gd-arrow ' + dir;
+  arrow.style.left = (cx - cr.left) + 'px';
+  if(firstPaint) gdPopCard(dir==='up' ? '12px' : '-12px');
+}
+
+function gdPopCard(from){
+  const card = document.getElementById('gdCard');
+  card.dataset.shown = '1';
+  card.style.setProperty('--gd-from', from);
+  card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop');
+}
+
+function startGuide(force){
+  if(gdRunning) return;
+  if(!force && guideDone()) return;
+  if(typeof needOnboarding==='function' && needOnboarding()) return;
+  const ob = document.getElementById('onboard');
+  if(ob && !ob.hidden) return;
+
+  gdSteps = GUIDE_STEPS.slice();
+  gdRunning = true; window.__gdRunning = true;
+  if(typeof hideShareTip==='function') hideShareTip();
+  document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open'));
+  const g = document.getElementById('guide');
+  document.getElementById('gdNever').checked = false;
+  delete document.getElementById('gdCard').dataset.shown;
+  gdDir = 1;
+  g.hidden = false;
+  requestAnimationFrame(()=> g.classList.add('show'));
+  gdGoto(0);
+}
+
+async function gdStepValid(i){
+  // 대상이 화면에 없는 단계(예: 일정이 없어서 이동 줄이 없음)는 건너뜁니다
+  const step = gdSteps[i];
+  if(!step.target) return true;
+  const cur = document.querySelector('.screen.active');
+  if(step.screen && (!cur || cur.id !== 'screen-'+step.screen)){
+    switchScreen(step.screen);
+    await new Promise(r=> setTimeout(r, 380));
+  }
+  return !!gdFind(step);
+}
+
+async function gdMove(delta){
+  gdDir = delta;
+  let i = gdIdx + delta;
+  while(i >= 0 && i < gdSteps.length && !(await gdStepValid(i))) i += delta;
+  if(i < 0) return;
+  if(i >= gdSteps.length){ endGuide(true); return; }
+  gdGoto(i);
+}
+
+function endGuide(completed){
+  const never = document.getElementById('gdNever').checked;
+  if(completed || never) setGuideDone();
+  gdRunning = false; window.__gdRunning = false;
+  const g = document.getElementById('guide');
+  g.classList.remove('show');
+  setTimeout(()=>{ g.hidden = true; }, 360);
+  switchScreen('schedule');
+  if(!completed && !never) toast('다음에 앱을 열면 가이드를 다시 보여드릴게요');
+}
+
+document.getElementById('gdNext').addEventListener('click', ()=> gdMove(1));
+document.getElementById('gdPrev').addEventListener('click', ()=> gdMove(-1));
+document.getElementById('gdSkip').addEventListener('click', ()=> endGuide(false));
+document.getElementById('guideAgainBtn').addEventListener('click', ()=>{
+  const box=document.getElementById('tripSet'); if(box) box.hidden=true;
+  startGuide(true);
+});
+document.addEventListener('keydown', e=>{
+  if(!gdRunning) return;
+  if(e.key==='Escape') endGuide(false);
+  if(e.key==='ArrowRight') gdMove(1);
+  if(e.key==='ArrowLeft') gdMove(-1);
+});
+window.addEventListener('resize', ()=>{ if(gdRunning){ const st=gdSteps[gdIdx]; gdPaint(gdFind(st), st); } });
+
+/* 시작 화면이 사라진 뒤 처음 한 번 띄웁니다 */
+function scheduleGuide(){
+  const wait = ()=>{
+    if(document.getElementById('splash')) return setTimeout(wait, 250);
+    setTimeout(()=> startGuide(false), 450);
+  };
+  wait();
+}
+
 const splashStartedAt = performance.now();
 const splashReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let splashDismissScheduled = false;
