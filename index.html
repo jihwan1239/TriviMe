@@ -263,6 +263,17 @@
   .pc-name{ font-size:17px; font-weight:600; margin:0 0 6px; line-height:1.3; letter-spacing:-.03em; }
   .pc-note{ font-size:13px; color:var(--muted); line-height:1.45; letter-spacing:-.01em; }
   .pc-foot{ display:flex; align-items:center; gap:8px; margin-top:9px; }
+  .pc-expand{ margin-top:7px; border-top:1px solid var(--line); }
+  .pc-expand summary{ list-style:none; cursor:pointer; color:var(--sky-deep); font-size:11.5px;
+    font-weight:600; padding:9px 0 0; min-height:31px; }
+  .pc-expand summary::-webkit-details-marker{ display:none; }
+  .pc-expand summary::after{ content:'⌄'; padding-left:5px; }
+  .pc-expand[open] summary::after{ content:'⌃'; }
+  .pc-expand .pc-note{ margin-top:5px; }
+  .pc-route-action{ display:block; border:0; background:var(--sky-soft); color:var(--sky-deep);
+    border-radius:8px; padding:8px 10px; font:inherit; font-size:11px; font-weight:600;
+    cursor:pointer; margin-top:9px; }
+  .pc-route-action:focus-visible, .pc-expand summary:focus-visible{ outline:2px solid var(--sky); outline-offset:2px; }
   .pc-rating{ font-size:12px; }
   .pc-rating .star{ color:#FFB020; }
   .pc-rating .rc{ color:var(--muted-2); }
@@ -724,6 +735,8 @@
   .nm-tag{ font-size:9.5px; font-weight:700; color:var(--sun-deep); border:1px solid #F2DFB8;
     border-radius:999px; padding:1px 6px; }
   .nm-meta{ font-size:11px; color:var(--muted); width:100%; }
+  .pc-brief{ margin-top:8px; color:var(--muted); font-size:11.5px; line-height:1.4;
+    white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
 
   /* 경로 액션 버튼 */
   .rd-actions{ display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
@@ -1703,7 +1716,7 @@ function addPlan(day, copyCurrent){
     day.stops.filter(s=> s.plan===cur).forEach(s=>{
       const c = JSON.parse(JSON.stringify(s));
       c.id = newUid(); c.plan = np.id;
-      delete c.aiRoute; delete c.taxiFare; delete c.taxiNote;
+      delete c.aiRoute; delete c.aiRouteChoices; delete c.taxiFare; delete c.taxiNote;
       day.stops.push(c);
     });
     day.stops.sort((a,b)=>a.time.localeCompare(b.time));
@@ -1753,6 +1766,7 @@ function setPlanField(day, stop, key, value){
 /* 현재 안 기준의 이동수단·AI 결과 */
 function stopMode(stop){ return normalizeMode(planField(currentDay(), stop, 'mode')); }
 function stopAiRoute(stop){ return planField(currentDay(), stop, 'aiRoute'); }
+function stopAiRouteChoices(stop){ return planField(currentDay(), stop, 'aiRouteChoices'); }
 function stopTaxiFare(stop){ return planField(currentDay(), stop, 'taxiFare'); }
 function stopTaxiNote(stop){ return planField(currentDay(), stop, 'taxiNote'); }
 
@@ -2202,7 +2216,6 @@ function renderCarousel(){
   const locatedIndex=new Map(withLoc.map((s,i)=>[s,i]));
   if(!activeStopId && withLoc.length) activeStopId=withLoc[0].id;
   const cards=document.createDocumentFragment();
-  const transitCards=[];
   list.forEach((s,i)=>{
     const idx=locatedIndex.has(s)?locatedIndex.get(s):-1;
     const card=document.createElement('div');
@@ -2210,6 +2223,10 @@ function renderCarousel(){
     card.dataset.id=s.id;
     const rating = s.rating? `<span class="pc-rating"><span class="star">★</span> ${s.rating} <span class="rc">(리뷰 ${s.ratingCount})</span></span>`:'';
     const cc = s.tbd? '#C4C4C8' : catC(s.cat);
+    const next=list[i+1];
+    const mode=next? (MODES.find(m=>m.key===stopMode(s))||MODES[0]) : null;
+    const ai=next && stopMode(s)==='transit'? stopAiRoute(s):null;
+    const brief=next? `<div class="pc-brief">${esc(mode.label)}${ai? ` · AI 추정 약 ${esc(ai.minutes||'?')}분`:''} · ${esc(next.name)}까지</div>`:'';
     card.innerHTML=`
       <div class="pc-top">
         <span class="pc-num" style="background:${cc}">${idx>=0? idx+1:'–'}</span>
@@ -2218,17 +2235,37 @@ function renderCarousel(){
           <span class="icon">${iconSvg(CATS[s.cat])}</span>${s.cat}</span>
       </div>
       <div class="pc-name">${esc(s.name)}</div>
-      <div class="pc-note">${esc(s.note||'')}</div>
-      ${nextMoveHtml(s, day, list, i)}
-      <div class="pc-foot">${rating}${s.tbd?'<span class="tbd-badge">위치 미정</span>':''}</div>`;
+      ${brief}
+      ${s.tbd?'<span class="tbd-badge">위치 미정</span>':''}
+      <details class="pc-expand"><summary>장소${next?' · 이동':''} 상세 보기</summary>
+        ${s.note? `<div class="pc-note">${esc(s.note)}</div>`:''}
+        ${nextMoveHtml(s, day, list, i)}
+        ${rating? `<div class="pc-foot">${rating}</div>`:''}
+        ${next && stopMode(s)==='transit'? `<button type="button" class="pc-route-action">${stopAiRouteChoices(s)?.length?'AI 후보 다시 비교':'이동 경로 확인'}</button>`:''}
+      </details>`;
     card.addEventListener('click', ()=> selectStop(s.id,true,true));
+    const details=card.querySelector('.pc-expand');
+    details.addEventListener('click', e=>e.stopPropagation());
+    details.querySelector('.pc-route-action')?.addEventListener('click', ()=>openTransitFromMap(s.id));
+    if(next && stopMode(s)==='transit'){
+      details.addEventListener('toggle', ()=>{
+        if(details.open && !details.dataset.routeLoaded){
+          details.dataset.routeLoaded='1';
+          hydrateMapTransit(card,s,next);
+        }
+      });
+    }
     cards.appendChild(card);
-    const next=list[i+1];
-    if(next && stopMode(s)==='transit')transitCards.push([card,s,next]);
   });
   wrap.appendChild(cards);
-  transitCards.forEach(([card,from,to])=>hydrateMapTransit(card,from,to));
   carouselCenterTimer=setTimeout(()=> scrollCardIntoCenter(activeStopId), 60);
+}
+function openTransitFromMap(stopId){
+  switchScreen('schedule');
+  const bar=[...document.querySelectorAll('.tmove')].find(el=>Number(el.dataset.fromId)===stopId);
+  if(!bar) return;
+  bar.querySelector('.tm-open')?.click();
+  bar.scrollIntoView({behavior:'smooth',block:'center'});
 }
 /* 카드 하단에 "다음 이동" 요약 (AI 추정 노선 포함) */
 function nextMoveHtml(stop, day, list, i){
@@ -2542,6 +2579,7 @@ function rowEl(s, idx, prev, next, todayMinute){
 function moveBar(from, to){
   const bar=document.createElement('div');
   bar.className='tmove';
+  bar.dataset.fromId=from.id;
   const mode=stopMode(from);
   const m=MODES.find(x=>x.key===mode)||MODES[0];
   const both = !from.tbd && !to.tbd && from.lat!=null && to.lat!=null;
@@ -3050,7 +3088,7 @@ async function askAiRoute(from, to, btn, box){
       const sys = `너는 ${co.name} ${place} 지역의 대중교통에 밝은 안내자야.
 출발지에서 목적지까지 지하철·버스·트램·열차를 이용하는 경로를 서로 다른 성격으로 3가지 제안해.
 가능하면 "최소 시간", "최소 환승", "최소 도보" 세 가지 관점으로 나눠줘.
-실제로 존재하는 노선명과 역·정류장 이름만 사용하고, 역 이름은 한국어 표기 뒤에 괄호로 현지어를 붙여.
+실제로 존재한다고 확신할 수 없는 노선명이나 역·정류장 이름은 지어내지 말고 "확인 필요"라고 표시해. 시각표나 요금을 실시간으로 확인한 것처럼 말하지 마. 역 이름은 알 때만 한국어 표기 뒤에 괄호로 현지어를 붙여.
 반드시 JSON 배열만 출력하고 다른 텍스트는 쓰지마.
 형식: [{"label":"최소 시간","summary":"한 줄 요약","minutes":숫자,"fare":"예상 요금","transfers":환승횟수,"walkMinutes":도보합계분,"steps":[{"mode":"도보|지하철|버스|트램|열차","line":"노선명","from":"출발","to":"도착","note":"참고"}],"caution":"주의할 점"}]`;
       const usr = `출발: ${from.name}${from.place? ' ('+from.place+')':''}\n도착: ${to.name}${to.place? ' ('+to.place+')':''}\n`
@@ -3070,7 +3108,11 @@ async function askAiRoute(from, to, btn, box){
     }
 
     if(!list || !list.length) throw new Error('empty');
-    renderRouteChoices(list, from, box);
+    const choices=list.filter(r=>r && typeof r==='object').slice(0,3);
+    if(!choices.length) throw new Error('empty choices');
+    setPlanField(day, from, 'aiRouteChoices', choices);
+    markChanged();
+    renderRouteChoices(choices, from, box);
   }catch(e){
     console.warn('[AI 경로]', e);
     box.innerHTML = `<div class="rd-none err">경로를 불러오지 못했어요. 잠시 후 다시 시도해주세요.</div>`;
@@ -3094,7 +3136,7 @@ function renderRouteChoices(list, from, box){
 
   box.innerHTML = `
     <div class="rc-wrap">
-      <div class="rc-head">AI 추천 경로 <span class="rc-n">${list.length}가지</span> · 마지막으로 누른 경로는 창을 닫으면 저장돼요</div>
+      <div class="rc-head">AI 추정 경로 <span class="rc-n">${list.length}가지</span></div>
       <div class="rc-list">
         ${list.map((r,i)=>`
           <button type="button" class="rc-item ${isSame(r,picked)?'on':''}" data-i="${i}" aria-pressed="${isSame(r,picked)}">
@@ -3129,10 +3171,10 @@ function renderRouteChoices(list, from, box){
     b.addEventListener('click', ()=> show(Number(b.dataset.i)));
   });
 
-  // 이미 고른 게 있으면 그걸, 없으면 첫 번째를 펼쳐둡니다
+  // 저장된 선택은 유지하고, 후보는 창을 다시 열어도 비교할 수 있습니다.
   const startIdx = list.findIndex(r=> isSame(r,picked));
-  if(startIdx>=0){detail.innerHTML=renderAiRoute(list[startIdx]);box.querySelectorAll('.rc-item')[startIdx].classList.add('on');}
-  else detail.innerHTML='<div class="rd-none">후보를 눌러 경로와 주의사항을 확인하세요. 마지막으로 누른 경로가 저장됩니다.</div>';
+  if(startIdx>=0){detail.innerHTML=renderAiRoute(list[startIdx]);}
+  else detail.innerHTML='<div class="rd-none">후보를 눌러 비교하세요. 마지막으로 누른 경로는 이동 창을 닫을 때 저장돼요.</div>';
 }
 
 function renderTaxiFare(fare, note){
@@ -3225,9 +3267,9 @@ function renderAiRoute(d){
       ${d.summary? `<div class="ai-route-sum">${esc(d.summary)}</div>`:''}
       ${head.length? `<div class="rd-head">${head.join('<span class="rd-sep">·</span>')}</div>`:''}
       ${lis? `<ol class="rd-steps">${lis}</ol>`:''}
-      <div class="ai-route-warn">AI가 추정한 경로예요. 지하철·전차 구간은 OpenStreetMap의 실제 선로를 따라
-        지도에 그려지지만, <b>시간표와 요금은 AI 추정</b>이라 실제와 다를 수 있어요.
-        출발 전에 구글 지도에서 한 번 확인해주세요.${d.caution? ` ${esc(d.caution)}`:''}</div>
+      <div class="ai-route-warn">AI가 추정한 경로예요. 지도에 표시된 선은 실제 운행 노선이 아니며,
+        <b>역·노선·시간표·요금도 정확하지 않을 수 있어요.</b>
+        출발 전에 교통 사업자나 지도 앱에서 확인해주세요.${d.caution? ` ${esc(d.caution)}`:''}</div>
     </div>`;
 }
 
@@ -3359,6 +3401,8 @@ async function fillLegDetail(from,to,legEl,km){
       const btn = detailEl.querySelector('[data-ai-route]');
       const box = detailEl.querySelector('.ai-route-box');
       if(btn) btn.addEventListener('click', ()=> askAiRoute(from,to,btn,box));
+      const choices=stopAiRouteChoices(from);
+      if(Array.isArray(choices) && choices.length) renderRouteChoices(choices,from,box);
 
       metaEl.innerHTML = `직선거리 약 ${km.toFixed(1)}km`
         + (anyReal? ' · 도보·차량은 구글 경로 기준' : '');
