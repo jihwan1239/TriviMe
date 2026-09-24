@@ -284,6 +284,20 @@
   .wx-none{ color:var(--muted-2); }
   .sec-header h1{ font-size:26px; font-weight:700; margin:0; letter-spacing:-.03em; flex:1; min-width:0;
     line-height:1.28; padding-top:2px; }
+  /* 일정표 제목 : 날짜 캡션 + 한 줄 제목 */
+  #schedTitle .st-cap{ display:block; font-size:12.5px; font-weight:600; color:var(--sky-deep);
+    letter-spacing:-.01em; line-height:1.3; margin-bottom:3px; font-variant-numeric:tabular-nums; }
+  #schedTitle .st-main{ display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* 비어 있는 날 안내 */
+  .day-hint{ margin-top:12px; padding:18px 16px; border-radius:var(--r-card);
+    background:linear-gradient(160deg, var(--sky-soft), #fff 70%);
+    border:1px solid rgba(47,147,221,.12); text-align:center; }
+  .dh-title{ font-size:14.5px; font-weight:600; letter-spacing:-.02em; color:var(--ink); }
+  .dh-sub{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.55; }
+  .dh-ai{ margin-top:12px; border:none; border-radius:999px; padding:9px 15px;
+    background:var(--sun-soft); color:var(--sun-deep); font-size:13px; font-weight:600;
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; letter-spacing:-.01em; }
+  .dh-ai .icon{ width:14px; height:14px; color:var(--sun); }
   .h1-emoji{ margin-right:8px; font-size:23px; vertical-align:-1px; }
   .mini-btn{ flex:0 0 auto; border:none; background:var(--fill); color:var(--ink);
     border-radius:var(--r-ctl); padding:9px 14px; font-size:13px; font-weight:500; cursor:pointer;
@@ -2193,7 +2207,18 @@ function renderScheduleScreenInner(){
   document.querySelectorAll('.tm-detail .ai-route-box').forEach(box=>box._commitAiRoute?.());
   const day=currentDay();
   const titleEl=document.getElementById('schedTitle');
-  if(titleEl) titleEl.textContent = day? `${fmtDate(day.iso)} (${fmtDow(day.iso)}) · ${day.label}` : '일정표';
+  if(titleEl){
+    if(day){
+      const idx = TRIP.days.findIndex(d=>d.id===day.id);
+      const dt = day.iso ? new Date(day.iso+'T12:00:00') : null;
+      const cap = dt ? `${idx+1}일차 · ${dt.getMonth()+1}월 ${dt.getDate()}일 ${fmtDow(day.iso)}요일` : `${idx+1}일차`;
+      const label = (day.label||'').trim() || `${idx+1}일차 일정`;
+      titleEl.innerHTML = `<span class="st-cap">${esc(cap)}</span><span class="st-main">${esc(label)}</span>`;
+      titleEl.setAttribute('aria-label', `${cap}, ${label}`);
+    } else {
+      titleEl.textContent = '일정표';
+    }
+  }
   renderDayChips('daybar', onDayChange);
 
   const flLb=document.getElementById('flightLabel');
@@ -2275,6 +2300,23 @@ function renderScheduleScreenInner(){
     if(next) tbl.appendChild(moveBar(s, next));
   });
   wrap.appendChild(tbl);
+
+  // 장소가 하나 이하인 날에는 다음에 할 일을 부드럽게 안내합니다
+  const realStops = list.filter(x=>!x.stay && !x.flight);
+  if(realStops.length === 0){
+    const hint = document.createElement('div');
+    hint.className = 'day-hint';
+    hint.innerHTML = `
+      <div class="dh-title">아직 이 날 일정이 비어 있어요</div>
+      <div class="dh-sub">가고 싶은 곳을 하나씩 넣거나, AI에게 코스를 추천받아보세요.</div>
+      <button type="button" class="dh-ai"><span class="icon">${iconSvg('star')}</span>AI 코스 추천 받기</button>`;
+    const ai = hint.querySelector('.dh-ai');
+    ai.addEventListener('click', ()=>{
+      const fab = document.getElementById('aiFab');
+      if(fab) fab.click();
+    });
+    wrap.appendChild(hint);
+  }
 }
 
 /* 표 한 줄 */
@@ -2492,9 +2534,9 @@ async function renderWeather(day){
     return;
   }
 
-  el.innerHTML = `<span class="wx-none">날씨 확인 중…</span>`;
+  if(!el.innerHTML.trim()) el.innerHTML = `<span class="wx-none">날씨 확인 중…</span>`;
   const w = await fetchWeather(day.iso, lat, lng);
-  if(!w){ el.innerHTML = `<span class="wx-none">날씨를 불러오지 못했어요</span>`; return; }
+  if(!w){ el.innerHTML = ''; return; }     // 실패는 조용히 숨깁니다 (깨진 화면처럼 보이지 않도록)
   const [label, emoji] = WX_CODE[w.code] || ['—','·'];
   el.innerHTML = `
     <span class="wx-ico">${emoji}</span>
@@ -2604,7 +2646,7 @@ function renderDaySummary(day, el){
     <div class="ds-left">
       <span class="ds-chip fix">확정 ${fixCount}</span>
       ${optCount? `<span class="ds-chip opt">선택 ${optCount}</span>`:''}
-      <span class="ds-move">이동 약 ${fmtMin(showOptional? tAll : tFix)}</span>
+      ${(showOptional? tAll : tFix) > 0 ? `<span class="ds-move">이동 약 ${fmtMin(showOptional? tAll : tFix)}</span>` : ''}
       ${optCount && showOptional && tAll!==tFix? `<span class="ds-sub">선택 빼면 ${fmtMin(tFix)}</span>`:''}
     </div>
     ${optCount? `<button type="button" class="ds-toggle ${showOptional?'':'off'}" id="optToggle">
