@@ -5469,10 +5469,11 @@ async function init(){
 
 /* ================= 사용 가이드 =================
    처음 한 번 버튼마다 짧게 설명합니다.
-   - '다시 보지 않기'를 체크하고 닫거나, 끝까지 보면 다음부터 뜨지 않아요.
-   - 체크하지 않고 건너뛰면 다음에 앱을 열 때 다시 보여줍니다.
+   - '다시 보지 않기'를 체크해야 다음 실행부터 자동 안내를 생략합니다.
+   - 체크하지 않으면 끝까지 보거나 건너뛰어도 다음 실행에 다시 보여줍니다.
    - 여행 설정 > '사용 가이드 다시 보기'로 언제든 다시 볼 수 있어요. */
-const GUIDE_KEY = 'trivime:guideDone:v1';
+// 이전 키는 가이드 완료와 다시 보지 않기를 구별하지 않아 새 키로 전환합니다.
+const GUIDE_KEY = 'trivime:guideNever:v2';
 function guideDone(){ try{ return localStorage.getItem(GUIDE_KEY)==='1'; }catch(e){ return false; } }
 function setGuideDone(){ try{ localStorage.setItem(GUIDE_KEY,'1'); }catch(e){} }
 
@@ -5649,13 +5650,14 @@ async function gdMove(delta){
 
 function endGuide(completed){
   const never = document.getElementById('gdNever').checked;
-  if(completed || never) setGuideDone();
+  if(never) setGuideDone();
+  else try{ localStorage.removeItem(GUIDE_KEY); }catch(e){}
   gdRunning = false; window.__gdRunning = false;
   const g = document.getElementById('guide');
   g.classList.remove('show');
   setTimeout(()=>{ g.hidden = true; }, 360);
   switchScreen('schedule');
-  if(!completed && !never) toast('다음에 앱을 열면 가이드를 다시 보여드릴게요');
+  if(!never) toast('다음에 앱을 열면 가이드를 다시 보여드릴게요');
 }
 
 document.getElementById('gdNext').addEventListener('click', ()=> gdMove(1));
