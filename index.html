@@ -405,6 +405,11 @@
     font-size:10.5px; color:var(--muted-2); pointer-events:none; }
   /* 접이식 여행 설정 */
   .mini-btn.ghost{ background:var(--fill); border-color:transparent; color:var(--muted); margin-top:3px; }
+  #screen-schedule .sec-title-row{ align-items:center; }
+  #screen-schedule .sec-title-row h1{ padding-top:0; }
+  #scheduleTripsTopBtn, #tripSetBtn{ height:44px; min-height:44px; margin:0;
+    border:0; border-radius:10px; line-height:1; justify-content:center; }
+  #scheduleTripsTopBtn{ width:44px; padding:0; }
   .mini-btn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
   .trip-set{ margin-bottom:12px; }
   .set-actions{ display:flex; gap:7px; }
@@ -1110,7 +1115,7 @@
     <div class="sec-header">
       <div class="sec-title-row">
         <h1 id="schedTitle">일정표</h1>
-        <button type="button" class="head-btn" id="scheduleTripsTopBtn" title="내 여행 목록">☰</button>
+        <button type="button" class="head-btn" id="scheduleTripsTopBtn" title="내 여행 목록" aria-label="내 여행 목록"><span class="icon" data-i="navList"></span></button>
         <button class="mini-btn ghost" id="tripSetBtn" aria-expanded="false" aria-controls="tripSet"><span class="icon" data-i="pencil"></span>여행 설정</button>
       </div>
       <div class="wx-line" id="wxLine"></div>
@@ -1204,7 +1209,7 @@
           <div class="ob-calendar-nav"><button type="button" id="ob_month_prev" aria-label="이전 달">‹</button><strong id="ob_month" aria-live="polite"></strong><button type="button" id="ob_month_next" aria-label="다음 달">›</button></div>
           <div class="ob-calendar-week" aria-hidden="true"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
           <div id="ob_calendar" class="ob-calendar" role="group" aria-labelledby="ob_month"></div>
-          <div class="ob-calendar-actions"><button type="button" id="ob_range_cancel" class="btn">취소</button><button type="button" id="ob_range_apply" class="btn-primary" disabled>기간 적용</button></div>
+          <div class="ob-calendar-actions"><button type="button" id="ob_range_cancel" class="btn-ghost">취소</button><button type="button" id="ob_range_apply" class="btn-primary" disabled>기간 적용</button></div>
         </div>
         <p class="ob-days" id="ob_days" aria-live="polite"></p>
       </div>
