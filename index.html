@@ -951,7 +951,8 @@
             stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-linecap="round"
             stroke-dasharray="1 6" mask="url(#spTrailMask)"/>
       <!-- 비행기 -->
-      <g>
+      <g transform="translate(8 56)">
+       <g>
         <g transform="scale(1.25)">
         <path d="M-9 0 L-3 -1.6 L1 -8.5 L3.6 -8.5 L2.2 -1.8 L8.6 -1.4 Q11 0 8.6 1.4 L2.2 1.8 L3.6 8.5 L1 8.5 L-3 1.6 L-9 0 Z
                  M-8.5 -0.2 L-10.5 -4 L-8.6 -4 L-6 -0.9 Z M-8.5 0.2 L-10.5 4 L-8.6 4 L-6 0.9 Z"
@@ -960,7 +961,8 @@
         <animateMotion begin="0s" dur="2.2s" fill="freeze" rotate="auto"
                        keyPoints="0;0;1" keyTimes="0;0.2;1"
                        calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1"
-                       path="M8 56 C 70 56, 120 44, 160 28 S 230 8, 252 6"/>
+                       path="M0 0 C 62 0, 112 -12, 152 -28 S 222 -48, 244 -50"/>
+       </g>
       </g>
     </svg>
   </div>
@@ -4755,6 +4757,13 @@ document.getElementById('ob_range_toggle').onclick=()=>{
   const date=obRangeStart?new Date(obRangeStart+'T12:00:00'):new Date();obRangeMonth=new Date(date.getFullYear(),date.getMonth(),1);
   panel.hidden=false;document.getElementById('ob_range_toggle').setAttribute('aria-expanded','true');renderObCalendar();
   document.getElementById('ob_range_hint').textContent='출발일과 종료일을 차례로 선택해주세요.';
+  requestAnimationFrame(()=>{
+    if(panel.hidden) return;
+    const box=document.getElementById('onboard');
+    const calendar=panel.getBoundingClientRect(), viewport=box.getBoundingClientRect();
+    const centerOffset=(calendar.top+calendar.height/2)-(viewport.top+viewport.height/2);
+    box.scrollTo({top:Math.max(0,box.scrollTop+centerOffset),behavior:splashReducedMotion?'instant':'smooth'});
+  });
 };
 document.getElementById('ob_month_prev').onclick=()=>{obRangeMonth.setMonth(obRangeMonth.getMonth()-1);renderObCalendar();};
 document.getElementById('ob_month_next').onclick=()=>{obRangeMonth.setMonth(obRangeMonth.getMonth()+1);renderObCalendar();};
