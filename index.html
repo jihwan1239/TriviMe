@@ -9,6 +9,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="TriviMe" />
+<script>
+  // iOS 홈 화면 웹앱은 화면 맨 아래를 OS가 그리는 버전이 있습니다.
+  if(/iPhone|iPad|iPod/.test(navigator.userAgent) &&
+     (navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches))){
+    document.documentElement.classList.add('ios-home-app');
+  }
+</script>
 <link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
 <title>TriviMe | 함께 계획하고, 같이 떠나요.</title>
@@ -22,6 +30,10 @@
     background:linear-gradient(165deg, #6CC0F2 0%, #4FAAE8 55%, #3A98DD 100%);
     display:flex; align-items:center; justify-content:center;
     transition:opacity .75s cubic-bezier(.4,0,.2,1); }
+  /* iOS 홈 화면 모드에서 페이지 밖의 흰 홈 인디케이터 영역과 색 경계를 부드럽게 연결합니다. */
+  .ios-home-app #splash::after{ content:''; position:absolute; left:0; right:0; bottom:0;
+    height:clamp(55px, 9vh, 95px); z-index:1; pointer-events:none;
+    background:linear-gradient(to bottom, rgba(255,255,255,0), #fff 100%); }
   #splash.sp-out{ opacity:0; pointer-events:none; }
   /* 사라질 때 로고가 살짝 떠오르며 흐려집니다 */
   #splash .sp-inner{ transition:transform .75s cubic-bezier(.4,0,.2,1), opacity .6s ease; }
