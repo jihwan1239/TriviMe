@@ -2068,10 +2068,11 @@ function renderMapForDay(){
   if(!withLoc.length){ centerOnTrip(); return; }
   // 같은 좌표에 여러 일정이 있으면 핀 하나로 묶고, 지금 보고 있는 카드의 번호를 보여줍니다
   const groups=[];
+  const groupsByPosition=new Map();
   withLoc.forEach((s,i)=>{
     const key=`${s.lat.toFixed(5)},${s.lng.toFixed(5)}`;
-    let g=groups.find(x=>x.key===key);
-    if(!g){ g={key, lat:s.lat, lng:s.lng, items:[]}; groups.push(g); }
+    let g=groupsByPosition.get(key);
+    if(!g){ g={key, lat:s.lat, lng:s.lng, items:[]}; groupsByPosition.set(key,g); groups.push(g); }
     g.items.push({ stop:s, num:i+1 });
   });
   const groupView = groupViewOf;
@@ -2183,10 +2184,13 @@ function setCarouselMetrics(){
   wrap.style.setProperty('--cardw', cardw+'px');
   wrap.style.setProperty('--edge', ((w-cardw)/2-5)+'px');
 }
+let carouselCenterTimer;
 function renderCarousel(){
   const day=currentDay(), wrap=document.getElementById('carousel');
+  clearTimeout(carouselCenterTimer);
   wrap.innerHTML=''; setCarouselMetrics();
-  if(!day || !visibleStops(day).length){
+  const list=day?visibleStops(day):[];
+  if(!list.length){
     wrap.innerHTML=`<div class="place-card empty">${day && day.stops.length ? '지도에 표시할 확정 일정이 없어요.' : '아직 지도에 표시할 장소가 없어요.'}<button type="button" class="map-empty-action">일정표에서 장소 추가하기</button></div>`;
     wrap.querySelector('.map-empty-action').onclick=()=>{
       switchScreen('schedule');
@@ -2194,11 +2198,13 @@ function renderCarousel(){
     };
     return;
   }
-  const list=visibleStops(day);
   const withLoc=list.filter(s=>!s.tbd && s.lat!=null);
+  const locatedIndex=new Map(withLoc.map((s,i)=>[s,i]));
   if(!activeStopId && withLoc.length) activeStopId=withLoc[0].id;
-  list.forEach(s=>{
-    const idx=withLoc.indexOf(s);
+  const cards=document.createDocumentFragment();
+  const transitCards=[];
+  list.forEach((s,i)=>{
+    const idx=locatedIndex.has(s)?locatedIndex.get(s):-1;
     const card=document.createElement('div');
     card.className='place-card'+(s.id===activeStopId?' active':'');
     card.dataset.id=s.id;
@@ -2213,19 +2219,19 @@ function renderCarousel(){
       </div>
       <div class="pc-name">${esc(s.name)}</div>
       <div class="pc-note">${esc(s.note||'')}</div>
-      ${nextMoveHtml(s, day)}
+      ${nextMoveHtml(s, day, list, i)}
       <div class="pc-foot">${rating}${s.tbd?'<span class="tbd-badge">위치 미정</span>':''}</div>`;
     card.addEventListener('click', ()=> selectStop(s.id,true,true));
-    wrap.appendChild(card);
-    const next=list[list.indexOf(s)+1];
-    if(next && stopMode(s)==='transit')hydrateMapTransit(card,s,next);
+    cards.appendChild(card);
+    const next=list[i+1];
+    if(next && stopMode(s)==='transit')transitCards.push([card,s,next]);
   });
-  setTimeout(()=> scrollCardIntoCenter(activeStopId), 60);
+  wrap.appendChild(cards);
+  transitCards.forEach(([card,from,to])=>hydrateMapTransit(card,from,to));
+  carouselCenterTimer=setTimeout(()=> scrollCardIntoCenter(activeStopId), 60);
 }
 /* 카드 하단에 "다음 이동" 요약 (AI 추정 노선 포함) */
-function nextMoveHtml(stop, day){
-  const list = visibleStops(day);
-  const i = list.findIndex(x=>x.id===stop.id);
+function nextMoveHtml(stop, day, list, i){
   const next = list[i+1];
   if(!next) return '';
   const mode = stopMode(stop);
@@ -2325,10 +2331,12 @@ function renderDayChips(containerId, afterClick){
   const wrap=document.getElementById(containerId);
   if(!wrap){ console.warn('[일정] 날짜 칩 영역을 찾지 못했어요:', containerId); return; }
   wrap.innerHTML='';
+  const today=new Date().toISOString().slice(0,10);
+  const chips=document.createDocumentFragment();
   TRIP.days.forEach(d=>{
     const el=document.createElement('button');
     el.className='daychip'+(d.id===activeDayId?' active':'');
-    const isToday = d.iso === new Date().toISOString().slice(0,10);
+    const isToday = d.iso === today;
     el.innerHTML=`<span class="d">${fmtDate(d.iso)} ${fmtDow(d.iso)}${isToday? ' <b>오늘</b>':''}</span>`
       + `<span class="l">${esc(d.label||'일정')}</span>`;
     el.addEventListener('click', ()=>{
@@ -2339,8 +2347,9 @@ function renderDayChips(containerId, afterClick){
       const now=document.querySelector(`#${containerId} .daychip.active`);
       if(now) now.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
     });
-    wrap.appendChild(el);
+    chips.appendChild(el);
   });
+  wrap.appendChild(chips);
 }
 
 /* ================= SCHEDULE ================= */
@@ -2446,11 +2455,15 @@ function renderScheduleScreenInner(){
   }
 
   const withLoc=list.filter(s=>!s.tbd && s.lat!=null);
+  const locatedIndex=new Map(withLoc.map((s,i)=>[s,i]));
+  const currentTime=new Date();
+  const todayMinute=day.iso===currentTime.toISOString().slice(0,10)
+    ? currentTime.getHours()*60+currentTime.getMinutes() : null;
   const tbl=document.createElement('div'); tbl.className='tbl';
 
   list.forEach((s,i)=>{
-    const idx=withLoc.indexOf(s);
-    tbl.appendChild(rowEl(s, idx, list[i-1]));
+    const idx=locatedIndex.has(s)?locatedIndex.get(s):-1;
+    tbl.appendChild(rowEl(s, idx, list[i-1], list[i+1], todayMinute));
     const next=list[i+1];
     if(next) tbl.appendChild(moveBar(s, next));
   });
@@ -2492,7 +2505,7 @@ function tightInfo(prev, cur){
   return { short: need - gap, need, gap, src: known.src };
 }
 
-function rowEl(s, idx, prev){
+function rowEl(s, idx, prev, next, todayMinute){
   const el=document.createElement('div');
   el.className='trow'+(s.opt?' optional':'');
   el.dataset.id=s.id;
@@ -2517,16 +2530,9 @@ function rowEl(s, idx, prev){
     </div>
     <span class="tc-caret">›</span>`;
   // 오늘이면서 지금 시각에 해당하는 일정을 강조합니다
-  const day = currentDay();
-  if(day && day.iso === new Date().toISOString().slice(0,10)){
-    const list = visibleStops(day);
-    const idxInList = list.findIndex(x=>x.id===s.id);
-    const next = list[idxInList+1];
-    const now = new Date();
-    const nowMin = now.getHours()*60 + now.getMinutes();
-    const toMin = (t)=>{ const m=/^(\d{1,2}):(\d{2})$/.exec(t||''); return m? (+m[1])*60+(+m[2]) : null; };
-    const cur = toMin(s.time), nxt = next? toMin(next.time) : 24*60;
-    if(cur!=null && nowMin>=cur && nowMin<nxt) el.classList.add('now');
+  if(todayMinute!==null){
+    const cur=toMinutes(s.time), nxt=next?toMinutes(next.time):24*60;
+    if(cur!=null && todayMinute>=cur && todayMinute<nxt) el.classList.add('now');
   }
   el.addEventListener('click', ()=> openFormAt(el, s.id));
   return el;
