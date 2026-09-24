@@ -163,6 +163,20 @@
     border-radius:8px; color:var(--muted); cursor:pointer; display:flex;align-items:center;justify-content:center; }
   .head-btn .icon{ width:16px;height:16px; }
   .head-btn.on{ background:var(--red-soft); color:var(--red); }
+  .share-anchor{ position:relative; flex:0 0 auto; }
+  .share-tip{ position:absolute; top:calc(100% + 13px); right:-43px; z-index:3;
+    width:min(270px, calc(100vw - 40px)); padding:13px 37px 13px 14px;
+    background:#fff; color:var(--ink); border:1px solid #DCEAF7; border-radius:13px;
+    box-shadow:0 8px 28px rgba(23,72,115,.19); font-size:12.5px; line-height:1.55;
+    letter-spacing:-.015em; text-align:left; }
+  .share-tip[hidden]{ display:none; }
+  .share-tip::before{ content:''; position:absolute; top:-6px; right:53px; width:10px; height:10px;
+    transform:rotate(45deg); background:#fff; border-top:1px solid #DCEAF7; border-left:1px solid #DCEAF7; }
+  .share-tip strong{ color:var(--sky-deep); font-weight:700; }
+  .share-tip-close{ position:absolute; right:5px; top:5px; width:32px; height:32px;
+    border:none; border-radius:8px; background:transparent; color:var(--muted);
+    font-size:19px; cursor:pointer; }
+  .share-tip-close:focus-visible{ outline:2px solid var(--sky); }
 
   .daybar{ display:flex; gap:7px; overflow-x:auto; padding:2px 1px 4px;
     -ms-overflow-style:none; scrollbar-width:none; }
@@ -207,6 +221,10 @@
   .place-card.active{ transform:translateY(-2px); }
   .place-card.active{ border-color:var(--red); }
   .place-card.empty{ text-align:center; color:var(--muted); font-size:13px; padding:22px 16px; }
+  .map-empty-action{ display:block; margin:12px auto 0; border:none; border-radius:9px;
+    background:var(--sky-soft); color:var(--sky-deep); padding:9px 13px;
+    font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+  .map-empty-action:focus-visible{ outline:2px solid var(--sky); outline-offset:2px; }
   .pc-top{ display:flex; align-items:center; gap:8px; margin-bottom:9px; }
   .pc-num{ width:24px;height:24px; border-radius:8px; color:#fff;
     font-size:12px; font-weight:600; font-variant-numeric:tabular-nums;
@@ -829,6 +847,9 @@
   .v.off{ background:var(--tint); color:var(--muted); }
 
   .share-box{ display:flex; gap:8px; margin-top:6px; }
+  .share-link-label{ display:block; margin:14px 0 6px; font-size:12px; font-weight:600; color:var(--muted); }
+  .share-mode{ padding:9px 12px; border-radius:10px; background:var(--sky-soft);
+    color:var(--sky-deep); font-size:12px; line-height:1.5; margin:8px 0 13px; }
   .share-box input{ flex:1; padding:11px 13px; border-radius:var(--r-sm); border:1px solid var(--line-2);
     font-size:12px; background:var(--tint); font-family:var(--font-mono); min-width:0; }
   .share-box button{ flex:0 0 auto; border:none; border-radius:var(--r-sm); background:var(--ink);
@@ -983,7 +1004,13 @@
           <h1 id="tripTitle">여행 일정</h1>
           <div class="tsub" id="syncBadge"><i></i><span id="syncLabel">내 기기 저장</span></div>
         </div>
-        <button class="head-btn" id="shareBtn" title="공유"><span class="icon" data-i="share"></span></button>
+        <div class="share-anchor">
+          <button class="head-btn" id="shareBtn" title="일정 공유 · 백업"><span class="icon" data-i="share"></span></button>
+          <div class="share-tip" id="shareTip" role="note" hidden>
+            <strong>친구와 여행 계획하기</strong><br><span id="shareTipText"></span>
+            <button type="button" class="share-tip-close" id="shareTipClose" aria-label="공유 안내 닫기">×</button>
+          </div>
+        </div>
         <button class="head-btn" id="statusBtn" title="연동 상태"><span class="icon" data-i="info"></span></button>
       </div>
       <div class="plan-bar map-plan" id="planBarMap" hidden></div>
@@ -1852,7 +1879,11 @@ function renderCarousel(){
   const day=currentDay(), wrap=document.getElementById('carousel');
   wrap.innerHTML=''; setCarouselMetrics();
   if(!day || !visibleStops(day).length){
-    wrap.innerHTML=`<div class="place-card empty">표시할 일정이 없어요.<br>일정표 탭에서 장소를 추가해보세요.</div>`;
+    wrap.innerHTML=`<div class="place-card empty">${day && day.stops.length ? '지도에 표시할 확정 일정이 없어요.' : '아직 지도에 표시할 장소가 없어요.'}<button type="button" class="map-empty-action">일정표에서 장소 추가하기</button></div>`;
+    wrap.querySelector('.map-empty-action').onclick=()=>{
+      switchScreen('schedule');
+      document.getElementById('addStopBtn').click();
+    };
     return;
   }
   const list=visibleStops(day);
@@ -4122,6 +4153,28 @@ function renderPrep(){
 }
 
 /* ================= NAV ================= */
+const SHARE_TIP_KEY = 'trivime-share-tip-dismissed:' + TRIP_ID;
+let shareTipDismissed = false;
+try{ shareTipDismissed = localStorage.getItem(SHARE_TIP_KEY)==='1'; }catch(e){}
+function hideShareTip(){
+  const tip=document.getElementById('shareTip');
+  tip.hidden=true;
+  document.getElementById('shareBtn').removeAttribute('aria-describedby');
+}
+function dismissShareTip(){
+  shareTipDismissed=true;
+  try{ localStorage.setItem(SHARE_TIP_KEY,'1'); }catch(e){}
+  hideShareTip();
+}
+function showShareTip(){
+  if(shareTipDismissed || needOnboarding() || !document.getElementById('onboard').hidden) return;
+  document.getElementById('shareTipText').textContent = HAS_SYNC
+    ? '링크를 공유해 친구들과 여행 일정을 함께 계획해보세요.'
+    : '링크를 보내 친구들과 여행을 계획해보세요. 수정한 내용은 링크를 다시 보내야 반영돼요.';
+  document.getElementById('shareTip').hidden=false;
+  document.getElementById('shareBtn').setAttribute('aria-describedby','shareTipText');
+}
+document.getElementById('shareTipClose').onclick=dismissShareTip;
 function refreshAll(){
   const t=document.getElementById('tripTitle');
   if(t) t.textContent = TRIP.title||'여행 일정';
@@ -4133,6 +4186,7 @@ function refreshAll(){
   if(document.getElementById('screen-schedule').classList.contains('active')) renderScheduleScreen();
 }
 function switchScreen(name){
+  hideShareTip();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.navbtn').forEach(b=>{ b.classList.toggle('active', b.dataset.screen===name); if(b.dataset.screen===name) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
@@ -4144,6 +4198,7 @@ function switchScreen(name){
     try{ renderMapForDay(); }catch(err){ console.error('[지도 렌더]', err); }
     renderCarousel();
     setTimeout(()=>{ if(engine==='leaflet' && lmap) lmap.invalidateSize(); },60);
+    showShareTip();
   }
   if(name==='schedule'){ closeForm(); closeDayForm(); if(HAS_DIR){ for(const k in routeCache) delete routeCache[k]; } renderScheduleScreen(); }
   if(name==='prep'){ renderPrep(); }
@@ -4222,12 +4277,17 @@ document.getElementById('scheduleStatusBtn').onclick=()=>document.getElementById
 
 /* ================= SHARE ================= */
 document.getElementById('shareBtn').addEventListener('click', ()=>{
+  dismissShareTip();
   const panel=document.getElementById('sharePanel');
   const base = tripUrl();
+  const nativeShare = typeof navigator.share === 'function';
   if(HAS_SYNC){
     panel.innerHTML=`
+      <p class="share-mode">실시간 공유 · 친구가 수정한 일정도 함께 확인할 수 있어요.</p>
       <p class="sub">이 주소를 친구들에게 보내세요. 한 사람이 일정을 고치면 모두의 화면에 반영돼요.</p>
+      <label class="share-link-label" for="shareUrl">여행 공유 링크</label>
       <div class="share-box"><input id="shareUrl" readonly value="${esc(base)}"><button id="copyBtn">복사</button></div>
+      ${nativeShare?'<button type="button" class="btn-ghost" id="shareNativeBtn" style="width:100%;margin-top:8px;">휴대폰 공유 메뉴로 보내기</button>':''}
       <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
       <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
       <p class="hint">새 여행을 만들면 별도의 링크가 생기고, 그 링크를 받은 사람만 그 일정을 함께 봅니다.</p>
@@ -4236,11 +4296,14 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
   } else {
     const url = base + '#trip=' + encodeTrip();
     panel.innerHTML=`
+      <p class="share-mode">현재 일정 복사 · 이후 변경한 내용은 다시 공유해야 해요.</p>
       <p class="sub">현재 일정을 담은 링크예요. 친구가 이 링크를 열면 지금 이 일정이 그대로 보여요.</p>
+      <label class="share-link-label" for="shareUrl">여행 공유 링크</label>
       <div class="share-box"><input id="shareUrl" readonly value="${esc(url)}"><button id="copyBtn">복사</button></div>
+      ${nativeShare?'<button type="button" class="btn-ghost" id="shareNativeBtn" style="width:100%;margin-top:8px;">휴대폰 공유 메뉴로 보내기</button>':''}
       <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
       <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
-      <p class="hint">새 여행을 만들면 별도의 링크가 생기고, 그 링크를 받은 사람만 그 일정을 함께 봅니다.</p>
+      <p class="hint">새 여행을 만든 뒤 공유 링크를 보내면 그때의 일정을 전달할 수 있어요.</p>
       <p class="hint">지금은 <b>실시간 공유가 꺼져 있어요.</b> 이 링크는 보내는 순간의 일정을 복사해 전달하는 방식이라,
       이후 각자 수정한 내용은 서로에게 반영되지 않아요.<br>
       수정한 일정을 보내려면 링크를 다시 공유해주세요.</p>
@@ -4252,6 +4315,13 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
     if(!confirm('새 여행을 만들까요? 새 주소가 열리고, 지금 일정은 이 링크에 그대로 남습니다.')) return;
     location.href = tripUrl(randomTripId());
   });
+
+  const nativeBtn=document.getElementById('shareNativeBtn');
+  if(nativeBtn) nativeBtn.onclick=async()=>{
+    try{
+      await navigator.share({title:TRIP.title||'TriviMe 여행 일정',url:document.getElementById('shareUrl').value});
+    }catch(e){ if(e.name!=='AbortError') toast('공유하지 못했어요. 링크 복사를 이용해주세요.'); }
+  };
 
   const txtBtn = document.getElementById('copyTextBtn');
   if(txtBtn) txtBtn.addEventListener('click', async ()=>{
