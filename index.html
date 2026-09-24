@@ -832,6 +832,8 @@
   /* ===== MODAL ===== */
   .modal-bg{ position:fixed; inset:0; background:rgba(26,26,30,.5); display:none;
     align-items:flex-end; justify-content:center; z-index:1000; }
+  /* 새 여행 설정 화면 위에서도 여행 목록을 누르고 닫을 수 있어야 합니다. */
+  #tripLibraryModalBg{ z-index:1300; }
   .modal-bg.open{ display:flex; animation:fadeIn .18s ease; }
   .modal-bg.open .modal{ animation:sheetUp .26s cubic-bezier(.2,.9,.3,1); }
   @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
@@ -1215,6 +1217,11 @@
       <label class="ob-label" for="tripLibraryLink">공유받은 여행 링크 열기</label>
       <div class="trip-link-row"><input type="url" id="tripLibraryLink" inputmode="url" placeholder="친구에게 받은 TriviMe 링크 붙여넣기"><button type="button" class="btn-primary" id="tripLibraryOpen">열기</button></div>
       <p class="trip-library-hint">홈 화면 웹앱은 카카오톡에서 열린 링크를 자동으로 가져오지 못할 수 있어요. 받은 주소를 복사해 여기에 붙여넣으면 됩니다.</p>
+      <details class="ios-install-guide" id="tripLibraryIosGuide" style="margin-top:18px">
+        <summary>아이폰 웹앱 추가 · 카카오톡 공유 링크 안내</summary>
+        <p>카카오톡으로 링크를 받았다면 화면 오른쪽 아래 공유 버튼 → <b>Safari로 열기</b>를 선택하세요. 메뉴가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
+        <p>Safari에서 공유 → <b>홈 화면에 추가</b> → <b>웹 앱으로 열기</b>를 선택하면 됩니다. 이미 웹앱을 설치했다면 링크를 복사해서 위 <b>공유받은 여행 링크 열기</b>에 붙여넣으세요.</p>
+      </details>
     </div>
   </div>
 
@@ -1264,7 +1271,7 @@ function localTrips(){
         const dates=trip.days.map(d=>d.iso).filter(iso=>/^\d{4}-\d{2}-\d{2}$/.test(iso)).sort();
         trips.push({id,title:String(trip.title||'이름 없는 여행'),city:String(trip.country.city||trip.country.name||''),
           countryCode:String(trip.country.code||''),start:dates[0]||'',end:dates[dates.length-1]||'',
-          updatedAt:Number(trip.updatedAt)||0});
+          createdAt:Number(trip.createdAt)||0,updatedAt:Number(trip.updatedAt)||0});
       }catch(e){}
     }
   }catch(e){}
@@ -4290,11 +4297,16 @@ document.getElementById('shareTipClose').onclick=dismissShareTip;
 function openTripLibrary(){
   const list=document.getElementById('tripLibraryList');
   const trips=localTrips();
+  const dateLabel=(time)=>{
+    const date=new Date(time);
+    return Number.isFinite(time) && time>0 && !isNaN(date) ? date.toLocaleDateString('ko-KR') : '';
+  };
   list.innerHTML=trips.length ? trips.map(t=>`
     <div class="trip-library-item ${t.id===TRIP_ID?'current':''}">
       <button type="button" class="trip-library-open" data-trip-id="${t.id}" ${t.id===TRIP_ID?'aria-current="page"':''}>
         <span aria-hidden="true">${(COUNTRIES.find(c=>c.code===t.countryCode)||COUNTRIES.find(c=>c.code==='ETC')).flag}</span>
-        <span class="info"><strong>${esc(t.title)}</strong><small>${esc([t.city,t.start && (t.end && t.end!==t.start ? `${t.start} ~ ${t.end}` : t.start)].filter(Boolean).join(' · '))}</small></span>
+        <span class="info"><strong>${esc(t.title)}</strong><small>${esc([t.city,t.start && (t.end && t.end!==t.start ? `${t.start} ~ ${t.end}` : t.start)].filter(Boolean).join(' · '))}</small>
+          <small>${esc([dateLabel(t.createdAt) && `생성 ${dateLabel(t.createdAt)}`,dateLabel(t.updatedAt) && `최종 수정 ${dateLabel(t.updatedAt)}`].filter(Boolean).join(' · ') || '저장 날짜 정보 없음')}</small></span>
         <span class="arrow" aria-hidden="true">${t.id===TRIP_ID?'✓':'›'}</span>
       </button>
       <button type="button" class="trip-library-delete" data-delete-trip="${t.id}" aria-label="${esc(t.title)} 이 기기에서 삭제">삭제</button>
@@ -4844,10 +4856,9 @@ function showOnboarding(editMode){
   if(!box || !list) return;
   const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
   const isKakao=/KAKAOTALK/i.test(navigator.userAgent);
-  const installed=navigator.standalone===true || window.matchMedia?.('(display-mode: standalone)').matches;
   const guide=document.getElementById('iosInstallGuide');
-  guide.hidden=!!editMode || !isIOS || !!installed;
-  guide.open=!editMode && isKakao;
+  guide.hidden=!!editMode;
+  guide.open=!editMode && isIOS;
   document.getElementById('kakaoInstallStep').hidden=!isKakao;
   document.getElementById('ob_saved_trips').hidden=!!editMode || !localTrips().length;
 
@@ -5113,7 +5124,7 @@ async function commitTrip(){
   TRIP = {
     title,
     country: { code:co.code, name:co.name, city, lat:co.lat, lng:co.lng },
-    nextUid: 100, nextDayId: 10, updatedAt: 0,
+    nextUid: 100, nextDayId: 10, createdAt: Date.now(), updatedAt: 0,
     days: []
   };
 
