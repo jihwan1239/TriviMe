@@ -2055,6 +2055,7 @@ function renderScheduleScreen(){
 }
 
 function renderScheduleScreenInner(){
+  document.querySelectorAll('.tm-detail .ai-route-box').forEach(box=>box._commitAiRoute?.());
   const day=currentDay();
   const titleEl=document.getElementById('schedTitle');
   if(titleEl) titleEl.textContent = day? `${fmtDate(day.iso)} (${fmtDow(day.iso)}) · ${day.label}` : '일정표';
@@ -2243,7 +2244,7 @@ function moveBar(from, to){
   // 구글에서 실제 소요시간이 오면 줄을 갱신합니다
   primeLegTime(from, to, (v)=>{
     const lb=bar.querySelector('.tm-label');
-    if(lb) lb.textContent = `${m.label} ${fmtMin(v.mins)}`;
+    if(lb && stopMode(from)===mode) lb.innerHTML=`${m.label} <b>${fmtMin(v.mins)}</b>`;
     const sum=document.getElementById('daySummary');
     const d=currentDay();
     if(sum && d) renderDaySummary(d, sum);
@@ -2251,10 +2252,23 @@ function moveBar(from, to){
   openBtn.addEventListener('click', ()=>{
     if(box.hidden){
       box.innerHTML='';
-      box.appendChild(buildLeg(from, to));
+      box.appendChild(buildLeg(from, to, box));
       box.hidden=false; openBtn.classList.add('open');
     } else {
+      box.querySelector('.ai-route-box')?._commitAiRoute?.();
       box.hidden=true; openBtn.classList.remove('open');
+      // 선택한 수단과 경로 요약을 접힌 줄에도 반영합니다.
+      const selected=MODES.find(x=>x.key===stopMode(from))||MODES[0];
+      const time=knownLegMinutes(from,to);
+      const label=bar.querySelector('.tm-label');
+      if(label) label.innerHTML=`${selected.label} <b>${time? (time.src==='est'?'약 ':'')+fmtMin(time.mins):'위치 미정'}</b>`;
+      const icon=bar.querySelector('.tm-ico');
+      if(icon){ icon.style.background=selected.s;icon.style.color=selected.c;icon.innerHTML=iconSvg(selected.icon); }
+      openBtn.style.setProperty('--mc',selected.c);
+      const fare=stopMode(from)==='transit'? stopAiRoute(from)?.fare : stopMode(from)==='taxi'? stopTaxiFare(from) : '';
+      bar.querySelector('.tm-fare')?.remove();
+      if(fare){ const span=document.createElement('span');span.className='tm-fare';span.textContent=String(fare);openBtn.querySelector('.tm-caret').before(span); }
+      renderMapForDay();
     }
   });
   return bar;
@@ -2666,6 +2680,8 @@ async function askAiRoute(from, to, btn, box){
     box.innerHTML = `<div class="rd-none">AI 경로 추천을 쓰려면 AI 연결이 필요해요. ${DISABLED_MSG}</div>`;
     return;
   }
+  box._commitAiRoute?.();
+  box._commitAiRoute=null;
   btn.disabled = true;
   box.innerHTML = `<div class="ai-route loading">경로 후보를 찾는 중...</div>`;
 
@@ -2728,11 +2744,19 @@ async function askAiRoute(from, to, btn, box){
 /* 후보 3가지를 보여주고 하나를 고르게 합니다 */
 function renderRouteChoices(list, from, box){
   const picked = stopAiRoute(from);
+  const day = currentDay();
   const isSame = (a,b)=> a && b && a.label===b.label && a.minutes===b.minutes;
+  let draft = null;
+  box._commitAiRoute = ()=>{
+    if(!draft) return;
+    setPlanField(day, from, 'aiRoute', draft);
+    markChanged();
+    draft=null;
+  };
 
   box.innerHTML = `
     <div class="rc-wrap">
-      <div class="rc-head">AI 추천 경로 <span class="rc-n">${list.length}가지</span></div>
+      <div class="rc-head">AI 추천 경로 <span class="rc-n">${list.length}가지</span> · 마지막으로 누른 경로는 창을 닫으면 저장돼요</div>
       <div class="rc-list">
         ${list.map((r,i)=>`
           <button type="button" class="rc-item ${isSame(r,picked)?'on':''}" data-i="${i}" aria-pressed="${isSame(r,picked)}">
@@ -2756,8 +2780,7 @@ function renderRouteChoices(list, from, box){
     const r = list[i];
     box.querySelectorAll('.rc-item').forEach((el,k)=>{el.classList.toggle('on',k===i);el.setAttribute('aria-pressed',String(k===i));});
     detail.innerHTML = renderAiRoute(r);
-    setPlanField(currentDay(), from, 'aiRoute', r);
-    markChanged();
+    draft = r;
     const chip=box.closest('.leg')?.querySelector('.mins[data-mins="transit"]');
     if(chip && r.minutes)chip.textContent=`약 ${r.minutes}분`;
     const tag=box.querySelector('.rc-head');
@@ -2870,7 +2893,7 @@ function renderAiRoute(d){
     </div>`;
 }
 
-function buildLeg(from,to){
+function buildLeg(from,to,openBox){
   const leg=document.createElement('div'); leg.className='leg';
   const both = !from.tbd && !to.tbd && from.lat!=null && to.lat!=null;
   const km = both? haversineKm(from,to):null;
@@ -2902,9 +2925,16 @@ function buildLeg(from,to){
 
   leg.querySelectorAll('.mode').forEach(btn=>{
     btn.addEventListener('click', ()=>{
+      if(btn.dataset.mode===stopMode(from)) return;
+      leg.querySelector('.ai-route-box')?._commitAiRoute?.();
       setPlanField(currentDay(), from, 'mode', btn.dataset.mode); markChanged();
-      renderScheduleScreen();
-      renderMapForDay();           // 지도에도 바로 반영
+      // 선택 창은 계속 열어두고 새 수단의 경로만 표시합니다.
+      if(openBox){
+        openBox.replaceChildren(buildLeg(from,to,openBox));
+      } else {
+        renderScheduleScreen();
+        renderMapForDay();
+      }
     });
   });
 
@@ -4190,6 +4220,7 @@ function refreshAll(){
   if(document.getElementById('screen-schedule').classList.contains('active')) renderScheduleScreen();
 }
 function switchScreen(name){
+  if(name!=='schedule') document.querySelectorAll('.tm-detail .ai-route-box').forEach(box=>box._commitAiRoute?.());
   hideShareTip();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
