@@ -178,13 +178,18 @@
     font-size:19px; cursor:pointer; }
   .share-tip-close:focus-visible{ outline:2px solid var(--sky); }
   .trip-library-list{ display:flex; flex-direction:column; gap:8px; margin:14px 0 20px; }
-  .trip-library-item{ width:100%; padding:14px; border:1px solid var(--line); background:#fff;
-    border-radius:12px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .trip-library-item{ width:100%; border:1px solid var(--line); background:#fff;
+    border-radius:12px; display:flex; align-items:center; gap:2px; }
   .trip-library-item.current{ border-color:var(--sky); background:var(--sky-soft); }
+  .trip-library-open{ flex:1; min-width:0; border:0; background:transparent; padding:14px;
+    display:flex; align-items:center; gap:12px; cursor:pointer; text-align:left; color:var(--ink); }
   .trip-library-item .info{ flex:1; min-width:0; }
   .trip-library-item strong{ display:block; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .trip-library-item small{ display:block; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.5; }
   .trip-library-item .arrow{ color:var(--sky-deep); font-size:18px; }
+  .trip-library-delete{ flex:0 0 auto; border:0; background:transparent; color:var(--muted);
+    font:inherit; font-size:12px; padding:14px; min-height:44px; cursor:pointer; }
+  .trip-library-delete:focus-visible,.trip-library-open:focus-visible{outline:2px solid var(--sky);outline-offset:-2px;}
   .trip-library-actions{ display:flex; gap:8px; }
   .trip-library-actions button{ flex:1; }
   .trip-link-row{ display:flex; gap:7px; margin-top:8px; }
@@ -1267,12 +1272,7 @@ function localTrips(){
 }
 function resolveTripId(){
   const q = new URLSearchParams(location.search).get('trip');
-  if(q && /^[a-z0-9-]{4,40}$/i.test(q)) return q;
-  try{
-    const last=localStorage.getItem(LS_LAST_TRIP);
-    if(last && localStorage.getItem(TRIP_KEY_PREFIX+last)) return last;
-  }catch(e){}
-  return localTrips()[0]?.id || randomTripId();
+  return q && /^[a-z0-9-]{4,40}$/i.test(q) ? q : randomTripId();
 }
 const TRIP_ID = resolveTripId();
 function tripUrl(id){
@@ -4291,14 +4291,33 @@ function openTripLibrary(){
   const list=document.getElementById('tripLibraryList');
   const trips=localTrips();
   list.innerHTML=trips.length ? trips.map(t=>`
-    <button type="button" class="trip-library-item ${t.id===TRIP_ID?'current':''}" data-trip-id="${t.id}" ${t.id===TRIP_ID?'aria-current="page"':''}>
-      <span aria-hidden="true">${(COUNTRIES.find(c=>c.code===t.countryCode)||COUNTRIES.find(c=>c.code==='ETC')).flag}</span>
-      <span class="info"><strong>${esc(t.title)}</strong><small>${esc([t.city,t.start && (t.end && t.end!==t.start ? `${t.start} ~ ${t.end}` : t.start)].filter(Boolean).join(' · '))}</small></span>
-      <span class="arrow" aria-hidden="true">${t.id===TRIP_ID?'✓':'›'}</span>
-    </button>`).join('') : '<p class="trip-library-hint">이 기기에 저장된 여행이 아직 없어요. 새 여행을 시작하거나 친구의 링크를 열어보세요.</p>';
+    <div class="trip-library-item ${t.id===TRIP_ID?'current':''}">
+      <button type="button" class="trip-library-open" data-trip-id="${t.id}" ${t.id===TRIP_ID?'aria-current="page"':''}>
+        <span aria-hidden="true">${(COUNTRIES.find(c=>c.code===t.countryCode)||COUNTRIES.find(c=>c.code==='ETC')).flag}</span>
+        <span class="info"><strong>${esc(t.title)}</strong><small>${esc([t.city,t.start && (t.end && t.end!==t.start ? `${t.start} ~ ${t.end}` : t.start)].filter(Boolean).join(' · '))}</small></span>
+        <span class="arrow" aria-hidden="true">${t.id===TRIP_ID?'✓':'›'}</span>
+      </button>
+      <button type="button" class="trip-library-delete" data-delete-trip="${t.id}" aria-label="${esc(t.title)} 이 기기에서 삭제">삭제</button>
+    </div>`).join('') : '<p class="trip-library-hint">이 기기에 저장된 여행이 아직 없어요. 새 여행을 시작하거나 친구의 링크를 열어보세요.</p>';
   list.querySelectorAll('[data-trip-id]').forEach(button=>button.addEventListener('click',()=>{
     if(button.dataset.tripId===TRIP_ID){document.getElementById('tripLibraryModalBg').classList.remove('open');return;}
     location.assign(tripUrl(button.dataset.tripId));
+  }));
+  list.querySelectorAll('[data-delete-trip]').forEach(button=>button.addEventListener('click',()=>{
+    const id=button.dataset.deleteTrip;
+    const trip=trips.find(t=>t.id===id);
+    if(!trip || !confirm(`‘${trip.title}’을 이 기기의 여행 목록에서 삭제할까요?\n저장된 일정과 준비물도 이 기기에서 삭제됩니다. 공유받은 온라인 일정은 이 작업으로 삭제되지 않습니다.`)) return;
+    try{
+      localStorage.removeItem(TRIP_KEY_PREFIX+id);
+      localStorage.removeItem('sapporo-prep:'+id);
+      localStorage.removeItem('sapporo-backup:'+id);
+      localStorage.removeItem('trivime-share-tip-dismissed:'+id);
+      if(localStorage.getItem(LS_LAST_TRIP)===id) localStorage.removeItem(LS_LAST_TRIP);
+    }catch(e){toast('삭제하지 못했어요. 저장 공간을 확인해주세요.');return;}
+    if(id===TRIP_ID){ location.assign(`${location.origin}${location.pathname}`); return; }
+    openTripLibrary();
+    document.getElementById('ob_saved_trips').hidden=!localTrips().length;
+    toast('이 기기의 여행 목록에서 삭제했어요.');
   }));
   document.getElementById('tripLibraryModalBg').classList.add('open');
 }
