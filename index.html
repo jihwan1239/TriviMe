@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="splash-active">
+<html lang="ko">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -19,8 +19,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   /* ============ 시작 화면 ============ */
-  #splash{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--app-height,100%); z-index:10000; overflow:hidden;
-    background:linear-gradient(165deg, #6CC0F2 0%, #4FAAE8 55%, #3A98DD 80%, #3A98DD 100%);
+  #splash{ position:fixed; inset:0; z-index:10000; overflow:hidden;
+    background:linear-gradient(165deg, #6CC0F2 0%, #4FAAE8 55%, #3A98DD 100%);
     display:flex; align-items:center; justify-content:center;
     transition:opacity .75s cubic-bezier(.4,0,.2,1); }
   #splash.sp-out{ opacity:0; pointer-events:none; }
@@ -47,14 +47,13 @@
   .sp-glow{ position:absolute; border-radius:50%; pointer-events:none; z-index:1; }
   .sp-glow-a{ width:120vw; height:120vw; right:-60vw; top:-62vw;
     background:radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%); }
-  .sp-glow-b{ display:none; width:110vw; height:110vw; left:-55vw; bottom:-60vw;
+  .sp-glow-b{ width:110vw; height:110vw; left:-55vw; bottom:-60vw;
     background:radial-gradient(circle, rgba(255,226,140,.15) 0%, rgba(255,226,140,0) 58%); }
 
   @media (prefers-reduced-motion: reduce){
     .sp-brand, .sp-tag, .sp-en, .sp-flight{ animation:none; }
   }
   :root{
-    --app-height:100%;
     --paper:#FFFFFF; --ink:#1C1C1E; --muted:#8A8A8E; --muted-2:#C4C4C8;
     --line:#EDEDF0; --line-2:#DFDFE4; --tint:#F2F2F7;   /* iOS systemGroupedBackground 계열 */
     --fill:#EFEFF4;                                      /* 눌리는 면 */
@@ -86,8 +85,6 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   button, .trow, .place-card, .prep-item, .geo-result{ touch-action:manipulation; }
   html,body{ margin:0; padding:0; height:100%; width:100%; }
-  html.splash-active, html.splash-active body{ background:#3A98DD; }
-  html:not(.splash-active), html:not(.splash-active) body{ background:#F8FBFF; }
   html{ overflow:hidden; }
   body{ background:#FFFFFF; color:var(--ink); font-family:var(--font-body);
     -webkit-font-smoothing:antialiased;
@@ -118,7 +115,7 @@
   /* 지도 핀 */
   .pin-wrap{ transition:transform .18s ease; }
   .app{ max-width:520px; margin:0 auto; width:100%;
-    height:var(--content-height,var(--app-height)); top:var(--viewport-top,0px); left:0; right:0; bottom:auto;
+    height:auto; inset:0;
     background:var(--paper); display:flex; flex-direction:column;
     position:fixed; overflow:hidden; overscroll-behavior:contain; }
   @media (min-width:560px){
@@ -132,12 +129,6 @@
   .screen{ flex:1; min-height:0; display:none; flex-direction:column; position:relative;
     overflow-x:hidden; overscroll-behavior-y:contain; }
   .screen.active{ display:flex; }
-  /* Keep the footer outside the scrolling screen's sizing flow. */
-  .app > .screen{ position:absolute; top:0; left:0; right:0; bottom:var(--bottom-controls-height,140px); }
-  .bottom-controls{ position:absolute; left:0; right:0; bottom:0; z-index:600;
-    display:flex; flex-direction:column; background:#F8FBFF; }
-  .bottom-controls .bottomnav{ margin-top:0; }
-
 
   /* ===== MAP ===== */
   html{ background:#FFFFFF; }   /* 홈 화면 앱의 상태바 영역 색이 됩니다 */
@@ -363,15 +354,6 @@
   .seg-toggle .seg.on{ background:#fff; font-weight:600;
     box-shadow:0 1px 3px rgba(0,0,0,.09), 0 1px 1px rgba(0,0,0,.04); }
   .seg-toggle .seg:active{ opacity:1; transform:scale(.96); }
-  #f_optWrap{ gap:8px; padding:0; background:none; }
-  #f_optWrap .seg{ min-height:68px; padding:11px 8px; border-radius:12px;
-    border:1.5px solid var(--line-2); background:#F7F9FC; box-shadow:none;
-    display:flex; flex-direction:column; align-items:center; gap:5px; }
-  #f_optWrap .seg strong{ font-size:14px; font-weight:600; }
-  #f_optWrap .seg small{ font-size:11.5px; font-weight:400; color:#657487; }
-  #f_optWrap .seg.on{ border-color:var(--sky); background:var(--sky-soft); color:var(--sky-deep); }
-  #f_optWrap .seg.on small{ color:var(--sky-deep); }
-  #f_optWrap .seg:focus-visible{ outline:2px solid var(--sky); outline-offset:3px; }
 
   /* 카테고리 고르기 */
   .lbl-row{ display:flex; align-items:center; justify-content:space-between; margin:16px 0 7px; }
@@ -878,14 +860,15 @@
   .progress .top span:last-child{ font-family:var(--font-mono); font-size:13.5px; font-weight:600; }
   .progress .bar{ height:6px; background:var(--line); border-radius:99px; margin-top:11px; overflow:hidden; }
   .progress .fill{ height:100%; border-radius:99px; width:0%; transition:width .3s var(--ease);
-    background:var(--sky); }
+    background:linear-gradient(90deg, var(--sky), var(--sun)); }
   .prep-caption{ font-size:11.5px; color:var(--muted-2); margin:-8px 0 18px; padding-left:2px; }
 
   /* ===== NAV ===== */
   .bottomnav{ display:flex; border-top:.5px solid rgba(0,0,0,.12);
     background:rgba(255,255,255,.88); backdrop-filter:saturate(180%) blur(20px);
     -webkit-backdrop-filter:saturate(180%) blur(20px);
-    padding-bottom:max(4px, env(safe-area-inset-bottom, 0px)); z-index:600; }
+    /* iOS가 지나치게 큰 하단 안전 영역을 보고해도 탭 아래가 과하게 늘어나지 않게 합니다. */
+    padding-bottom:clamp(8px, calc(env(safe-area-inset-bottom, 0px) - 12px), 28px); z-index:600; }
   .navbtn{ flex:1; border:none; background:none; padding:9px 4px 7px; display:flex; flex-direction:column;
     align-items:center; gap:5px; color:var(--muted-2); cursor:pointer; }
   .navbtn .icon{ width:20px; height:20px; }
@@ -895,7 +878,7 @@
   .navbtn.active .icon{ color:var(--sky); }
 
   /* ===== MODAL ===== */
-  .modal-bg{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); background:rgba(26,26,30,.5); display:none;
+  .modal-bg{ position:fixed; inset:0; background:rgba(26,26,30,.5); display:none;
     align-items:flex-end; justify-content:center; z-index:1000; }
   /* 새 여행 설정 화면 위에서도 여행 목록을 누르고 닫을 수 있어야 합니다. */
   #tripLibraryModalBg{ z-index:1300; }
@@ -1054,8 +1037,6 @@
     border-radius:24px 24px 0 0; box-shadow:0 -12px 48px rgba(23,48,75,.16);
     padding-bottom:calc(26px + env(safe-area-inset-bottom,0px));
     max-height:86vh; max-height:86dvh; overscroll-behavior:contain; }
-  html.keyboard-open .modal{ max-height:calc(var(--app-height) - 16px); padding-bottom:16px; }
-  html.keyboard-open .bottomnav{ padding-bottom:4px; }
   .modal h2{ padding-right:44px; }
   .modal-close{ top:16px; right:12px; width:44px; height:44px;
     border-radius:50%; background:#EDF2F8; color:#53667A; }
@@ -1076,7 +1057,7 @@
   }
 
   /* ============ 사용 가이드 ============ */
-  .guide{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); z-index:5000; opacity:0; transition:opacity .35s ease; }
+  .guide{ position:fixed; inset:0; z-index:5000; opacity:0; transition:opacity .35s ease; }
   .guide[hidden]{ display:none; }
   .guide.show{ opacity:1; }
 
@@ -1088,9 +1069,9 @@
                border-radius .45s ease; }
   .gd-hole::before{ content:''; position:absolute; inset:-3px; border-radius:inherit;
     border:2px solid rgba(255,255,255,.95);
-    box-shadow:0 0 0 3px rgba(47,147,221,.25); }
+    box-shadow:0 0 0 4px rgba(108,192,242,.35), 0 0 24px rgba(108,192,242,.55); }
   .gd-hole::after{ content:''; position:absolute; inset:-3px; border-radius:inherit;
-    border:2px solid rgba(47,147,221,.6); }
+    border:2px solid rgba(108,192,242,.9); animation:gdPulse 1.8s cubic-bezier(.2,.8,.2,1) infinite; }
   @keyframes gdPulse{ 0%{ opacity:.9; transform:scale(1); } 100%{ opacity:0; transform:scale(1.14); } }
   .gd-hole.center{ width:0 !important; height:0 !important; left:50% !important; top:46% !important; }
   .gd-hole.center::before, .gd-hole.center::after{ display:none; }
@@ -1098,10 +1079,10 @@
   /* 유리 카드 */
   .gd-card{ position:fixed; left:16px; right:16px; max-width:440px; margin:0 auto;
     padding:14px 16px 14px; border-radius:22px; overflow:visible;
-    background:#F8FBFF;
+    background:linear-gradient(160deg, rgba(255,255,255,.82), rgba(255,255,255,.66));
     -webkit-backdrop-filter:blur(26px) saturate(190%); backdrop-filter:blur(26px) saturate(190%);
     border:1px solid rgba(255,255,255,.7);
-    box-shadow:0 16px 40px rgba(23,48,75,.20);
+    box-shadow:0 18px 48px rgba(8,20,40,.28), 0 1px 0 rgba(255,255,255,.8) inset;
     transition:top .45s cubic-bezier(.32,.72,0,1); }
   .gd-card.pop{ animation:gdPop .5s cubic-bezier(.2,.9,.25,1.1) both; }
   @keyframes gdPop{ from{ opacity:0; transform:translateY(var(--gd-from, 10px)) scale(.96); }
@@ -1111,7 +1092,7 @@
   .gd-progress{ height:3px; border-radius:3px; background:rgba(47,147,221,.14);
     overflow:hidden; margin:0 2px 11px; }
   .gd-progress span{ display:block; height:100%; width:0; border-radius:3px;
-    background:var(--sky);
+    background:linear-gradient(90deg, var(--sky), var(--sun));
     transition:width .5s cubic-bezier(.32,.72,0,1); }
 
   .gd-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
@@ -1139,18 +1120,18 @@
   .gd-prev:active, .gd-next:active{ transform:scale(.96); opacity:1; }
   .gd-prev{ background:rgba(120,130,145,.14); color:#1D2733; }
   .gd-prev[disabled]{ opacity:0; pointer-events:none; }
-  .gd-next{ background:var(--sky-deep); color:#fff; min-width:68px;
-    box-shadow:0 3px 8px rgba(47,147,221,.18); }
+  .gd-next{ background:linear-gradient(135deg, #4FAAE8, #2F8FD8); color:#fff; min-width:68px;
+    box-shadow:0 4px 12px rgba(47,147,221,.35); }
 
   /* 말풍선 꼬리도 같은 유리 */
   .gd-arrow{ position:absolute; width:14px; height:14px; left:50%; margin-left:-7px; transform:rotate(45deg);
-    background:#F8FBFF;
+    background:rgba(255,255,255,.78); -webkit-backdrop-filter:blur(26px); backdrop-filter:blur(26px);
     border:1px solid rgba(255,255,255,.7); border-radius:3px;
     transition:left .45s cubic-bezier(.32,.72,0,1); }
   /* 반투명 카드 안쪽으로 겹치는 절반은 잘라내 이음새가 보이지 않게 합니다 */
   .gd-arrow.up{ top:-7px; border-right:none; border-bottom:none;
     clip-path:polygon(0 0, 100% 0, 0 100%); }
-  .gd-arrow.down{ bottom:-7px; border-left:none; border-top:none; background:#F8FBFF;
+  .gd-arrow.down{ bottom:-7px; border-left:none; border-top:none; background:rgba(255,255,255,.68);
     clip-path:polygon(100% 0, 100% 100%, 0 100%); }
   .gd-arrow.none{ display:none; }
 
@@ -1171,7 +1152,6 @@
     box-shadow:inset 0 1px 0 #fff, inset 0 0 0 1px #CDE5F7, 0 3px 9px #2377A710;
     transform:translateX(calc(var(--nav-index,0) * 100%));
     transition:transform .28s cubic-bezier(.22,.8,.25,1); }
-  .bottomnav{ background:#F8FBFF; }
   .bottomnav .navbtn{ z-index:1; margin:0; min-width:0; height:48px; min-height:48px;
     padding:5px 3px; gap:3px; border-radius:18px; color:#66788A; }
   .bottomnav .navbtn.active{ background:none; box-shadow:none; color:#14699E; }
@@ -1231,7 +1211,6 @@
     transform:scale(1.03) rotate(-.6deg); animation:ghostIn .18s ease; }
   @keyframes ghostIn{ from{ transform:scale(1); } to{ transform:scale(1.03) rotate(-.6deg); } }
 </style>
-
 </head>
 <body>
 <div id="splash" aria-hidden="true">
@@ -1444,7 +1423,7 @@
     </div>
   </section>
 
-
+  <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
 
   <!-- ============ 사용 가이드 ============ -->
   <div class="guide" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gdTitle">
@@ -1470,14 +1449,11 @@
     </div>
   </div>
 
-  <div class="bottom-controls" id="bottomControls">
-  <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
   <nav class="bottomnav" aria-label="주요 메뉴">
     <button class="navbtn active" data-screen="schedule"><span class="icon" data-i="navList"></span><span class="lb">일정표</span></button>
     <button class="navbtn" data-screen="map"><span class="icon" data-i="navMap"></span><span class="lb">지도</span></button>
     <button class="navbtn" data-screen="prep"><span class="icon" data-i="navCheck"></span><span class="lb">준비사항</span></button>
   </nav>
-  </div>
 
   <!-- ============ AI MODAL ============ -->
   <div class="modal-bg" id="aiModalBg">
@@ -4337,11 +4313,12 @@ function openForm(stopId, prefill){
 
       <label>시간</label>
       ${timeFieldHtml('f_time', ed? ed.time : (pf.time||nextStopDefaultTime(day)))}
-      <label id="f_optLabel">일정 유형</label>
-      <div class="seg-toggle" id="f_optWrap" role="group" aria-labelledby="f_optLabel">
-        <button type="button" class="seg ${isOpt?'':'on'}" data-opt="0" aria-pressed="${!isOpt}"><strong>확정</strong><small>시간 고정</small></button>
-        <button type="button" class="seg ${isOpt?'on':''}" data-opt="1" aria-pressed="${isOpt}"><strong>선택</strong><small>최적화 시 순서·시간 조정</small></button>
+      <label>시간</label>
+      <div class="seg-toggle" id="f_optWrap">
+        <button type="button" class="seg ${isOpt?'':'on'}" data-opt="0">확정</button>
+        <button type="button" class="seg ${isOpt?'on':''}" data-opt="1">선택</button>
       </div>
+      <p class="hint"><b>확정</b>은 이 시간에 꼭 가야 하는 일정이에요. <b>선택</b>으로 두면 동선 최적화 때 순서와 시간이 더 효율적으로 바뀔 수 있어요.</p>
       <label>카테고리</label>
       <div class="cat-pick" id="f_catWrap">
         ${Object.keys(CATS).map(c=>`
@@ -4377,9 +4354,8 @@ function openForm(stopId, prefill){
   });
   document.querySelectorAll('#f_optWrap .seg').forEach(b=>{
     b.addEventListener('click', ()=>{
-      document.querySelectorAll('#f_optWrap .seg').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
+      document.querySelectorAll('#f_optWrap .seg').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
-      b.setAttribute('aria-pressed','true');
     });
   });
   document.getElementById('f_geoSearch').addEventListener('click', ()=> doGeoSearch(false));
@@ -5274,12 +5250,7 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + (lastDirStatus && lastDirStatus!=='OK' && lastDirStatus!=='ZERO_RESULTS'
         ? `<p class="hint err-hint">최근 경로 조회 응답: <code>${esc(lastDirStatus)}</code><br>${dirStatusMsg(lastDirStatus)}</p>` : '')
     + `<p class="hint">실시간 공유가 꺼져 있으면 일정은 이 브라우저에만 저장돼요. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 공유 링크나 백업 파일을 보관해주세요.</p>`
-    + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
-  const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260928-footer-5',standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,filled:document.documentElement.classList.contains('standalone-fill'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
-  document.getElementById('layoutInfo').textContent=report;
-  document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
   document.getElementById('statusModalBg').classList.add('open');
 });
@@ -5976,76 +5947,7 @@ async function commitTrip(){
 }
 
 /* ================= INIT ================= */
-// Keep app controls inside the viewport the browser can actually display.
-// Never infer a usable height from screen.height or expand it with safe-area padding.
-/* 상단 안전영역(상태바) 높이를 실제 값으로 읽습니다 */
-function safeTopInset(){
-  const el=document.createElement('div');
-  el.style.cssText='position:fixed;top:0;left:0;height:0;visibility:hidden;padding-top:env(safe-area-inset-top,0px);';
-  document.body.appendChild(el);
-  const v=parseFloat(getComputedStyle(el).paddingTop)||0;
-  el.remove();
-  return v;
-}
-function isStandaloneApp(){
-  return navigator.standalone===true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-}
-/* 측정된 높이 + 상태바 높이가 기기 화면 높이와 같다면, 상태바만큼 모자라게 측정된 것 */
-function fixStandaloneGap(h){
-  if(!isStandaloneApp()) return h;
-  const top=safeTopInset();
-  if(top<=0) return h;
-  const portrait = window.innerHeight >= window.innerWidth;
-  const screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-  const missing = screenH - h;
-  if(missing > 0 && Math.abs(missing - top) <= 6) return screenH;   // 정확히 상태바만큼 빈 경우만
-  return h;
-}
-
-function bindAppViewport(){
-  const vv=window.visualViewport, root=document.documentElement;
-  const probe=document.createElement('div');
-  probe.id='viewportProbe'; probe.setAttribute('aria-hidden','true');
-  probe.style.cssText='position:fixed;inset:0;visibility:hidden;pointer-events:none;';
-  document.body.appendChild(probe);
-  const controls=document.getElementById('bottomControls');
-  const sizeControls=()=>root.style.setProperty('--bottom-controls-height',controls.getBoundingClientRect().height+'px');
-  new ResizeObserver(sizeControls).observe(controls);
-  sizeControls();
-  let idleHeight=vv?.height || window.innerHeight, frame=0;
-  const update=()=>{
-    frame=0;
-    // Preserve pinch zoom; do not reflow the app to the zoomed viewport.
-    if(vv && Math.abs(vv.scale-1)>.01) return;
-    const height=vv?.height || window.innerHeight;
-    if(!Number.isFinite(height) || height<=0) return;
-    const editable=document.activeElement?.matches('input,textarea,[contenteditable="true"]');
-    root.classList.toggle('keyboard-open',!!editable && idleHeight-height>150);
-    const nativeHeight=probe.getBoundingClientRect().height;
-    const rootHeight=root.clientHeight;
-    let usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
-    // 홈 화면 앱 + 투명 상태바에서는 iOS가 높이를 '상태바만큼 짧게' 알려주는 버그가 있어
-    // 화면 맨 아래에 빈 띠가 생깁니다. 모자란 높이가 상태바 높이와 딱 맞을 때만 그만큼 채웁니다.
-    const fixed=fixStandaloneGap(usable);
-    if(fixed!==usable){ usable=fixed; root.classList.add('standalone-fill'); }
-    else root.classList.remove('standalone-fill');
-    root.style.setProperty('--app-height',Math.max(height,usable)+'px');
-    root.style.setProperty('--content-height',usable+'px');
-    root.style.setProperty('--viewport-top',(vv?.offsetTop || 0)+'px');
-    if(!editable) idleHeight=height;
-  };
-  const queue=()=>{if(!frame) frame=requestAnimationFrame(update);};
-  vv?.addEventListener('resize',queue);
-  vv?.addEventListener('scroll',queue);
-  window.addEventListener('resize',queue);
-  window.addEventListener('pageshow',queue);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden) queue();});
-  document.addEventListener('focusin',queue);
-  document.addEventListener('focusout',()=>setTimeout(queue,250));
-  update();
-}
 async function init(){
-  bindAppViewport();
   mountIcons();
   document.querySelectorAll('button[title]').forEach(b=>b.setAttribute('aria-label',b.title));
   document.querySelectorAll('.modal-close').forEach(b=>b.setAttribute('aria-label','닫기'));
@@ -6218,7 +6120,7 @@ function gdPaint(el, step){
   const hole = document.getElementById('gdHole');
   const card = document.getElementById('gdCard');
   const arrow = document.getElementById('gdArrow');
-  const vh = document.getElementById('guide').clientHeight || window.innerHeight, vw = window.innerWidth;
+  const vh = window.innerHeight, vw = window.innerWidth;
 
   document.getElementById('gdStep').textContent = `${gdIdx+1} / ${gdSteps.length}`;
   document.getElementById('gdTitle').textContent = step.title;
@@ -6378,11 +6280,7 @@ function finishSplash(){
   splashDismissScheduled = true;
   setTimeout(()=>{
     splash.classList.add('sp-out');
-    setTimeout(()=>{
-      splash.remove();
-      document.documentElement.classList.remove('splash-active');
-      document.querySelector('meta[name="theme-color"]').content='#F8FBFF';
-    }, 800);
+    setTimeout(()=> splash.remove(), 800);
   }, Math.max(0, (splashReducedMotion ? 900 : 2450) - (performance.now() - splashStartedAt)));
 }
 // Keep the opening animation from blocking the app on a slow connection.
