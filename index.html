@@ -1573,6 +1573,8 @@ function resolveTripId(){
   return q && /^[a-z0-9-]{4,40}$/i.test(q) ? q : randomTripId();
 }
 const TRIP_ID = resolveTripId();
+// 일반 첫 진입에만 목록을 제안합니다. 여행 선택·새 여행·공유 링크 진입은 바로 이어갑니다.
+const START_WITH_TRIP_LIBRARY = !new URLSearchParams(location.search).get('trip') && !/^#trip=/.test(location.hash);
 function tripUrl(id){
   return `${location.origin}${location.pathname}?trip=${encodeURIComponent(id||TRIP_ID)}`;
 }
@@ -6003,13 +6005,14 @@ async function init(){
   // 아직 나라가 정해지지 않은 새 여행방이면 온보딩을 띄웁니다
   if(needOnboarding()){
     showOnboarding();
+    scheduleStartup();
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
     return;
   }
 
   pushBackup(TRIP, '앱 시작');
   const fixed = ensureFlightStops() | ensureStayStarts();
-  scheduleGuide();
+  scheduleStartup();
   if(fixed){ refreshAll(); }
   if(HAS_SYNC && !TRIP.updatedAt) markChanged();
 
@@ -6032,7 +6035,10 @@ function setGuideDone(){ try{ localStorage.setItem(GUIDE_KEY,'1'); }catch(e){} }
 const GUIDE_STEPS = [
   { screen:'schedule', target:null,
     title:'TriviMe에 오신 걸 환영해요',
-    body:'주요 기능을 30초 만에 짚어드릴게요. 언제든 건너뛸 수 있어요.' },
+    body:'여행을 계획할 때 필요한 기능을 짧게 안내할게요. 언제든 건너뛸 수 있어요.' },
+  { screen:'schedule', target:'#scheduleTripsTopBtn',
+    title:'여러 여행 이어서 계획하기',
+    body:'여행 목록에서 다른 여행을 열거나 새 여행을 만들 수 있어요. 생성·수정 날짜를 확인하고, 필요 없는 여행은 이 기기에서 삭제할 수 있어요.' },
   { screen:'schedule', target:'#daybar',
     title:'날짜 넘기기',
     body:'아래 칩으로 여행 날짜를 옮겨 다녀요. 일정표와 지도가 같은 날짜를 함께 보여줘요.' },
@@ -6044,22 +6050,31 @@ const GUIDE_STEPS = [
     body:'일정을 누르면 시간, 장소, 메모를 고칠 수 있어요. 꾹 누른 채 위아래로 끌면 순서도 바꿀 수 있어요.' },
   { screen:'schedule', target:'.tmove',
     title:'이동수단과 소요 시간',
-    body:'이 줄을 펼쳐 도보, 대중교통, 택시 중에 고르면 걸리는 시간과 요금을 알려줘요. 시간이 빠듯하면 빨간 느낌표로 알려드려요.' },
+    body:'일정 사이 이동 줄을 펼쳐 수단과 경로를 확인해요. AI 경로는 여러 후보를 눌러 비교한 뒤 닫으면 마지막 선택이 저장돼요. 다시 열어 다른 후보도 볼 수 있어요.' },
+  { screen:'schedule', target:'#optimizeBtn',
+    title:'선택 일정의 동선 정리',
+    body:'시간을 바꿔도 되는 일정은 편집 화면에서 ‘선택’으로 두세요. 동선 최적화는 확정 일정의 시간을 유지하며 선택 일정의 순서와 시간을 제안해요. 결과를 보고 적용할 수 있어요.' },
   { screen:'schedule', target:'#addStopBtn',
     title:'장소 추가',
     body:'새로운 장소는 여기서 넣어요. 일정 사이에 끼워 넣고 싶다면 구간의 ＋ 일정 추가를 눌러도 돼요.' },
   { screen:'schedule', target:'#tripSetBtn',
     title:'여행 설정',
-    body:'항공편, 숙소, 여행지, 날짜는 여기서 바꿔요. 이 가이드도 여기서 다시 볼 수 있어요.' },
+    body:'여행지와 날짜를 바꾸거나 사용 가이드를 다시 볼 수 있어요. 항공편과 숙소는 바로 아래 버튼에서 등록해요.' },
   { screen:'map', target:'.navbtn[data-screen="map"]',
     title:'지도로 동선 보기',
     body:'하루 일정을 지도 위 핀과 선으로 한눈에 확인할 수 있어요.' },
+  { screen:'map', target:'.pc-expand',
+    title:'필요한 정보만 펼쳐 보기',
+    body:'카드를 좌우로 넘겨 장소를 보고, 상세 보기를 펼쳐 메모와 이동 정보를 확인하세요. AI 후보 다시 비교를 누르면 해당 구간의 이동 창으로 연결돼요.' },
   { screen:'map', target:'#aiFab',
     title:'AI 장소 추천',
     body:'지금 동선에 어울리는 카페나 명소를 AI가 추천해줘요.' },
   { screen:'map', target:'#shareBtn',
     title:'친구와 함께 짜기',
-    body:'링크를 보내면 친구들과 같은 일정을 함께 보고 고칠 수 있어요.' },
+    body:HAS_SYNC ? '링크를 보내면 친구들과 같은 일정을 함께 보고 고칠 수 있어요. 공유 메뉴에서 일정을 텍스트로 복사할 수도 있어요.' : '현재 일정이 담긴 링크를 친구에게 보내세요. 이후 수정한 내용은 링크를 다시 보내야 반영돼요. 공유 메뉴에서 텍스트 복사도 할 수 있어요.' },
+  { screen:'map', target:'#statusBtn',
+    title:'이전 일정으로 되돌리기',
+    body:'일정을 잘못 바꿨다면 이 메뉴의 백업 목록에서 이전 상태로 되돌릴 수 있어요. 동선 최적화 전 일정도 여기서 찾을 수 있어요.' },
   { screen:'prep', target:'#prepAiBtn',
     title:'여행 준비물',
     body:'여행지와 기간에 맞는 준비물 목록을 AI가 만들어줘요. 체크한 항목은 내 기기에만 저장돼요.' },
@@ -6233,10 +6248,25 @@ document.addEventListener('keydown', e=>{
 window.addEventListener('resize', ()=>{ if(gdRunning){ const st=gdSteps[gdIdx]; gdPaint(gdFind(st), st); } });
 
 /* 시작 화면이 사라진 뒤 처음 한 번 띄웁니다 */
+function scheduleStartup(){
+  const wait=()=>{
+    if(document.getElementById('splash')) return setTimeout(wait,250);
+    if(START_WITH_TRIP_LIBRARY && localTrips().length){
+      openTripLibrary();
+    } else {
+      scheduleGuide();
+    }
+  };
+  wait();
+}
 function scheduleGuide(){
   const wait = ()=>{
     if(document.getElementById('splash')) return setTimeout(wait, 250);
-    setTimeout(()=> startGuide(false), 450);
+    if(document.querySelector('.modal-bg.open')) return setTimeout(wait,250);
+    setTimeout(()=>{
+      if(document.querySelector('.modal-bg.open')) wait();
+      else startGuide(false);
+    },450);
   };
   wait();
 }
