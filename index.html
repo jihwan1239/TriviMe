@@ -118,7 +118,7 @@
   /* 지도 핀 */
   .pin-wrap{ transition:transform .18s ease; }
   .app{ max-width:520px; margin:0 auto; width:100%;
-    height:var(--app-height); top:var(--viewport-top,0px); left:0; right:0; bottom:auto;
+    height:var(--content-height,var(--app-height)); top:var(--viewport-top,0px); left:0; right:0; bottom:auto;
     background:var(--paper); display:flex; flex-direction:column;
     position:fixed; overflow:hidden; overscroll-behavior:contain; }
   @media (min-width:560px){
@@ -132,6 +132,12 @@
   .screen{ flex:1; min-height:0; display:none; flex-direction:column; position:relative;
     overflow-x:hidden; overscroll-behavior-y:contain; }
   .screen.active{ display:flex; }
+  /* Keep the footer outside the scrolling screen's sizing flow. */
+  .app > .screen{ position:absolute; top:0; left:0; right:0; bottom:var(--bottom-controls-height,140px); }
+  .bottom-controls{ position:absolute; left:0; right:0; bottom:0; z-index:600;
+    display:flex; flex-direction:column; background:#F8FBFF; }
+  .bottom-controls .bottomnav{ margin-top:0; }
+
 
   /* ===== MAP ===== */
   html{ background:#FFFFFF; }   /* 홈 화면 앱의 상태바 영역 색이 됩니다 */
@@ -889,7 +895,7 @@
   .navbtn.active .icon{ color:var(--sky); }
 
   /* ===== MODAL ===== */
-  .modal-bg{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--app-height); background:rgba(26,26,30,.5); display:none;
+  .modal-bg{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); background:rgba(26,26,30,.5); display:none;
     align-items:flex-end; justify-content:center; z-index:1000; }
   /* 새 여행 설정 화면 위에서도 여행 목록을 누르고 닫을 수 있어야 합니다. */
   #tripLibraryModalBg{ z-index:1300; }
@@ -1070,7 +1076,7 @@
   }
 
   /* ============ 사용 가이드 ============ */
-  .guide{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--app-height); z-index:5000; opacity:0; transition:opacity .35s ease; }
+  .guide{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); z-index:5000; opacity:0; transition:opacity .35s ease; }
   .guide[hidden]{ display:none; }
   .guide.show{ opacity:1; }
 
@@ -1438,7 +1444,7 @@
     </div>
   </section>
 
-  <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
+
 
   <!-- ============ 사용 가이드 ============ -->
   <div class="guide" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="gdTitle">
@@ -1464,11 +1470,14 @@
     </div>
   </div>
 
+  <div class="bottom-controls" id="bottomControls">
+  <div class="day-dock" id="dayDock"><div class="sched-days" id="daybar"></div></div>
   <nav class="bottomnav" aria-label="주요 메뉴">
     <button class="navbtn active" data-screen="schedule"><span class="icon" data-i="navList"></span><span class="lb">일정표</span></button>
     <button class="navbtn" data-screen="map"><span class="icon" data-i="navMap"></span><span class="lb">지도</span></button>
     <button class="navbtn" data-screen="prep"><span class="icon" data-i="navCheck"></span><span class="lb">준비사항</span></button>
   </nav>
+  </div>
 
   <!-- ============ AI MODAL ============ -->
   <div class="modal-bg" id="aiModalBg">
@@ -5265,7 +5274,12 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + (lastDirStatus && lastDirStatus!=='OK' && lastDirStatus!=='ZERO_RESULTS'
         ? `<p class="hint err-hint">최근 경로 조회 응답: <code>${esc(lastDirStatus)}</code><br>${dirStatusMsg(lastDirStatus)}</p>` : '')
     + `<p class="hint">실시간 공유가 꺼져 있으면 일정은 이 브라우저에만 저장돼요. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 공유 링크나 백업 파일을 보관해주세요.</p>`
+    + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
+  const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
+  const report=JSON.stringify({version:'20260928-footer-4',standalone:navigator.standalone===true||matchMedia('(display-mode: standalone)').matches,innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
+  document.getElementById('layoutInfo').textContent=report;
+  document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
   document.getElementById('statusModalBg').classList.add('open');
 });
@@ -5966,6 +5980,14 @@ async function commitTrip(){
 // Never infer a usable height from screen.height or expand it with safe-area padding.
 function bindAppViewport(){
   const vv=window.visualViewport, root=document.documentElement;
+  const probe=document.createElement('div');
+  probe.id='viewportProbe'; probe.setAttribute('aria-hidden','true');
+  probe.style.cssText='position:fixed;inset:0;visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const controls=document.getElementById('bottomControls');
+  const sizeControls=()=>root.style.setProperty('--bottom-controls-height',controls.getBoundingClientRect().height+'px');
+  new ResizeObserver(sizeControls).observe(controls);
+  sizeControls();
   let idleHeight=vv?.height || window.innerHeight, frame=0;
   const update=()=>{
     frame=0;
@@ -5976,6 +5998,10 @@ function bindAppViewport(){
     const editable=document.activeElement?.matches('input,textarea,[contenteditable="true"]');
     root.classList.toggle('keyboard-open',!!editable && idleHeight-height>150);
     root.style.setProperty('--app-height',height+'px');
+    const nativeHeight=probe.getBoundingClientRect().height;
+    const rootHeight=root.clientHeight;
+    const usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
+    root.style.setProperty('--content-height',usable+'px');
     root.style.setProperty('--viewport-top',(vv?.offsetTop || 0)+'px');
     if(!editable) idleHeight=height;
   };
