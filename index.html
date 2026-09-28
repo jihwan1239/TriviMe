@@ -496,7 +496,7 @@
   .trow:last-child::after{ display:none; }
   .trow:active{ background:var(--fill); }
   .trow.open{ background:var(--tint); }
-  .trow.optional{ background:#FCFCFD; }
+  .trow.optional{ }
   /* 이동 시간이 부족한 일정 */
   .trow.tight::after{ background:#F6D9D9; }
   .tight-badge{ display:inline-flex; align-items:center; justify-content:center;
@@ -508,11 +508,11 @@
   .trow.now{ background:var(--sun-soft); }
   .trow.now .tc-time{ color:var(--sun-deep); font-weight:700; }
   .trow.now::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--sun); }
-  .trow.optional .tc-name{ color:var(--muted); }
+
   .tc-num{ flex:0 0 22px; height:22px; border-radius:7px; color:#fff;
     font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;
     display:flex; align-items:center; justify-content:center; letter-spacing:-.02em; }
-  .trow.optional .tc-num{ opacity:.45; }
+
   .tc-time{ flex:0 0 auto; min-width:44px; font-size:13.5px; font-weight:600; color:var(--muted);
     font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
   .tc-main{ flex:1; min-width:0; }
@@ -1164,6 +1164,52 @@
   @media(prefers-reduced-motion:reduce){
     .bottomnav::before, .bottomnav .navbtn .icon{ transition:none; }
   }
+
+  .tight-badge, .tight-msg{ transition:opacity .25s ease, transform .25s ease; }
+  .tight-out{ opacity:0; transform:translateY(-2px); }
+
+  /* 동선 최적화 */
+  .ds-opt{ margin-left:auto; flex:0 0 auto; display:inline-flex; align-items:center; gap:5px;
+    border:none; border-radius:999px; padding:7px 12px; font-size:12.5px; font-weight:600; cursor:pointer;
+    background:linear-gradient(135deg, #4FAAE8, #2F8FD8); color:#fff; box-shadow:0 3px 10px rgba(47,147,221,.28); }
+  .ds-opt .icon{ width:14px; height:14px; }
+  .ds-opt.dim{ background:var(--fill); color:var(--muted); box-shadow:none; }
+  #optSub{ line-height:1.7; }
+  .opt-good{ color:var(--sky-deep); }
+  .opt-save{ display:inline-block; margin-left:4px; font-size:12px; font-weight:700; color:#1F8A55;
+    background:#E7F6EF; border-radius:999px; padding:2px 8px; }
+  .opt-note{ font-size:12px; color:var(--muted); }
+  .opt-list{ list-style:none; margin:10px 0 0; padding:0; border-radius:14px; overflow:hidden;
+    border:1px solid var(--line); }
+  .opt-list li{ display:flex; align-items:center; gap:10px; padding:11px 13px; border-bottom:1px solid var(--line);
+    animation:optIn .4s var(--ease) both; animation-delay:var(--d); background:#fff; }
+  .opt-list li:last-child{ border-bottom:none; }
+  .opt-list li.moved{ background:linear-gradient(90deg, var(--sky-soft), #fff 70%); }
+  @keyframes optIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .ol-time{ flex:0 0 74px; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .ol-time s{ display:block; font-size:11px; font-weight:500; color:var(--muted-2); }
+  .ol-name{ flex:1; min-width:0; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  li.fixed .ol-name{ color:var(--muted); }
+  .ol-tag{ flex:0 0 auto; font-size:11px; font-weight:600; border-radius:6px; padding:2px 7px;
+    background:var(--fill); color:var(--muted); }
+  li.moved .ol-tag{ background:var(--sky); color:#fff; }
+  .opt-actions{ display:flex; gap:8px; margin-top:16px; }
+  .opt-actions .btn-ghost{ flex:0 0 auto; }
+  .opt-actions .btn-primary{ flex:1; }
+  @media (prefers-reduced-motion: reduce){ .opt-list li{ animation:none; } }
+
+  /* 꾹 눌러 끌기 */
+  .trow{ -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+  .trow.pressing{ transition:transform .38s ease, background .38s ease; transform:scale(.985); background:var(--sky-soft); }
+  .drag-src{ display:none !important; }
+  .drag-ph{ margin:4px 8px; border-radius:12px; border:2px dashed rgba(47,147,221,.45);
+    background:rgba(47,147,221,.06); transition:height .2s; }
+  .drag-ghost{ position:fixed; z-index:4000; pointer-events:none; margin:0;
+    background:rgba(255,255,255,.92); border-radius:14px;
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    box-shadow:0 14px 34px rgba(12,30,55,.22), 0 0 0 1.5px rgba(47,147,221,.35);
+    transform:scale(1.03) rotate(-.6deg); animation:ghostIn .18s ease; }
+  @keyframes ghostIn{ from{ transform:scale(1); } to{ transform:scale(1.03) rotate(-.6deg); } }
 </style>
 </head>
 <body>
@@ -1420,6 +1466,19 @@
   </div>
 
   <!-- ============ STATUS MODAL ============ -->
+  <div class="modal-bg" id="optModalBg">
+    <div class="modal">
+      <button class="modal-close" data-close="optModalBg"><span class="icon" data-i="close"></span></button>
+      <h2>동선 최적화</h2>
+      <p class="sub" id="optSub"></p>
+      <div id="optBody"></div>
+      <div class="opt-actions">
+        <button type="button" class="btn-ghost" data-close="optModalBg">그대로 두기</button>
+        <button type="button" class="btn-primary" id="optApply">이 순서로 바꾸기</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-bg" id="statusModalBg">
     <div class="modal">
       <button class="modal-close" data-close="statusModalBg"><span class="icon" data-i="close"></span></button>
@@ -1547,6 +1606,8 @@ const RAW = {
   navMap:'<path d="M12 21s7-6.6 7-12.2A7 7 0 105 8.8C5 14.4 12 21 12 21z"/><circle cx="12" cy="8.7" r="2.3"/>',
   navList:'<path d="M4 6h16M4 12h16M4 18h10"/>',
   navCheck:'<path d="M4 12.5l5 5L20 6"/>',
+  route:'<circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>',
+  grip:'<circle cx="9" cy="7" r="1.1"/><circle cx="15" cy="7" r="1.1"/><circle cx="9" cy="12" r="1.1"/><circle cx="15" cy="12" r="1.1"/><circle cx="9" cy="17" r="1.1"/><circle cx="15" cy="17" r="1.1"/>',
   chev:'<path d="M6 9.5l6 5.5 6-5.5"/>',
   walk:'<circle cx="13" cy="4.5" r="1.8"/><path d="M12 8.5l-3 3.5 1.5 3.5L9 21M12 8.5l3 2 2 3M10.5 15.5L14 21"/>',
   metro:'<rect x="5" y="3.5" width="14" height="13" rx="3"/><path d="M5 11.5h14M7.5 20.5l2-4M16.5 20.5l-2-4"/><circle cx="8.8" cy="8" r="1"/><circle cx="15.2" cy="8" r="1"/>',
@@ -1678,7 +1739,7 @@ let engine='leaflet';
 let lmap, lMarkers=[], lLine, gmap, gMarkers=[], gLine, dirService;
 let scrollTimer=null, suppressScrollSync=false, syncTimer=null, pushTimer=null;
 
-let showOptional = (()=>{ try{ return localStorage.getItem('sapporo:showOpt')!=='0'; }catch(e){ return true; } })();
+let showOptional = true;   /* 선택 = 시간이 유동적인 일정이라 항상 보여줍니다 */
 function setShowOptional(v){
   showOptional = v;
   try{ localStorage.setItem('sapporo:showOpt', v?'1':'0'); }catch(e){}
@@ -2543,6 +2604,43 @@ function tightInfo(prev, cur){
   return { short: need - gap, need, gap, src: known.src };
 }
 
+/* 경고 표시만 제자리에서 다시 계산합니다 (펼친 이동 줄은 닫지 않음) */
+function tightMsgHtml(t){
+  return `앞 일정에서 ${fmtMin(t.need)} 걸리는데 ${fmtMin(t.gap)}밖에 없어요 · <b>${fmtMin(t.short)} 부족</b>`;
+}
+function refreshTightMarks(){
+  const day=currentDay(); if(!day) return;
+  const list=visibleStops(day);
+  list.forEach((s,i)=>{
+    const row=document.querySelector(`.trow[data-id="${s.id}"]`);
+    if(!row) return;
+    const t=tightInfo(list[i-1], s);
+    const had=row.classList.contains('tight');
+    row.classList.toggle('tight', !!t);
+    const nameEl=row.querySelector('.tc-name');
+    let badge=row.querySelector('.tight-badge');
+    let msg=row.querySelector('.tight-msg');
+    if(t){
+      if(!badge && nameEl){
+        badge=document.createElement('span');
+        badge.className='tight-badge'; badge.title='이동 시간 부족'; badge.textContent='!';
+        const firstBadge=nameEl.querySelector('.mini-badge');
+        firstBadge ? nameEl.insertBefore(badge, firstBadge) : nameEl.appendChild(badge);
+      }
+      if(!msg){
+        msg=document.createElement('div'); msg.className='tight-msg';
+        row.querySelector('.tc-main').appendChild(msg);
+      }
+      msg.innerHTML=tightMsgHtml(t);
+    } else {
+      if(had){
+        // 사라질 때 살짝 흐려지며 빠집니다
+        [badge,msg].forEach(el=>{ if(!el) return; el.classList.add('tight-out'); setTimeout(()=>el.remove(), 260); });
+      } else { badge?.remove(); msg?.remove(); }
+    }
+  });
+}
+
 function rowEl(s, idx, prev, next, todayMinute){
   const el=document.createElement('div');
   el.className='trow'+(s.opt?' optional':'');
@@ -2565,7 +2663,7 @@ function rowEl(s, idx, prev, next, todayMinute){
         ${s.stayEnd? '<span class="mini-badge stay">숙소 복귀</span>':''}
         ${s.flight? `<span class="mini-badge fl">${s.flight==='in'?'입국':'출국'}</span>`:''}</div>
       <div class="tc-sub">${esc(sub.join(' · '))}</div>
-      ${tight? `<div class="tight-msg">앞 일정에서 ${fmtMin(tight.need)} 걸리는데 ${fmtMin(tight.gap)}밖에 없어요 · <b>${fmtMin(tight.short)} 부족</b></div>`:''}
+      ${tight? `<div class="tight-msg">${tightMsgHtml(tight)}</div>`:''}
     </div>
     <span class="tc-caret">›</span>`;
   // 오늘이면서 지금 시각에 해당하는 일정을 강조합니다
@@ -2573,8 +2671,141 @@ function rowEl(s, idx, prev, next, todayMinute){
     const cur=toMinutes(s.time), nxt=next?toMinutes(next.time):24*60;
     if(cur!=null && todayMinute>=cur && todayMinute<nxt) el.classList.add('now');
   }
-  el.addEventListener('click', ()=> openFormAt(el, s.id));
+  el.addEventListener('click', ()=>{
+    if(el.dataset.noclick){ delete el.dataset.noclick; return; }   // 끌기 직후의 탭은 무시
+    openFormAt(el, s.id);
+  });
+  enableRowDrag(el, s);
   return el;
+}
+
+/* ---- 꾹 눌러서 일정 순서 바꾸기 ----
+   순서는 시간으로 정해지므로, 놓은 자리의 앞뒤 일정 사이로 시간을 옮겨줍니다.
+   숙소 출발·복귀와 항공편은 고정입니다. */
+function enableRowDrag(el, stop){
+  if(stop.stay || stop.stayEnd || stop.flight) return;
+  const PRESS = 380;
+  let timer=null, sx=0, sy=0, dragging=false, ghost=null, ph=null, list=null, offY=0, lastY=0, raf=null, ownLeg=null;
+
+  const hhmm = t=>`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+
+  function press(x,y){ sx=x; sy=y; clearTimeout(timer); timer=setTimeout(()=>begin(y), PRESS); el.classList.add('pressing'); }
+  function unpress(){ clearTimeout(timer); timer=null; el.classList.remove('pressing'); }
+
+  function begin(y){
+    timer=null; dragging=true; el.classList.remove('pressing');
+    if(navigator.vibrate) navigator.vibrate(12);
+    list = el.parentElement;
+    const r0 = el.getBoundingClientRect();
+    offY = y - r0.top;
+    ghost = el.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    Object.assign(ghost.style, { width:r0.width+'px', left:r0.left+'px', top:(y-offY)+'px' });
+    document.body.appendChild(ghost);
+    // 끌고 있는 일정의 이동 줄만 잠시 숨깁니다 (다른 줄은 그대로라 손가락 아래가 흔들리지 않아요)
+    ownLeg = (el.nextElementSibling && el.nextElementSibling.classList.contains('tmove')) ? el.nextElementSibling : null;
+    ph = document.createElement('div'); ph.className='drag-ph'; ph.style.height=r0.height+'px';
+    el.after(ph); el.classList.add('drag-src');
+    if(ownLeg) ownLeg.style.display='none';
+    lastY = y; tick();
+  }
+
+  function move(y){
+    lastY = y;
+    ghost.style.top = (y-offY)+'px';
+    const rows=[...list.querySelectorAll('.trow:not(.drag-src)')];
+    let placed=false;
+    for(const r of rows){
+      const b=r.getBoundingClientRect();
+      if(y < b.top + b.height/2){ if(r.previousElementSibling!==ph) r.before(ph); placed=true; break; }
+    }
+    if(!placed && rows.length){ const last=rows[rows.length-1]; if(last.nextElementSibling!==ph) last.after(ph); }
+  }
+
+  // 화면 가장자리로 끌면 목록이 따라 스크롤됩니다
+  function tick(){
+    if(!dragging) return;
+    const sc=document.getElementById('screen-schedule');
+    if(sc){
+      const b=sc.getBoundingClientRect(), edge=70;
+      if(lastY < b.top+edge+80) sc.scrollTop -= Math.ceil((b.top+edge+80-lastY)/8);
+      else if(lastY > b.bottom-edge-60) sc.scrollTop += Math.ceil((lastY-(b.bottom-edge-60))/8);
+    }
+    raf=requestAnimationFrame(tick);
+  }
+
+  function finish(){
+    dragging=false; cancelAnimationFrame(raf);
+    el.dataset.noclick='1';
+    setTimeout(()=>{ delete el.dataset.noclick; }, 400);
+
+    const day=currentDay();
+    const ids=[...list.children].filter(n=>n===ph || (n.classList.contains('trow') && !n.classList.contains('drag-src')))
+                .map(n=> n===ph ? '__PH__' : n.dataset.id);
+    const order = ids.map(id=> id==='__PH__' ? null : day.stops.find(x=>String(x.id)===String(id)));
+    let idx = order.indexOf(null);
+    const rest = order.filter(Boolean);
+
+    // 숙소 출발 앞, 숙소 복귀 뒤로는 못 가도록 자리를 맞춥니다
+    const startI = rest.findIndex(x=>x.stay);
+    const endI = rest.findIndex(x=>x.stayEnd);
+    if(startI>=0 && idx<=startI) idx = startI+1;
+    if(endI>=0 && idx>endI) idx = endI;
+
+    ghost.remove(); ph.remove(); el.classList.remove('drag-src'); if(ownLeg) ownLeg.style.display='';
+
+    const prev = rest[idx-1], next = rest[idx];
+    const pT = prev? toMinutes(prev.time) : null, nT = next? toMinutes(next.time) : null;
+    const cur = toMinutes(stop.time);
+    let t;
+    if(pT!=null && nT!=null){
+      if(cur!=null && cur>pT && cur<nT) return;           // 제자리
+      t = nT-pT >= 10 ? Math.round(((pT+nT)/2)/5)*5 : pT;
+      if(t<=pT && nT-pT>=2) t = pT+1;
+    } else if(pT!=null){ if(cur!=null && cur>pT) return; t = Math.min(pT+60, 23*60+50); }
+    else if(nT!=null){ if(cur!=null && cur<nT) return; t = Math.max(nT-60, 0); }
+    else return;
+
+    const was = stop.time;
+    stop.time = hhmm(t);
+    if(stop.stayEnd) delete stop.endAuto;
+    day.stops.sort((a,b)=>a.time.localeCompare(b.time));
+    ensureStayStarts(); markChanged();
+    renderScheduleScreen(); try{ renderMapForDay(); }catch(e){}
+    toast(`순서를 옮겼어요 · ${fmtClock(was)} → ${fmtClock(stop.time)}`);
+  }
+
+  function abort(){
+    if(!dragging) return;
+    dragging=false; cancelAnimationFrame(raf);
+    ghost?.remove(); ph?.remove(); el.classList.remove('drag-src'); if(ownLeg) ownLeg.style.display='';
+  }
+
+  // 터치
+  el.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1) return;
+    const t=e.touches[0]; press(t.clientX, t.clientY);
+  }, {passive:true});
+  el.addEventListener('touchmove', e=>{
+    const t=e.touches[0];
+    if(timer && (Math.abs(t.clientX-sx)>8 || Math.abs(t.clientY-sy)>8)) unpress();   // 스크롤이면 취소
+    if(dragging){ e.preventDefault(); move(t.clientY); }
+  }, {passive:false});
+  el.addEventListener('touchend', ()=>{ unpress(); if(dragging) finish(); });
+  el.addEventListener('touchcancel', ()=>{ unpress(); abort(); });
+  el.addEventListener('contextmenu', e=>{ if(timer||dragging) e.preventDefault(); });
+
+  // 마우스 (PC에서도 꾹 눌러 끌 수 있게)
+  el.addEventListener('mousedown', e=>{
+    if(e.button!==0) return;
+    press(e.clientX, e.clientY);
+    const mm=ev=>{
+      if(timer && (Math.abs(ev.clientX-sx)>6 || Math.abs(ev.clientY-sy)>6)) unpress();
+      if(dragging){ ev.preventDefault(); move(ev.clientY); }
+    };
+    const mu=()=>{ unpress(); if(dragging) finish(); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
+  });
 }
 
 /* 일정 사이 이동 줄 (접힌 상태) */
@@ -2626,6 +2857,7 @@ function moveBar(from, to){
     const sum=document.getElementById('daySummary');
     const d=currentDay();
     if(sum && d) renderDaySummary(d, sum);
+    refreshTightMarks();
   });
   openBtn.addEventListener('click', ()=>{
     if(box.hidden){
@@ -2844,24 +3076,19 @@ function renderDaySummary(day, el){
   const tAll = calc(inPlan);
   const tFix = calc(inPlan.filter(s=>!s.opt));
 
+  const canOpt = all.filter(s=>s.opt && !s.tbd && s.lat!=null && !s.stay && !s.stayEnd && !s.flight).length > 0
+               && all.filter(s=>!s.tbd && s.lat!=null).length >= 3;
   el.innerHTML = `
     <div class="ds-left">
       <span class="ds-chip fix">확정 ${fixCount}</span>
       ${optCount? `<span class="ds-chip opt">선택 ${optCount}</span>`:''}
-      ${(showOptional? tAll : tFix) > 0 ? `<span class="ds-move">이동 약 ${fmtMin(showOptional? tAll : tFix)}</span>` : ''}
-      ${optCount && showOptional && tAll!==tFix? `<span class="ds-sub">선택 빼면 ${fmtMin(tFix)}</span>`:''}
+      ${tAll > 0 ? `<span class="ds-move">이동 약 ${fmtMin(tAll)}</span>` : ''}
     </div>
-    ${optCount? `<button type="button" class="ds-toggle ${showOptional?'':'off'}" id="optToggle">
-        ${showOptional? '선택 포함' : '선택 제외'}
-      </button>`:''}`;
+    ${all.length>=3? `<button type="button" class="ds-opt ${canOpt?'':'dim'}" id="optimizeBtn">
+        <span class="icon">${iconSvg('route')}</span>동선 최적화</button>`:''}`;
 
-  const tg = document.getElementById('optToggle');
-  if(tg) tg.addEventListener('click', ()=>{
-    setShowOptional(!showOptional);
-    activeStopId=null;
-    renderScheduleScreen(); refreshAll();
-    toast(showOptional? '선택 일정을 포함해서 보여요' : '확정 일정만 보여요');
-  });
+  const ob = document.getElementById('optimizeBtn');
+  if(ob) ob.addEventListener('click', openOptimizer);
 }
 
 /* =========================================================
@@ -3328,6 +3555,10 @@ function buildLeg(from,to,openBox){
       if(openBox){
         openBox.replaceChildren(buildLeg(from,to,openBox));
         revealActiveMode(openBox);
+        refreshTightMarks();                                   // 경고를 바로 다시 계산
+        const sum=document.getElementById('daySummary'); const d=currentDay();
+        if(sum && d) renderDaySummary(d, sum);
+        try{ renderMapForDay(); }catch(e){}
       } else {
         renderScheduleScreen();
         renderMapForDay();
@@ -3763,6 +3994,10 @@ function ensureStayStarts(){
           changed=true;
         }
         const next = d.stops.find(x=>!x.stay && !x.stayEnd);
+        if(existing.startAuto && next){
+          const want = stayLeaveTime(next, existing, normalizeMode(existing.mode));
+          if(want !== existing.time){ existing.time = want; changed=true; }
+        }
         if(next && next.lat!=null && existing.lat!=null && normalizeMode(existing.mode)==='walk'
            && !(existing.byPlan) && haversineKm(existing, next) > 3){
           existing.mode = dayMainMode(d, existing, next);          // 3km 넘게 걸어가는 출발은 바로잡기
@@ -4076,12 +4311,12 @@ function openForm(stopId, prefill){
 
       <label>시간</label>
       ${timeFieldHtml('f_time', ed? ed.time : (pf.time||nextStopDefaultTime(day)))}
-      <label>상태</label>
+      <label>시간</label>
       <div class="seg-toggle" id="f_optWrap">
         <button type="button" class="seg ${isOpt?'':'on'}" data-opt="0">확정</button>
         <button type="button" class="seg ${isOpt?'on':''}" data-opt="1">선택</button>
       </div>
-      <p class="hint">'선택'은 갈지 말지 정하지 않은 후보예요. 일정표에서 선택 일정을 빼고 동선과 시간을 볼 수 있어요.</p>
+      <p class="hint"><b>확정</b>은 이 시간에 꼭 가야 하는 일정이에요. <b>선택</b>으로 두면 동선 최적화 때 순서와 시간이 더 효율적으로 바뀔 수 있어요.</p>
       <label>카테고리</label>
       <div class="cat-pick" id="f_catWrap">
         ${Object.keys(CATS).map(c=>`
@@ -4796,6 +5031,137 @@ function refreshAll(){
   renderCarousel();
   if(document.getElementById('screen-schedule').classList.contains('active')) renderScheduleScreen();
 }
+
+/* ================= 동선 최적화 =================
+   확정 일정은 시간을 그대로 두고, 선택 일정만 순서와 시간을 옮겨
+   하루 전체 이동 시간이 가장 짧아지도록 정리합니다. */
+function optPlan(day){
+  const byT = (a,b)=> (toMinutes(a.time)||0) - (toMinutes(b.time)||0);
+  const all = day.stops.filter(s=> inActivePlan(day,s)).slice().sort(byT);
+  const isFixed = s => !s.opt || s.stay || s.stayEnd || s.flight || s.tbd || s.lat==null;
+  const movable = all.filter(s=>!isFixed(s));
+  const mode = dayMainMode(day, all[0], all[1]);
+  const trav = (a,b)=> (a.lat==null||b.lat==null) ? 0 : estimateMinutes(haversineKm(a,b), mode);
+
+  // 머무는 시간은 원래 일정 간격에서 읽어옵니다 (20분~3시간, 모르면 1시간)
+  const dwell = new Map();
+  all.forEach((x,i)=>{
+    if(x.stay || x.flight==='in'){ dwell.set(x.id, 0); return; }
+    const n = all[i+1];
+    let d = 60;
+    if(n){ d = (toMinutes(n.time)||0) - (toMinutes(x.time)||0) - trav(x,n); }
+    dwell.set(x.id, Math.max(20, Math.min(180, Math.round(d))));
+  });
+
+  // 주어진 순서로 하루를 흘려보며 비용 계산 (이동 시간 + 확정 시각 지각 벌점)
+  function simulate(order){
+    let travel=0, late=0, prevEnd=null, prev=null;
+    const times=new Map();
+    for(const x of order){
+      const tr = prev? trav(prev,x) : 0;
+      travel += tr;
+      let t;
+      const arrive = prevEnd==null ? (toMinutes(x.time)||0) : prevEnd + tr;
+      if(isFixed(x)){
+        const fixedT = toMinutes(x.time)||0;
+        if(arrive > fixedT + 1) late += arrive - fixedT;
+        t = Math.max(fixedT, arrive);
+        times.set(x.id, fixedT);
+      } else {
+        t = Math.ceil(arrive/5)*5;
+        times.set(x.id, t);
+      }
+      prevEnd = t + (dwell.get(x.id)||0);
+      prev = x;
+    }
+    const over = Math.max(0, prevEnd - (23*60+50));
+    return { cost: travel + late*4 + over*2, travel, late, times };
+  }
+
+  const start = simulate(all);
+  if(!movable.length) return { all, movable, start, best:start, order:all };
+
+  // 선택 일정을 하나씩 빼서 가장 좋은 자리에 다시 끼워 넣기를 반복합니다
+  let order = all.slice(), best = start;
+  for(let round=0; round<60; round++){
+    let improved=false;
+    for(const m of movable){
+      const base = order.filter(x=>x!==m);
+      for(let pos=0; pos<=base.length; pos++){
+        // 숙소 출발보다 앞, 숙소 복귀보다 뒤에는 넣지 않습니다
+        if(pos===0 && base[0] && base[0].stay) continue;
+        if(pos>0 && base[pos-1] && base[pos-1].stayEnd) continue;
+        const cand = base.slice(0,pos).concat([m], base.slice(pos));
+        const r = simulate(cand);
+        if(r.cost < best.cost - 0.5){ best=r; order=cand; improved=true; }
+      }
+    }
+    // 선택 일정끼리 자리 바꾸기
+    for(let i=0;i<movable.length;i++) for(let j=i+1;j<movable.length;j++){
+      const a=order.indexOf(movable[i]), b=order.indexOf(movable[j]);
+      const cand=order.slice(); [cand[a],cand[b]]=[cand[b],cand[a]];
+      const r=simulate(cand);
+      if(r.cost < best.cost - 0.5){ best=r; order=cand; improved=true; }
+    }
+    if(!improved) break;
+  }
+  return { all, movable, start, best, order };
+}
+
+let optResult = null;
+function openOptimizer(){
+  const day=currentDay(); if(!day) return;
+  const r = optPlan(day);
+  if(!r.movable.length){
+    toast('시간을 옮겨도 되는 일정을 "선택"으로 바꾸면 동선을 정리해드려요');
+    return;
+  }
+  const saved = Math.round(r.start.travel - r.best.travel);
+  const lateFix = r.start.late - r.best.late;
+  if(saved < 3 && lateFix <= 0){
+    toast('지금 순서가 이미 가장 효율적이에요');
+    return;
+  }
+  optResult = { dayId: day.id, times: r.best.times, movableIds: r.movable.map(x=>x.id) };
+
+  const hhmm = t=> `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+  const beforeIdx = new Map(r.all.map((x,i)=>[x.id,i]));
+  document.getElementById('optSub').innerHTML =
+    `이동 <b>약 ${fmtMin(Math.round(r.start.travel))}</b> → <b class="opt-good">약 ${fmtMin(Math.round(r.best.travel))}</b>`
+    + (saved>0? ` <span class="opt-save">${fmtMin(saved)} 절약</span>` : '')
+    + `<br><span class="opt-note">확정 일정의 시간은 그대로 두고, 선택 일정만 옮겼어요.</span>`;
+
+  document.getElementById('optBody').innerHTML = `<ol class="opt-list">${
+    r.order.map((x,i)=>{
+      const fixed = !r.movable.includes(x);
+      const nt = hhmm(r.best.times.get(x.id));
+      const moved = !fixed && (nt!==x.time || beforeIdx.get(x.id)!==i);
+      return `<li class="${fixed?'fixed':'flex'} ${moved?'moved':''}" style="--d:${i*45}ms">
+        <span class="ol-time">${moved && nt!==x.time? `<s>${esc(fmtClock(x.time))}</s>`:''}${esc(fmtClock(nt))}</span>
+        <span class="ol-name">${esc(x.name)}</span>
+        <span class="ol-tag">${fixed? (x.stay||x.stayEnd?'숙소':'확정') : (moved?'이동':'선택')}</span>
+      </li>`;
+    }).join('')
+  }</ol>`;
+  document.getElementById('optModalBg').classList.add('open');
+}
+
+document.getElementById('optApply').addEventListener('click', ()=>{
+  if(!optResult) return;
+  const day = TRIP.days.find(d=>d.id===optResult.dayId); if(!day) return;
+  pushBackup(TRIP, '동선 최적화 전');
+  const hhmm = t=> `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+  day.stops.forEach(x=>{
+    if(optResult.movableIds.includes(x.id) && optResult.times.has(x.id)) x.time = hhmm(optResult.times.get(x.id));
+  });
+  day.stops.sort((a,b)=>a.time.localeCompare(b.time));
+  ensureStayStarts(); markChanged();
+  document.getElementById('optModalBg').classList.remove('open');
+  optResult = null;
+  renderScheduleScreen(); try{ renderMapForDay(); }catch(e){}
+  toast('동선을 정리했어요. 이전 순서는 ⓘ에서 되돌릴 수 있어요');
+});
+
 function switchScreen(name){
   if(name!=='schedule') document.querySelectorAll('.tm-detail .ai-route-box').forEach(box=>box._commitAiRoute?.());
   hideShareTip();
@@ -5675,7 +6041,7 @@ const GUIDE_STEPS = [
     body:'＋로 다른 계획을 만들어 비교할 수 있어요. 선택된 안을 한 번 더 누르면 이름을 바꿀 수 있어요.' },
   { screen:'schedule', target:'.trow',
     title:'일정 고치기',
-    body:'일정을 누르면 시간, 장소, 메모를 바로 수정할 수 있어요.' },
+    body:'일정을 누르면 시간, 장소, 메모를 고칠 수 있어요. 꾹 누른 채 위아래로 끌면 순서도 바꿀 수 있어요.' },
   { screen:'schedule', target:'.tmove',
     title:'이동수단과 소요 시간',
     body:'이 줄을 펼쳐 도보, 대중교통, 택시 중에 고르면 걸리는 시간과 요금을 알려줘요. 시간이 빠듯하면 빨간 느낌표로 알려드려요.' },
