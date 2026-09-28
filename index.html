@@ -1577,7 +1577,7 @@ const MODES = [
   { key:'walk',    label:'도보',   icon:'walk',   kmh:4.5, fixed:0, g:'WALKING', c:'#7A8590', s:'#F1F2F4' },
   { key:'transit', label:'대중교통', icon:'metro', kmh:28,  fixed:10, g:'TRANSIT', c:'#2AA06A', s:'#E7F6EF' },
   { key:'taxi',    label:'택시',   icon:'taxi',   kmh:32,  fixed:4, g:'DRIVING', c:'#E0A21C', s:'#FDF4E2' },
-  { key:'car',     label:'렌터카',  icon:'car',    kmh:45,  fixed:3, g:'DRIVING', c:'#2F93DD', s:'#E9F4FC' }
+  { key:'car',     label:'차량(렌터카)',  icon:'car',    kmh:45,  fixed:3, g:'DRIVING', c:'#2F93DD', s:'#E9F4FC' }
 ];
 /* 예전 버전에서 저장된 'metro' / 'bus'를 '대중교통'으로 합칩니다 */
 function normalizeMode(m){ return (m==='metro'||m==='bus') ? 'transit' : (m||'walk'); }
@@ -1705,7 +1705,7 @@ function addPlan(day, copyCurrent){
   const cur = activePlanId(day);
 
   // 아직 어느 안에도 속하지 않은 일정을 현재 안으로 귀속 (자동 생성 항목은 공통 유지)
-  day.stops.forEach(s=>{ if(!s.plan && !s.stay && !s.flight) s.plan = cur; });
+  day.stops.forEach(s=>{ if(!s.plan && !s.stay && !s.stayEnd && !s.flight) s.plan = cur; });
 
   let n = ps.length + 1;
   while(ps.some(p=> p.name === `${n}안`)) n++;
@@ -1972,7 +1972,7 @@ let drawnKinds = new Set();
 function renderLegend(){
   const el=document.getElementById('mapLegend');
   if(!el) return;
-  const used = MODES.filter(m=> drawnKinds.has(m.key));   // 도보→대중교통→택시→렌터카 순
+  const used = MODES.filter(m=> drawnKinds.has(m.key));   // 도보→대중교통→택시→차량 순
   if(!used.length){ el.hidden=true; el.innerHTML=''; return; }
   el.hidden=false;
   el.innerHTML = used.map(m=>
@@ -2507,7 +2507,7 @@ function renderScheduleScreenInner(){
   wrap.appendChild(tbl);
 
   // 장소가 하나 이하인 날에는 다음에 할 일을 부드럽게 안내합니다
-  const realStops = list.filter(x=>!x.stay && !x.flight);
+  const realStops = list.filter(x=>!x.stay && !x.stayEnd && !x.flight);
   if(realStops.length === 0){
     const hint = document.createElement('div');
     hint.className = 'day-hint';
@@ -2530,6 +2530,7 @@ function toMinutes(t){ const m=/^(\d{1,2}):(\d{2})$/.exec(t||''); return m? (+m[
 
 /* 앞 일정에서 이동 시간을 빼면 이 일정에 늦는지 확인합니다 */
 function tightInfo(prev, cur){
+  if(cur && cur.stayEnd && cur.endAuto) return null;   // 자동으로 잡은 복귀 시각은 기준이 아닙니다
   if(!prev || !cur) return null;
   const a = toMinutes(prev.time), b = toMinutes(cur.time);
   if(a==null || b==null) return null;
@@ -2560,7 +2561,8 @@ function rowEl(s, idx, prev, next, todayMinute){
       <div class="tc-name">${esc(s.name)}
         ${tight? `<span class="tight-badge" title="이동 시간 부족">!</span>`:''}
         ${s.opt? '<span class="mini-badge opt">선택</span>':''}
-        ${s.stay? '<span class="mini-badge stay">숙소</span>':''}
+        ${s.stay? '<span class="mini-badge stay">숙소 출발</span>':''}
+        ${s.stayEnd? '<span class="mini-badge stay">숙소 복귀</span>':''}
         ${s.flight? `<span class="mini-badge fl">${s.flight==='in'?'입국':'출국'}</span>`:''}</div>
       <div class="tc-sub">${esc(sub.join(' · '))}</div>
       ${tight? `<div class="tight-msg">앞 일정에서 ${fmtMin(tight.need)} 걸리는데 ${fmtMin(tight.gap)}밖에 없어요 · <b>${fmtMin(tight.short)} 부족</b></div>`:''}
@@ -2630,6 +2632,7 @@ function moveBar(from, to){
       box.innerHTML='';
       box.appendChild(buildLeg(from, to, box));
       box.hidden=false; openBtn.classList.add('open');
+      revealActiveMode(box);
     } else {
       box.querySelector('.ai-route-box')?._commitAiRoute?.();
       box.hidden=true; openBtn.classList.remove('open');
@@ -2771,7 +2774,7 @@ function renderPlanBar(day, targetId){
   if(!day){ el.innerHTML=''; return; }
   el.hidden=false;
   const ps=dayPlans(day), act=activePlanId(day);
-  const count=(pid)=> day.stops.filter(x=> (!x.plan && (x.stay||x.flight)) || !x.plan || x.plan===pid).length;
+  const count=(pid)=> day.stops.filter(x=> (!x.plan && (x.stay||x.stayEnd||x.flight)) || !x.plan || x.plan===pid).length;
 
   const many = ps.length>1;
   el.innerHTML = ps.map(p=>`
@@ -2812,7 +2815,7 @@ function renderPlanBar(day, targetId){
 
   const add=document.getElementById('planAdd');
   if(add) add.addEventListener('click', ()=>{
-    const hasStops = day.stops.some(s=> !s.stay && !s.flight && (!s.plan || s.plan===act));
+    const hasStops = day.stops.some(s=> !s.stay && !s.stayEnd && !s.flight && (!s.plan || s.plan===act));
     const copy = hasStops
       ? confirm('지금 일정을 복사해서 새 안을 시작할까요?\n\n확인 = 복사해서 시작 (이후 수정은 서로 영향 없음)\n취소 = 빈 안으로 시작')
       : false;
@@ -3273,6 +3276,19 @@ function renderAiRoute(d){
     </div>`;
 }
 
+/* 펼쳤을 때 선택된 이동수단 칩이 가려져 있으면 보이게 스크롤합니다 */
+function revealActiveMode(root){
+  requestAnimationFrame(()=>{
+    const act = root && root.querySelector('.modes .mode.active');
+    if(!act) return;
+    const row = act.parentElement;
+    const over = act.offsetLeft + act.offsetWidth - (row.scrollLeft + row.clientWidth);
+    if(over > 0 || act.offsetLeft < row.scrollLeft){
+      row.scrollTo({ left: Math.max(0, act.offsetLeft - 8), behavior:'smooth' });
+    }
+  });
+}
+
 function buildLeg(from,to,openBox){
   const leg=document.createElement('div'); leg.className='leg';
   const both = !from.tbd && !to.tbd && from.lat!=null && to.lat!=null;
@@ -3311,6 +3327,7 @@ function buildLeg(from,to,openBox){
       // 선택 창은 계속 열어두고 새 수단의 경로만 표시합니다.
       if(openBox){
         openBox.replaceChildren(buildLeg(from,to,openBox));
+        revealActiveMode(openBox);
       } else {
         renderScheduleScreen();
         renderMapForDay();
@@ -3691,46 +3708,123 @@ function stayIsOwn(idx){
   return !!(d && d.stay && d.stay.lat!=null);
 }
 
-/* 각 날의 첫 일정을 '전날 묵은 숙소'에서 출발하도록 맞춥니다 */
+/* 그 날 가장 많이 쓴 이동수단 (없으면 거리로 판단) */
+function dayMainMode(d, from, to){
+  const cnt = {};
+  d.stops.filter(x=>!x.stay && !x.stayEnd && x.mode).forEach(x=>{
+    const m = normalizeMode(x.mode); cnt[m] = (cnt[m]||0) + 1;
+  });
+  const top = Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+  if(top && top[0]!=='walk') return top[0];
+  if(from && to && from.lat!=null && to.lat!=null && haversineKm(from,to) > 1.5){
+    return (top && top[0]) && top[0]!=='walk' ? top[0] : 'transit';
+  }
+  return 'walk';
+}
+/* 첫 일정에 늦지 않도록 숙소에서 나설 시각 (10분 단위로 내림, 최소 30분 여유) */
+function stayLeaveTime(first, stay, mode){
+  const base = toMinutes(first && first.time);
+  if(base==null) return '08:00';
+  let need = 30;
+  if(first.lat!=null && stay.lat!=null){
+    need = Math.max(30, estimateMinutes(haversineKm(stay, first), mode) + 10);
+  }
+  let t = Math.max(0, base - need);
+  t = Math.floor(t/10)*10;
+  return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
+}
+
+/* 숙소를 하루의 양 끝에 맞춥니다
+   - 아침 : 전날 밤 묵은 숙소에서 출발 (첫날 제외)
+   - 밤   : 그날 밤 묵는 숙소로 복귀 (마지막 날은 직접 지정했을 때만) */
 function ensureStayStarts(){
   let changed=false;
+  const hhmm = (t)=> `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;
 
   TRIP.days.forEach((d, idx)=>{
-    if(idx===0){                       // 첫날은 도착일이라 제외
-      const had = d.stops.length;
-      d.stops = d.stops.filter(x=>!x.stay);
-      if(d.stops.length!==had) changed=true;
-      return;
-    }
+    /* ---- 아침 출발 ---- */
+    (()=>{
+      if(idx===0){                                   // 첫날은 도착일이라 출발 없음
+        const had = d.stops.length;
+        d.stops = d.stops.filter(x=>!x.stay);
+        if(d.stops.length!==had) changed=true;
+        return;
+      }
+      const stay = stayForDayIndex(idx-1);           // 전날 밤 묵은 곳
+      const existing = d.stops.find(x=>x.stay);
+      if(!stay){
+        if(existing){ d.stops = d.stops.filter(x=>!x.stay); changed=true; }
+        return;
+      }
+      if(existing){
+        if(existing.name!==stay.name || existing.lat!==stay.lat || existing.lng!==stay.lng){
+          existing.name=stay.name; existing.place=stay.place||'';
+          existing.lat=stay.lat; existing.lng=stay.lng; existing.tbd=false;
+          changed=true;
+        }
+        const next = d.stops.find(x=>!x.stay && !x.stayEnd);
+        if(next && next.lat!=null && existing.lat!=null && normalizeMode(existing.mode)==='walk'
+           && !(existing.byPlan) && haversineKm(existing, next) > 3){
+          existing.mode = dayMainMode(d, existing, next);          // 3km 넘게 걸어가는 출발은 바로잡기
+          changed=true;
+        }
+        return;
+      }
+      if(d.noStay) return;                           // 사용자가 지운 날은 다시 넣지 않음
+      const first = d.stops.find(x=>!x.stayEnd);
+      const mode = dayMainMode(d, stay, first);
+      d.stops.unshift({
+        id:newUid(), time: first ? stayLeaveTime(first, stay, mode) : '08:00',
+        name:stay.name, note:'숙소에서 출발',
+        cat:'숙소', place:stay.place||'', lat:stay.lat, lng:stay.lng,
+        mode, stay:true, startAuto:true
+      });
+      changed=true;
+    })();
 
-    const stay = stayForDayIndex(idx-1);   // 전날 밤 묵은 곳
-    const existing = d.stops.find(x=>x.stay);
+    /* ---- 당일 밤 복귀 ---- */
+    (()=>{
+      const night = stayForDayIndex(idx);            // 오늘 밤 묵는 곳
+      const isLast = idx === TRIP.days.length-1;
+      const want = night && (!isLast || stayIsOwn(idx)) && !d.noStayEnd;
+      const endStop = d.stops.find(x=>x.stayEnd);
 
-    if(!stay){
-      if(existing){ d.stops = d.stops.filter(x=>!x.stay); changed=true; }
-      return;
-    }
+      if(!want){
+        if(endStop){ d.stops = d.stops.filter(x=>!x.stayEnd); changed=true; }
+        return;
+      }
 
-    if(existing){
-      if(existing.name!==stay.name || existing.lat!==stay.lat || existing.lng!==stay.lng){
-        existing.name=stay.name; existing.place=stay.place||'';
-        existing.lat=stay.lat; existing.lng=stay.lng; existing.tbd=false;
+      // 그날 가장 늦은 일정 한 시간 뒤로 (없으면 저녁 9시)
+      const times = d.stops.filter(x=>!x.stayEnd).map(x=>toMinutes(x.time)).filter(v=>v!=null);
+      const lastT = times.length ? Math.max(...times) : null;
+      const autoT = lastT==null ? '21:00' : hhmm(Math.min(lastT + 60, 23*60 + 59));
+
+      if(!endStop){
+        d.stops.push({
+          id:newUid(), time:autoT, name:night.name, note:'오늘 밤 숙소로',
+          cat:'숙소', place:night.place||'', lat:night.lat, lng:night.lng,
+          mode:'walk', stayEnd:true, endAuto:true
+        });
+        changed=true;
+        return;
+      }
+      if(endStop.name!==night.name || endStop.lat!==night.lat || endStop.lng!==night.lng){
+        endStop.name=night.name; endStop.place=night.place||'';
+        endStop.lat=night.lat; endStop.lng=night.lng; endStop.tbd=false;
         changed=true;
       }
-      return;
-    }
+      // 직접 시간을 고치지 않았다면 항상 하루의 마지막에 오도록
+      if(endStop.endAuto && lastT!=null && (toMinutes(endStop.time)||0) <= lastT){
+        endStop.time = autoT; changed=true;
+      }
+    })();
 
-    if(d.noStay) return;                   // 사용자가 지운 날은 다시 넣지 않음
-
-    const first = d.stops[0];
-    const t = first ? minusMinutes(first.time, 30) : '08:00';
-    d.stops.unshift({
-      id:newUid(), time:t, name:stay.name, note:'숙소에서 출발',
-      cat:'숙소', place:stay.place||'', lat:stay.lat, lng:stay.lng,
-      mode:'walk', stay:true
+    d.stops.sort((a,b)=>{
+      const c = a.time.localeCompare(b.time);
+      if(c) return c;
+      // 같은 시각이면 아침 출발은 맨 앞, 밤 복귀는 맨 뒤
+      return (a.stay? -1 : a.stayEnd? 1 : 0) - (b.stay? -1 : b.stayEnd? 1 : 0);
     });
-    d.stops.sort((a,b)=>a.time.localeCompare(b.time));
-    changed=true;
   });
 
   if(changed) markChanged();
@@ -3751,8 +3845,8 @@ function openStayForm(){
       <h3>${fmtDate(day.iso)} (${fmtDow(day.iso)}) 밤에 묵는 숙소</h3>
       <p class="hint" style="margin:0 0 14px;">
         ${nextDay
-          ? `여기에 지정한 숙소가 <b>${fmtDate(nextDay.iso)} 일정의 첫 출발지</b>가 됩니다.`
-          : '마지막 날이라 다음 날 출발지로는 쓰이지 않아요.'}
+          ? `여기에 지정한 숙소가 <b>오늘 마지막 일정</b>과 <b>${fmtDate(nextDay.iso)} 첫 출발지</b>로 들어가요.`
+          : '여기에 지정한 숙소가 <b>오늘 마지막 일정</b>으로 들어가요.'}
         ${own? '' : '<br>지금은 이전 날 설정을 이어받고 있어요. 여기서 바꾸면 이후 날짜에도 이어집니다.'}
       </p>
       <label class="first">숙소 이름</label>
@@ -3798,13 +3892,13 @@ function saveStay(){
   day.stay = stay;
   if(idx===0 || !TRIP.stay) TRIP.stay = stay;     // 기본값도 함께 맞춰둡니다
 
-  // 이 날 이후로는 다시 자동 채움
-  TRIP.days.forEach((d,i)=>{ if(i>idx) delete d.noStay; });
+  // 이 날부터는 다시 자동 채움 (오늘 밤 복귀 + 이후 날짜의 출발)
+  TRIP.days.forEach((d,i)=>{ if(i>idx) delete d.noStay; if(i>=idx) delete d.noStayEnd; });
   ensureStayStarts(); markChanged();
   closeDayForm(); activeStopId=null;
   refreshAll(); renderScheduleScreen();
   const next = TRIP.days[idx+1];
-  toast(next? `${fmtDate(next.iso)} 출발지에 반영했어요` : '숙소를 저장했어요');
+  toast(next? `오늘 밤 복귀와 ${fmtDate(next.iso)} 출발에 반영했어요` : '오늘 밤 숙소로 반영했어요');
 }
 
 function clearStay(){
@@ -3823,7 +3917,7 @@ function clearStay(){
 
   if(!confirm('숙소 지정을 모두 해제할까요? 자동으로 추가된 숙소 일정도 함께 사라져요.')) return;
   TRIP.stay = null;
-  TRIP.days.forEach(d=>{ delete d.stay; d.stops = d.stops.filter(x=>!x.stay); delete d.noStay; });
+  TRIP.days.forEach(d=>{ delete d.stay; d.stops = d.stops.filter(x=>!x.stay && !x.stayEnd); delete d.noStay; delete d.noStayEnd; });
   markChanged(); closeDayForm(); activeStopId=null;
   refreshAll(); renderScheduleScreen();
   toast('숙소 지정을 해제했어요');
@@ -4495,6 +4589,8 @@ function saveForm(){
   const isOpt = !!(optSel && optSel.dataset.opt==='1');
   if(editingStopId){
     const s=day.stops.find(x=>x.id===editingStopId);
+    if(s.stayEnd && s.time!==time) delete s.endAuto;   // 직접 정한 복귀 시각은 그대로 둡니다
+    if(s.stay && s.time!==time) delete s.startAuto;
     s.name=name; s.time=time; s.cat=cat; s.note=note;
     if(isOpt) s.opt=true; else delete s.opt;
     if(geoPicked){ s.lat=geoPicked.lat; s.lng=geoPicked.lng; s.place=shortPlace(geoPicked.label); s.tbd=false; }
@@ -4508,6 +4604,7 @@ function saveForm(){
     day.stops.push(ns);
   }
   day.stops.sort((a,b)=>a.time.localeCompare(b.time));
+  ensureStayStarts();                              // 늦은 일정이 생기면 밤 복귀를 뒤로 밀어줍니다
   markChanged();
   editingStopId=null; geoPicked=null;
   getFormArea().innerHTML='';
@@ -4519,6 +4616,7 @@ function deleteStop(id){
   const day=currentDay();
   const target=day.stops.find(x=>x.id===id);
   if(target && target.stay) day.noStay=true;   // 이 날은 숙소 출발을 자동으로 넣지 않음
+  if(target && target.stayEnd) day.noStayEnd=true;   // 이 날은 숙소 복귀를 자동으로 넣지 않음
   day.stops=day.stops.filter(x=>x.id!==id);
   markChanged();
   editingStopId=null;
