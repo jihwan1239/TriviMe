@@ -5277,7 +5277,7 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
   const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260928-footer-4',standalone:navigator.standalone===true||matchMedia('(display-mode: standalone)').matches,innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
+  const report=JSON.stringify({version:'20260928-footer-5',standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,filled:document.documentElement.classList.contains('standalone-fill'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
   document.getElementById('layoutInfo').textContent=report;
   document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
@@ -5978,6 +5978,30 @@ async function commitTrip(){
 /* ================= INIT ================= */
 // Keep app controls inside the viewport the browser can actually display.
 // Never infer a usable height from screen.height or expand it with safe-area padding.
+/* 상단 안전영역(상태바) 높이를 실제 값으로 읽습니다 */
+function safeTopInset(){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;top:0;left:0;height:0;visibility:hidden;padding-top:env(safe-area-inset-top,0px);';
+  document.body.appendChild(el);
+  const v=parseFloat(getComputedStyle(el).paddingTop)||0;
+  el.remove();
+  return v;
+}
+function isStandaloneApp(){
+  return navigator.standalone===true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+}
+/* 측정된 높이 + 상태바 높이가 기기 화면 높이와 같다면, 상태바만큼 모자라게 측정된 것 */
+function fixStandaloneGap(h){
+  if(!isStandaloneApp()) return h;
+  const top=safeTopInset();
+  if(top<=0) return h;
+  const portrait = window.innerHeight >= window.innerWidth;
+  const screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+  const missing = screenH - h;
+  if(missing > 0 && Math.abs(missing - top) <= 6) return screenH;   // 정확히 상태바만큼 빈 경우만
+  return h;
+}
+
 function bindAppViewport(){
   const vv=window.visualViewport, root=document.documentElement;
   const probe=document.createElement('div');
@@ -5997,10 +6021,15 @@ function bindAppViewport(){
     if(!Number.isFinite(height) || height<=0) return;
     const editable=document.activeElement?.matches('input,textarea,[contenteditable="true"]');
     root.classList.toggle('keyboard-open',!!editable && idleHeight-height>150);
-    root.style.setProperty('--app-height',height+'px');
     const nativeHeight=probe.getBoundingClientRect().height;
     const rootHeight=root.clientHeight;
-    const usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
+    let usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
+    // 홈 화면 앱 + 투명 상태바에서는 iOS가 높이를 '상태바만큼 짧게' 알려주는 버그가 있어
+    // 화면 맨 아래에 빈 띠가 생깁니다. 모자란 높이가 상태바 높이와 딱 맞을 때만 그만큼 채웁니다.
+    const fixed=fixStandaloneGap(usable);
+    if(fixed!==usable){ usable=fixed; root.classList.add('standalone-fill'); }
+    else root.classList.remove('standalone-fill');
+    root.style.setProperty('--app-height',Math.max(height,usable)+'px');
     root.style.setProperty('--content-height',usable+'px');
     root.style.setProperty('--viewport-top',(vv?.offsetTop || 0)+'px');
     if(!editable) idleHeight=height;
