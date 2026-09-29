@@ -19,7 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   /* ============ 시작 화면 ============ */
-  #splash{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--app-height,100%); z-index:10000; overflow:hidden;
+  #splash{ position:fixed; top:0; left:0; right:0; height:var(--app-height,100%); z-index:10000; overflow:hidden;
     background:linear-gradient(165deg, #6CC0F2 0%, #4FAAE8 55%, #3A98DD 80%, #3A98DD 100%);
     display:flex; align-items:center; justify-content:center;
     transition:opacity .75s cubic-bezier(.4,0,.2,1); }
@@ -54,7 +54,7 @@
     .sp-brand, .sp-tag, .sp-en, .sp-flight{ animation:none; }
   }
   :root{
-    --app-height:100%;
+    --app-height:100vh;
     --paper:#FFFFFF; --ink:#1C1C1E; --muted:#8A8A8E; --muted-2:#C4C4C8;
     --line:#EDEDF0; --line-2:#DFDFE4; --tint:#F2F2F7;   /* iOS systemGroupedBackground 계열 */
     --fill:#EFEFF4;                                      /* 눌리는 면 */
@@ -85,7 +85,7 @@
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   button, .trow, .place-card, .prep-item, .geo-result{ touch-action:manipulation; }
-  html,body{ margin:0; padding:0; height:100%; width:100%; }
+  html,body{ margin:0; padding:0; min-height:100%; width:100%; }
   html.splash-active, html.splash-active body{ background:#3A98DD; }
   html:not(.splash-active), html:not(.splash-active) body{ background:#F8FBFF; }
   html{ overflow:hidden; }
@@ -93,7 +93,7 @@
     -webkit-font-smoothing:antialiased;
     /* 가로 흔들림(바운스) 방지 */
     overflow:hidden; overscroll-behavior:none; overscroll-behavior-x:none;
-    position:fixed; inset:0; touch-action:pan-y; }
+    position:relative; min-height:var(--app-height); touch-action:pan-y; }
   button{ font-family:inherit; letter-spacing:-.01em;
     transition:opacity .18s var(--ease), background .2s var(--ease), color .2s var(--ease), transform .2s var(--ease); }
   button:active{ opacity:.55; }
@@ -118,9 +118,9 @@
   /* 지도 핀 */
   .pin-wrap{ transition:transform .18s ease; }
   .app{ max-width:520px; margin:0 auto; width:100%;
-    height:var(--content-height,var(--app-height)); top:var(--viewport-top,0px); left:0; right:0; bottom:auto;
+    height:var(--app-height); top:0; left:0; right:0; bottom:auto;
     background:var(--paper); display:flex; flex-direction:column;
-    position:fixed; overflow:hidden; overscroll-behavior:contain; }
+    position:relative; overflow:visible; overscroll-behavior:contain; }
   @media (min-width:560px){
     body{ background:#DCDCE0; }
     .app{ box-shadow:0 0 48px rgba(0,0,0,.18); }
@@ -134,7 +134,7 @@
   .screen.active{ display:flex; }
   /* Keep the footer outside the scrolling screen's sizing flow. */
   .app > .screen{ position:absolute; top:0; left:0; right:0; bottom:var(--bottom-controls-height,140px); }
-  .bottom-controls{ position:absolute; left:0; right:0; bottom:0; z-index:600;
+  .bottom-controls{ position:fixed; left:0; right:0; bottom:0; width:100%; max-width:520px; margin:0 auto; z-index:600;
     display:flex; flex-direction:column; background:#F8FBFF; }
   .bottom-controls .bottomnav{ margin-top:0; }
 
@@ -895,7 +895,7 @@
   .navbtn.active .icon{ color:var(--sky); }
 
   /* ===== MODAL ===== */
-  .modal-bg{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); background:rgba(26,26,30,.5); display:none;
+  .modal-bg{ position:fixed; top:0; left:0; right:0; height:var(--app-height); background:rgba(26,26,30,.5); display:none;
     align-items:flex-end; justify-content:center; z-index:1000; }
   /* 새 여행 설정 화면 위에서도 여행 목록을 누르고 닫을 수 있어야 합니다. */
   #tripLibraryModalBg{ z-index:1300; }
@@ -1076,7 +1076,7 @@
   }
 
   /* ============ 사용 가이드 ============ */
-  .guide{ position:fixed; top:var(--viewport-top,0px); left:0; right:0; height:var(--content-height,var(--app-height)); z-index:5000; opacity:0; transition:opacity .35s ease; }
+  .guide{ position:fixed; top:0; left:0; right:0; height:var(--app-height); z-index:5000; opacity:0; transition:opacity .35s ease; }
   .guide[hidden]{ display:none; }
   .guide.show{ opacity:1; }
 
@@ -1231,9 +1231,6 @@
     transform:scale(1.03) rotate(-.6deg); animation:ghostIn .18s ease; }
   @keyframes ghostIn{ from{ transform:scale(1); } to{ transform:scale(1.03) rotate(-.6deg); } }
 
-  /* iOS가 화면 맨 아래를 따로 비워둔 경우: 그 영역이 이미 홈 인디케이터 자리라 탭 여백은 최소로 */
-  html.viewport-short .bottomnav{ padding-bottom:6px !important; }
-  html.viewport-short .ob-inner{ padding-bottom:28px; }
   /* 그 영역은 페이지 배경색으로 칠해지므로, 바로 위 화면과 같은 색으로 맞춥니다 */
   html.ob-open:not(.splash-active), html.ob-open:not(.splash-active) body{ background:#FFFFFF; }
 
@@ -1590,6 +1587,18 @@
       animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   }
 
+
+  /* Native viewport layout: no JS pixel height for ordinary page rendering. */
+  @supports(height:100dvh){ :root{--app-height:100dvh;} }
+  @media(display-mode:standalone){ :root{--app-height:100vh;} }
+  html.standalone-app{--app-height:100vh;}
+  .modal-bg,.guide{height:auto;top:0;bottom:0;}
+  .modal{max-height:calc(var(--app-height) - 24px);}
+  /* Keyboard geometry affects overlays only, never the document or application height. */
+  html.keyboard-open .modal-bg,html.keyboard-open .guide{
+    top:var(--keyboard-top,0px);bottom:auto;height:var(--keyboard-height);
+  }
+  html.keyboard-open .modal{max-height:calc(var(--keyboard-height) - 16px);}
 </style>
 
 </head>
@@ -6395,7 +6404,7 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
   const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260929-overlay-restored-10',statusBarStyle:document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content,standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,short:document.documentElement.classList.contains('viewport-short'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
+  const report=JSON.stringify({version:'20260929-native-layout-11',statusBarStyle:document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content,standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,layoutHeight:getComputedStyle(document.documentElement).getPropertyValue('--app-height'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
   document.getElementById('layoutInfo').textContent=report;
   document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
@@ -7108,14 +7117,6 @@ function safeTopInset(){
 function isStandaloneApp(){
   return navigator.standalone===true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
 }
-/* 홈 화면 앱인데 앱 영역이 화면 맨 아래까지 닿지 않는지 (그 아래는 iOS가 따로 비워둔 영역) */
-function isShortStandalone(h){
-  if(!isStandaloneApp()) return false;
-  const portrait = window.innerHeight >= window.innerWidth;
-  const screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-  return (screenH - h) >= 24;
-}
-
 /* 온보딩 화면이 떠 있는지에 따라 맨 아래 영역 색을 맞춥니다 */
 function watchOnboardColor(){
   const ob=document.getElementById('onboard'); if(!ob) return;
@@ -7125,44 +7126,49 @@ function watchOnboardColor(){
 }
 
 function bindAppViewport(){
-  const vv=window.visualViewport, root=document.documentElement;
-  const probe=document.createElement('div');
-  probe.id='viewportProbe'; probe.setAttribute('aria-hidden','true');
-  probe.style.cssText='position:fixed;inset:0;visibility:hidden;pointer-events:none;';
-  document.body.appendChild(probe);
+  const root=document.documentElement, vv=window.visualViewport;
+  root.classList.toggle('standalone-app',isStandaloneApp());
   const controls=document.getElementById('bottomControls');
-  const sizeControls=()=>root.style.setProperty('--bottom-controls-height',controls.getBoundingClientRect().height+'px');
+  let lastControls=-1;
+  const sizeControls=()=>{
+    const height=Math.ceil(controls.getBoundingClientRect().height);
+    if(height===lastControls) return;
+    lastControls=height;
+    root.style.setProperty('--bottom-controls-height',height+'px');
+  };
   new ResizeObserver(sizeControls).observe(controls);
   sizeControls();
-  let idleHeight=vv?.height || window.innerHeight, frame=0;
-  const update=()=>{
+  // Diagnostic probe only. It never drives layout.
+  const probe=document.createElement('div');
+  probe.id='viewportProbe';probe.setAttribute('aria-hidden','true');
+  probe.style.cssText='position:fixed;inset:0;visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  let idleHeight=vv?.height || innerHeight,frame=0;
+  const updateKeyboard=()=>{
     frame=0;
-    // Preserve pinch zoom; do not reflow the app to the zoomed viewport.
     if(vv && Math.abs(vv.scale-1)>.01) return;
-    const height=vv?.height || window.innerHeight;
-    if(!Number.isFinite(height) || height<=0) return;
+    const height=vv?.height || innerHeight;
     const editable=document.activeElement?.matches('input,textarea,[contenteditable="true"]');
-    root.classList.toggle('keyboard-open',!!editable && idleHeight-height>150);
-    const nativeHeight=probe.getBoundingClientRect().height;
-    const rootHeight=root.clientHeight;
-    const usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
-    // 홈 화면 앱에서 iOS가 화면 맨 아래 일부를 앱 영역으로 주지 않는 경우가 있어요.
-    // 그 영역은 그릴 수 없으니 앱은 알려준 높이 안에 두고, 탭의 홈 인디케이터용 여백만 뺍니다.
-    root.classList.toggle('viewport-short', isShortStandalone(usable));
-    root.style.setProperty('--app-height',height+'px');
-    root.style.setProperty('--content-height',usable+'px');
-    root.style.setProperty('--viewport-top',(vv?.offsetTop || 0)+'px');
+    const open=!!editable && idleHeight-height>150;
+    root.classList.toggle('keyboard-open',open);
+    if(open){
+      root.style.setProperty('--keyboard-height',height+'px');
+      root.style.setProperty('--keyboard-top',(vv?.offsetTop || 0)+'px');
+    }else{
+      root.style.removeProperty('--keyboard-height');
+      root.style.removeProperty('--keyboard-top');
+    }
     if(!editable) idleHeight=height;
   };
-  const queue=()=>{if(!frame) frame=requestAnimationFrame(update);};
+  const queue=()=>{if(!frame) frame=requestAnimationFrame(updateKeyboard);};
   vv?.addEventListener('resize',queue);
   vv?.addEventListener('scroll',queue);
   window.addEventListener('resize',queue);
   window.addEventListener('pageshow',queue);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden) queue();});
   document.addEventListener('focusin',queue);
   document.addEventListener('focusout',()=>setTimeout(queue,250));
-  update();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden) queue();});
+  updateKeyboard();
 }
 async function init(){
   bindAppViewport();
