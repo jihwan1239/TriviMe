@@ -8,7 +8,7 @@
 <meta name="application-name" content="TriviMe" />
 <meta name="description" content="친구들과 여행 일정과 이동 경로를 함께 만들고 공유하는 모바일 여행 플래너" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="TriviMe" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
@@ -6395,7 +6395,7 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
   const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260929-statusbar-default-9',statusBarStyle:document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content,standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,short:document.documentElement.classList.contains('viewport-short'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
+  const report=JSON.stringify({version:'20260929-overlay-restored-10',statusBarStyle:document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content,standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,short:document.documentElement.classList.contains('viewport-short'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
   document.getElementById('layoutInfo').textContent=report;
   document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
