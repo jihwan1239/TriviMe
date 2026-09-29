@@ -1360,6 +1360,109 @@
 
   /* hidden 속성이 버튼 스타일에 덮이지 않도록 */
   .mini-btn[hidden], .stay-row[hidden], .wx-line[hidden], .quick-actions [hidden]{ display:none !important; }
+
+  /* ===== 여행 목록 : 떠 있는 유리 팝업 ===== */
+  #tripLibraryModalBg.tl-bg{ align-items:center; justify-content:center;
+    padding:calc(18px + env(safe-area-inset-top,0px)) 14px 18px;
+    background:rgba(16,34,56,.26);
+    -webkit-backdrop-filter:blur(10px) saturate(150%); backdrop-filter:blur(10px) saturate(150%); }
+  #tripLibraryModalBg.tl-bg.open{ display:flex; animation:tlFade .32s ease both; }
+  @keyframes tlFade{ from{ background:rgba(16,34,56,0); -webkit-backdrop-filter:blur(0); backdrop-filter:blur(0); } }
+  #tripLibraryModalBg .modal.tl-pop{ position:relative; width:100%; max-width:430px; max-height:100%;
+    margin:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    border-radius:28px; padding:22px 16px 14px;
+    background:linear-gradient(165deg, rgba(255,255,255,.86) 0%, rgba(244,249,255,.74) 100%);
+    -webkit-backdrop-filter:blur(30px) saturate(190%); backdrop-filter:blur(30px) saturate(190%);
+    border:1px solid rgba(255,255,255,.85);
+    box-shadow:0 26px 70px rgba(8,28,58,.30), 0 2px 8px rgba(8,28,58,.08), inset 0 1px 0 rgba(255,255,255,.95);
+    animation:tlPop .55s cubic-bezier(.2,.9,.25,1.06) both; }
+  #tripLibraryModalBg .modal.tl-pop::before{ display:none; }
+  @keyframes tlPop{ from{ opacity:0; transform:translateY(18px) scale(.95); } to{ opacity:1; transform:none; } }
+  .tl-close{ position:absolute !important; top:14px !important; right:14px !important;
+    width:32px; height:32px; border-radius:50% !important; background:rgba(120,135,155,.14) !important; }
+  .tl-hello{ margin:2px 4px 2px; font-size:12.5px; font-weight:700; color:var(--sky-deep); letter-spacing:-.01em; }
+  #tripLibraryModalBg h2{ margin:0 44px 12px 4px; font-size:22px; letter-spacing:-.035em; }
+  .tl-list-head{ display:flex; justify-content:space-between; align-items:center; margin:0 4px 8px;
+    font-size:12px; color:var(--muted); font-weight:600; }
+  .tl-edit{ border:none; background:none; color:var(--sky-deep); font-size:12.5px; font-weight:700; padding:4px; cursor:pointer; }
+  .tl-edit[hidden]{ display:none; }
+  .tl-list{ display:flex; flex-direction:column; gap:8px; margin:0 0 12px !important; }
+  .tl-group{ margin:10px 4px 0; font-size:11.5px; font-weight:700; color:var(--muted-2); }
+
+  .tl-item{ display:flex; align-items:stretch; border-radius:18px !important; overflow:hidden;
+    background:rgba(255,255,255,.72) !important; border:1px solid rgba(255,255,255,.9) !important;
+    box-shadow:0 1px 2px rgba(10,30,60,.05), 0 6px 18px rgba(10,30,60,.06);
+    animation:tlItem .45s cubic-bezier(.2,.8,.2,1) both; animation-delay:var(--d);
+    transition:transform .2s ease, opacity .25s ease, background .2s ease; }
+  @keyframes tlItem{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+  .tl-item:active{ transform:scale(.985); }
+  .tl-item.current{ background:linear-gradient(150deg, rgba(225,242,255,.95), rgba(255,255,255,.8)) !important;
+    border-color:rgba(47,147,221,.35) !important; }
+  .tl-item.opening{ transform:scale(.97); opacity:.6; }
+  .tl-item.removing{ opacity:0; transform:translateX(-12px); }
+  .tl-item.st-past{ background:rgba(255,255,255,.5) !important; }
+  .tl-item.st-past .info strong{ color:#4B5563; }
+  .tl-item .trip-library-open{ display:flex; align-items:center; gap:12px; padding:13px 12px 13px 13px !important; }
+  .tl-flag{ flex:0 0 42px; width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-size:22px;
+    background:linear-gradient(150deg, #fff, #EEF5FC); box-shadow:inset 0 0 0 1px rgba(47,147,221,.1); }
+  .tl-item .info strong{ font-size:15.5px !important; letter-spacing:-.025em; }
+  .tl-item .info small{ font-size:12px !important; margin-top:3px !important; }
+  .tl-item .info small.tl-ago{ font-size:11px !important; color:var(--muted-2); margin-top:2px !important; }
+  .tl-item.current .info small.tl-ago{ color:var(--sky-deep); font-weight:600; }
+  .tl-badge{ flex:0 0 auto; align-self:center; font-size:11.5px; font-weight:800; border-radius:999px; padding:5px 9px;
+    background:var(--sky-soft); color:var(--sky-deep); font-variant-numeric:tabular-nums; }
+  .st-now .tl-badge{ background:linear-gradient(135deg,#FFC94A,#F0A81E); color:#fff; box-shadow:0 3px 8px rgba(240,168,30,.35); }
+  .st-past .tl-badge, .st-none .tl-badge{ background:rgba(120,130,145,.12); color:var(--muted); font-weight:700; }
+  /* 편집을 눌렀을 때만 삭제 버튼이 나옵니다 */
+  .tl-item .trip-library-delete{ display:none; }
+  .tl-list.editing .tl-item .trip-library-delete{ display:flex; align-items:center; padding:0 16px;
+    background:#FDECEA; color:#D0463A; font-weight:700; font-size:13px; border-left:1px solid rgba(208,70,58,.12); }
+  .tl-list.editing .tl-badge{ display:none; }
+  .tl-empty{ text-align:center; padding:28px 12px; color:var(--muted); font-size:13px; line-height:1.7;
+    background:rgba(255,255,255,.6); border-radius:18px; }
+
+  .tl-new{ width:100%; display:flex; align-items:center; justify-content:center; gap:6px; border:none;
+    border-radius:16px; padding:14px; font-size:15px; font-weight:700; color:#fff; cursor:pointer;
+    background:linear-gradient(135deg, #52B0EA, #2F8FD8); box-shadow:0 8px 20px rgba(47,147,221,.32);
+    animation:tlItem .45s .18s cubic-bezier(.2,.8,.2,1) both; }
+  .tl-new .icon{ width:16px; height:16px; }
+  .tl-link{ margin-top:10px; border-radius:16px; background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.8);
+    padding:0 12px; }
+  .tl-link > summary{ list-style:none; cursor:pointer; padding:12px 2px; font-size:13px; font-weight:600; color:#4B5563;
+    display:flex; justify-content:space-between; align-items:center; }
+  .tl-link > summary::-webkit-details-marker{ display:none; }
+  .tl-link > summary::after{ content:'›'; color:var(--muted-2); font-size:17px; transition:transform .25s ease; }
+  .tl-link[open] > summary::after{ transform:rotate(90deg); }
+  .tl-link .trip-link-row{ margin-bottom:8px; }
+  .tl-link .trip-library-hint{ margin:0 2px 12px; font-size:11.5px; }
+  .tl-link .ios-install-guide{ margin:0 0 12px; }
+  .tl-guide{ display:flex; align-items:center; justify-content:center; gap:5px; width:100%; margin-top:6px;
+    border:none; background:none; color:var(--muted); font-size:12.5px; font-weight:600; padding:10px; cursor:pointer; }
+  .tl-guide[hidden]{ display:none; }
+  .tl-guide .icon{ width:14px; height:14px; }
+  @media (prefers-reduced-motion: reduce){
+    #tripLibraryModalBg .modal.tl-pop, .tl-item, .tl-new{ animation:none; }
+  }
+
+  .tl-close:focus-visible{ outline:2px solid rgba(47,147,221,.45) !important; outline-offset:2px; box-shadow:none !important; }
+  .tl-close:focus:not(:focus-visible){ outline:none !important; box-shadow:none !important; }
+
+  .tl-link .btn-primary{ background:linear-gradient(135deg,#52B0EA,#2F8FD8); box-shadow:none; }
+
+  /* 배경색이 바뀔 때 맨 아래 영역도 부드럽게 따라오도록 */
+  html, body{ transition:background-color .5s ease; }
+
+  /* ===== 마감 : 주요 버튼을 브랜드 하늘색으로 통일 ===== */
+  .btn-primary, .geo-btn{
+    background:linear-gradient(135deg, #4FAAE8 0%, #2F8FD8 100%);
+    color:#fff; box-shadow:0 4px 12px rgba(47,147,221,.22);
+    transition:transform .15s ease, box-shadow .2s ease, opacity .2s ease; }
+  .btn-primary:active, .geo-btn:active{ transform:scale(.97); opacity:1; box-shadow:0 2px 6px rgba(47,147,221,.2); }
+  .btn-primary:disabled, .geo-btn:disabled{ background:var(--fill); color:var(--muted-2); box-shadow:none; }
+  .btn-danger{ box-shadow:none; }
+  /* 입력칸에 초점이 가면 하늘색 테두리로 은은하게 */
+  input:focus-visible, textarea:focus-visible, select:focus-visible{
+    outline:none; box-shadow:0 0 0 3px rgba(47,147,221,.18); border-color:rgba(47,147,221,.55) !important; }
 </style>
 
 </head>
@@ -1680,22 +1783,28 @@
     </div>
   </div>
 
-  <div class="modal-bg" id="tripLibraryModalBg">
-    <div class="modal">
-      <button class="modal-close" data-close="tripLibraryModalBg"><span class="icon" data-i="close"></span></button>
-      <h2>내 여행 목록</h2>
-      <p class="sub">이 기기에서 열었던 여행을 골라 이어서 계획해보세요.</p>
-      <div id="tripLibraryList" class="trip-library-list"></div>
-      <div class="trip-library-actions"><button type="button" class="btn-primary" id="tripLibraryNew">＋ 새 여행</button></div>
-      <button type="button" class="mini-btn guide-again" id="tripLibraryGuideBtn" hidden><span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
-      <label class="ob-label" for="tripLibraryLink">공유받은 여행 링크 열기</label>
-      <div class="trip-link-row"><input type="url" id="tripLibraryLink" inputmode="url" placeholder="친구에게 받은 TriviMe 링크 붙여넣기"><button type="button" class="btn-primary" id="tripLibraryOpen">열기</button></div>
-      <p class="trip-library-hint">홈 화면 웹앱은 카카오톡에서 열린 링크를 자동으로 가져오지 못할 수 있어요. 받은 주소를 복사해 여기에 붙여넣으면 됩니다.</p>
-      <details class="ios-install-guide" id="tripLibraryIosGuide" style="margin-top:18px" hidden>
-        <summary>아이폰에서 웹앱 추가하기</summary>
-        <p id="tripLibraryKakaoStep" hidden>카카오톡으로 링크를 받았다면 화면 오른쪽 아래 공유 버튼 → <b>Safari로 열기</b>를 선택하세요. 메뉴가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
-        <p>Safari에서 공유 → <b>홈 화면에 추가</b> → <b>웹 앱으로 열기</b>를 선택하면 됩니다. 이미 웹앱을 설치했다면 링크를 복사해서 위 <b>공유받은 여행 링크 열기</b>에 붙여넣으세요.</p>
+  <div class="modal-bg tl-bg" id="tripLibraryModalBg">
+    <div class="modal tl-pop">
+      <button class="modal-close tl-close" data-close="tripLibraryModalBg"><span class="icon" data-i="close"></span></button>
+      <p class="tl-hello" id="tlHello">내 여행</p>
+      <h2 class="tl-title">내 여행 목록</h2>
+      <div class="tl-list-head">
+        <span id="tlCount"></span>
+        <button type="button" class="tl-edit" id="tlEdit">편집</button>
+      </div>
+      <div id="tripLibraryList" class="trip-library-list tl-list"></div>
+      <button type="button" class="tl-new" id="tripLibraryNew"><span class="icon" data-i="plus"></span>새 여행 만들기</button>
+      <details class="tl-link">
+        <summary>공유받은 링크로 열기</summary>
+        <div class="trip-link-row"><input type="url" id="tripLibraryLink" inputmode="url" placeholder="친구에게 받은 TriviMe 링크 붙여넣기" aria-label="공유받은 여행 링크"><button type="button" class="btn-primary" id="tripLibraryOpen">열기</button></div>
+        <p class="trip-library-hint">홈 화면 웹앱은 카카오톡에서 열린 링크를 자동으로 가져오지 못할 수 있어요. 받은 주소를 복사해 붙여넣으면 됩니다.</p>
+        <details class="ios-install-guide" id="tripLibraryIosGuide" hidden>
+          <summary>아이폰에서 웹앱 추가하기</summary>
+          <p id="tripLibraryKakaoStep" hidden>카카오톡으로 링크를 받았다면 화면 오른쪽 아래 공유 버튼 → <b>Safari로 열기</b>를 선택하세요. 메뉴가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
+          <p>Safari에서 공유 → <b>홈 화면에 추가</b> → <b>웹 앱으로 열기</b>를 선택하면 됩니다. 이미 웹앱을 설치했다면 링크를 복사해서 위에 붙여넣으세요.</p>
+        </details>
       </details>
+      <button type="button" class="tl-guide" id="tripLibraryGuideBtn" hidden><span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
     </div>
   </div>
 
@@ -5494,29 +5603,83 @@ function isKakaoBrowser(){ return /KAKAOTALK/i.test(navigator.userAgent); }
 document.getElementById('iosInstallGuide').addEventListener('toggle',e=>{
   if(e.currentTarget.open) e.currentTarget.classList.remove('is-new');
 });
-function openTripLibrary(){
+/* 여행 목록 — 떠 있는 유리 팝업
+   앱을 켰을 때는 "다시 오셨네요", 메뉴에서 열 때는 "내 여행 목록"으로 인사가 달라집니다 */
+function tlTodayIso(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function tlStatus(t){
+  const today=tlTodayIso();
+  if(!t.start) return { key:'none', label:'날짜 미정', order:2 };
+  if(t.start<=today && today<=(t.end||t.start)) return { key:'now', label:'여행 중', order:0 };
+  if(today<t.start){
+    const n=Math.round((new Date(t.start+'T12:00:00')-new Date(today+'T12:00:00'))/86400000);
+    return { key:'soon', label: n===1? '내일 출발' : `D-${n}`, order:1, n };
+  }
+  return { key:'past', label:'다녀온 여행', order:3 };
+}
+function tlRange(t){
+  if(!t.start) return '';
+  const a=new Date(t.start+'T12:00:00'), b=new Date((t.end||t.start)+'T12:00:00');
+  const days=Math.round((b-a)/86400000)+1;
+  const left=`${a.getMonth()+1}월 ${a.getDate()}일`;
+  const right = days===1 ? '' : (a.getMonth()===b.getMonth() ? ` – ${b.getDate()}일` : ` – ${b.getMonth()+1}월 ${b.getDate()}일`);
+  return `${left}${right}${days>1? ` · ${days-1}박 ${days}일`:' · 당일'}`;
+}
+function tlAgo(time){
+  if(!time) return '';
+  const m=Math.round((Date.now()-time)/60000);
+  if(m<1) return '방금 수정'; if(m<60) return `${m}분 전 수정`;
+  const h=Math.round(m/60); if(h<24) return `${h}시간 전 수정`;
+  const d=Math.round(h/24); if(d<30) return `${d}일 전 수정`;
+  return `${new Date(time).toLocaleDateString('ko-KR')} 수정`;
+}
+
+function openTripLibrary(fromStartup){
+  const startup = fromStartup===true;
+  const bg=document.getElementById('tripLibraryModalBg');
   document.getElementById('tripLibraryGuideBtn').hidden=needOnboarding() || !document.getElementById('onboard').hidden;
   document.getElementById('tripLibraryIosGuide').hidden=!isIOSDevice();
   document.getElementById('tripLibraryKakaoStep').hidden=!isKakaoBrowser();
+  document.getElementById('tlHello').textContent = startup ? '다시 오셨네요' : 'TriviMe';
+  bg.querySelector('h2').textContent = startup ? '어떤 여행을 이어갈까요?' : '내 여행 목록';
+
   const list=document.getElementById('tripLibraryList');
-  const trips=localTrips();
-  const dateLabel=(time)=>{
-    const date=new Date(time);
-    return Number.isFinite(time) && time>0 && !isNaN(date) ? date.toLocaleDateString('ko-KR') : '';
-  };
-  list.innerHTML=trips.length ? trips.map(t=>`
-    <div class="trip-library-item ${t.id===TRIP_ID?'current':''}">
-      <button type="button" class="trip-library-open" data-trip-id="${t.id}" ${t.id===TRIP_ID?'aria-current="page"':''}>
-        <span aria-hidden="true">${(COUNTRIES.find(c=>c.code===t.countryCode)||COUNTRIES.find(c=>c.code==='ETC')).flag}</span>
-        <span class="info"><strong>${esc(t.title)}</strong><small>${esc([t.city,t.start && (t.end && t.end!==t.start ? `${t.start} ~ ${t.end}` : t.start)].filter(Boolean).join(' · '))}</small>
-          <small>${esc([dateLabel(t.createdAt) && `생성 ${dateLabel(t.createdAt)}`,dateLabel(t.updatedAt) && `최종 수정 ${dateLabel(t.updatedAt)}`].filter(Boolean).join(' · ') || '저장 날짜 정보 없음')}</small></span>
-        <span class="arrow" aria-hidden="true">${t.id===TRIP_ID?'✓':'›'}</span>
+  list.classList.remove('editing');
+  document.getElementById('tlEdit').textContent='편집';
+  const trips=localTrips().map(t=>({ ...t, st:tlStatus(t) }))
+    .sort((a,b)=> a.st.order-b.st.order
+      || (a.st.key==='soon' ? a.st.n-b.st.n : 0)
+      || (a.st.key==='past' ? (b.end||'').localeCompare(a.end||'') : 0)
+      || b.updatedAt-a.updatedAt);
+  document.getElementById('tlCount').textContent = trips.length ? `${trips.length}개의 여행` : '';
+  document.getElementById('tlEdit').hidden = !trips.length;
+
+  const coOf = t => COUNTRIES.find(c=>c.code===t.countryCode) || COUNTRIES.find(c=>c.code==='ETC');
+  let lastGroup = '';
+  list.innerHTML = trips.length ? trips.map((t,i)=>{
+    const group = t.st.key==='past' ? '다녀온 여행' : '';
+    const head = (group && group!==lastGroup) ? `<div class="tl-group">${group}</div>` : '';
+    lastGroup = group || lastGroup;
+    const cur = t.id===TRIP_ID;
+    return `${head}
+    <div class="trip-library-item tl-item ${cur?'current':''} st-${t.st.key}" style="--d:${i*55}ms">
+      <button type="button" class="trip-library-open" data-trip-id="${t.id}" ${cur?'aria-current="page"':''}>
+        <span class="tl-flag" aria-hidden="true">${coOf(t).flag}</span>
+        <span class="info">
+          <strong>${esc(t.title)}</strong>
+          <small>${esc([t.city, tlRange(t)].filter(Boolean).join(' · ') || '날짜를 아직 정하지 않았어요')}</small>
+          <small class="tl-ago">${esc(cur ? '지금 보고 있는 여행' : tlAgo(t.updatedAt))}</small>
+        </span>
+        ${t.st.key==='past' ? '' : `<span class="tl-badge">${esc(t.st.label)}</span>`}
       </button>
       <button type="button" class="trip-library-delete" data-delete-trip="${t.id}" aria-label="${esc(t.title)} 이 기기에서 삭제">삭제</button>
-    </div>`).join('') : '<p class="trip-library-hint">이 기기에 저장된 여행이 아직 없어요. 새 여행을 시작하거나 친구의 링크를 열어보세요.</p>';
+    </div>`;
+  }).join('') : `<div class="tl-empty">이 기기에 저장된 여행이 아직 없어요.<br>새 여행을 시작하거나 친구의 링크를 열어보세요.</div>`;
+
   list.querySelectorAll('[data-trip-id]').forEach(button=>button.addEventListener('click',()=>{
-    if(button.dataset.tripId===TRIP_ID){document.getElementById('tripLibraryModalBg').classList.remove('open');return;}
-    location.assign(tripUrl(button.dataset.tripId));
+    if(list.classList.contains('editing')) return;
+    if(button.dataset.tripId===TRIP_ID){ bg.classList.remove('open'); return; }
+    button.closest('.tl-item').classList.add('opening');
+    setTimeout(()=> location.assign(tripUrl(button.dataset.tripId)), 180);
   }));
   list.querySelectorAll('[data-delete-trip]').forEach(button=>button.addEventListener('click',()=>{
     const id=button.dataset.deleteTrip;
@@ -5530,12 +5693,19 @@ function openTripLibrary(){
       if(localStorage.getItem(LS_LAST_TRIP)===id) localStorage.removeItem(LS_LAST_TRIP);
     }catch(e){toast('삭제하지 못했어요. 저장 공간을 확인해주세요.');return;}
     if(id===TRIP_ID){ location.assign(`${location.origin}${location.pathname}`); return; }
-    openTripLibrary();
+    const item=button.closest('.tl-item'); item.classList.add('removing');
+    setTimeout(()=>{ openTripLibrary(startup); list.classList.add('editing'); document.getElementById('tlEdit').textContent='완료'; }, 260);
     updateOnboardingTripActions();
     toast('이 기기의 여행 목록에서 삭제했어요.');
   }));
-  document.getElementById('tripLibraryModalBg').classList.add('open');
+  bg.classList.add('open');
 }
+document.getElementById('tlEdit').addEventListener('click', ()=>{
+  const list=document.getElementById('tripLibraryList');
+  const on=!list.classList.contains('editing');
+  list.classList.toggle('editing', on);
+  document.getElementById('tlEdit').textContent = on ? '완료' : '편집';
+});
 document.getElementById('tripLibraryBtn').onclick=openTripLibrary;
 document.getElementById('scheduleTripsTopBtn').onclick=openTripLibrary;
 document.getElementById('scheduleTripsBtn').onclick=openTripLibrary;
@@ -6712,12 +6882,21 @@ const GUIDE_STEPS = [
   { screen:'map', target:'#statusBtn',
     title:'이전 일정으로 되돌리기',
     body:'일정을 잘못 바꿨다면 이 메뉴의 백업 목록에서 이전 상태로 되돌릴 수 있어요. 동선 최적화 전 일정도 여기서 찾을 수 있어요.' },
-  { screen:'prep', target:'#prepAiBtn',
-    title:'여행 준비물',
-    body:'여행지와 기간에 맞는 준비물 목록을 AI가 만들어줘요. 체크한 항목은 내 기기에만 저장돼요.' },
+  { screen:'prep', bag:'prep', target:'.navbtn[data-screen="prep"]',
+    title:'여행 가방',
+    body:'일정표 밖에서 챙길 것들이 여기 모여 있어요. 위의 세 칸으로 준비물, 가고 싶은 곳, 경비를 오가요.' },
+  { screen:'prep', bag:'prep', target:'#prepAiBtn',
+    title:'준비물',
+    body:'여행지와 기간에 맞는 준비물 목록을 AI가 만들어줘요. 국내 여행이면 내국인 기준으로 맞춰요. 체크는 내 기기에만 저장돼요.' },
+  { screen:'prep', bag:'wish', target:'.bag-seg [data-bag="wish"]',
+    title:'가고 싶은 곳',
+    body:'날짜를 정하지 않고 장소부터 모아두세요. 일정에 넣기를 누르면 원하는 날에 들어가고, 일정표에서 장소를 추가할 때도 모아둔 곳을 바로 고를 수 있어요.' },
+  { screen:'prep', bag:'money', target:'.bag-seg [data-bag="money"]',
+    title:'경비 주머니',
+    body:'쓴 돈을 오른쪽 위 기록으로 적어두면 합계와 분류별 지출, 예산 대비 남은 돈, 1인당 금액을 보여줘요. 친구들과 같은 주머니를 함께 봐요.' },
   { screen:'schedule', target:null,
     title:'준비 끝!',
-    body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정의 사용 가이드 다시 보기에서 언제든 다시 볼 수 있어요.' }
+    body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정이나 내 여행 목록에서 언제든 다시 볼 수 있어요.' }
 ];
 
 let gdSteps = [], gdIdx = 0, gdRunning = false, gdDir = 1;
@@ -6743,6 +6922,10 @@ async function gdGoto(i){
   if(step.screen && (!cur || cur.id !== 'screen-'+step.screen)){
     switchScreen(step.screen);
     await new Promise(r=> setTimeout(r, 380));
+  }
+  if(step.bag && typeof setBagTab==='function' && bagTab!==step.bag){
+    setBagTab(step.bag);
+    await new Promise(r=> setTimeout(r, 320));
   }
   let el = gdFind(step);
   if(el){
@@ -6820,6 +7003,7 @@ function startGuide(force){
 
   gdSteps = GUIDE_STEPS.slice();
   gdRunning = true; window.__gdRunning = true;
+  window.__gdPrevBag = (typeof bagTab!=='undefined') ? bagTab : 'prep';
   if(typeof hideShareTip==='function') hideShareTip();
   document.querySelectorAll('.modal-bg.open').forEach(m=>m.classList.remove('open'));
   const g = document.getElementById('guide');
@@ -6840,6 +7024,10 @@ async function gdStepValid(i){
     switchScreen(step.screen);
     await new Promise(r=> setTimeout(r, 380));
   }
+  if(step.bag && typeof setBagTab==='function' && bagTab!==step.bag){
+    setBagTab(step.bag);
+    await new Promise(r=> setTimeout(r, 200));
+  }
   return !!gdFind(step);
 }
 
@@ -6853,6 +7041,9 @@ async function gdMove(delta){
 }
 
 function endGuide(completed){
+  if(window.__gdPrevBag && typeof setBagTab==='function'){
+    try{ bagTab = window.__gdPrevBag; localStorage.setItem('trivime:bagTab', bagTab); }catch(e){}
+  }
   const never = document.getElementById('gdNever').checked;
   if(never) setGuideDone();
   else try{ localStorage.removeItem(GUIDE_KEY); }catch(e){}
@@ -6889,7 +7080,7 @@ function scheduleStartup(){
   const wait=()=>{
     if(document.getElementById('splash')) return setTimeout(wait,250);
     if(START_WITH_TRIP_LIBRARY && localTrips().length){
-      openTripLibrary();
+      openTripLibrary(true);
     } else {
       scheduleGuide();
     }
@@ -6917,11 +7108,12 @@ function finishSplash(){
   splashDismissScheduled = true;
   setTimeout(()=>{
     splash.classList.add('sp-out');
+    // 화면 맨 아래 영역은 페이지 배경색을 따라가므로, 페이드와 함께 바로 바꿔야 파란 띠가 남지 않아요
     setTimeout(()=>{
-      splash.remove();
       document.documentElement.classList.remove('splash-active');
       document.querySelector('meta[name="theme-color"]').content='#F8FBFF';
-    }, 800);
+    }, 180);
+    setTimeout(()=> splash.remove(), 800);
   }, Math.max(0, (splashReducedMotion ? 900 : 2450) - (performance.now() - splashStartedAt)));
 }
 // Keep the opening animation from blocking the app on a slow connection.
