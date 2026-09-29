@@ -1463,6 +1463,62 @@
   /* 입력칸에 초점이 가면 하늘색 테두리로 은은하게 */
   input:focus-visible, textarea:focus-visible, select:focus-visible{
     outline:none; box-shadow:0 0 0 3px rgba(47,147,221,.18); border-color:rgba(47,147,221,.55) !important; }
+
+  /* 영수증 스캔 */
+  .rc-scan{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; cursor:pointer;
+    border:1px dashed rgba(47,147,221,.45); border-radius:16px; padding:12px 13px; margin:2px 0 14px;
+    background:linear-gradient(150deg, var(--sky-soft), #fff 80%); }
+  .rc-scan:disabled{ opacity:.55; }
+  .rc-ico{ flex:0 0 40px; height:40px; border-radius:12px; display:grid; place-items:center; color:#fff;
+    background:linear-gradient(150deg,#6CC0F2,#3A98DD); box-shadow:0 4px 10px rgba(47,147,221,.28); }
+  .rc-ico .icon{ width:20px; height:20px; }
+  .rc-txt{ display:flex; flex-direction:column; gap:2px; }
+  .rc-txt b{ font-size:14.5px; color:var(--ink); letter-spacing:-.02em; }
+  .rc-txt small{ font-size:12px; color:var(--muted); }
+  .rc-state{ display:flex; gap:11px; align-items:center; border-radius:14px; padding:10px; margin:-4px 0 14px;
+    background:var(--fill); font-size:12.5px; line-height:1.55; color:#3F4652; animation:optIn .3s var(--ease); }
+  .rc-state[hidden]{ display:none; }
+  .rc-state img{ flex:0 0 48px; width:48px; height:60px; object-fit:cover; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .rc-state em{ display:block; font-style:normal; color:#A15C07; margin-top:3px; }
+  .rc-state.ok{ background:#E9F7EF; } .rc-state.warn{ background:#FFF6E5; } .rc-state.err{ background:#FDEEEC; color:#9B3226; }
+  .rc-reading i::after{ content:''; animation:rcDots 1.2s steps(4) infinite; }
+  @keyframes rcDots{ 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
+  .rc-state.busy img{ animation:rcPulse 1.2s ease-in-out infinite; }
+  @keyframes rcPulse{ 50%{ opacity:.55; } }
+  .rc-flash{ animation:rcFlash .9s ease; }
+  @keyframes rcFlash{ 0%{ color:var(--sky); } 100%{ color:inherit; } }
+
+  .amt-wrap input:focus-visible{ box-shadow:none !important; }
+  .amt-wrap{ transition:border-color .2s ease; }
+  .amt-wrap:focus-within{ border-bottom-color:var(--sky-deep); }
+
+  /* 통화 */
+  .cur-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .cur-chips[hidden]{ display:none; }
+  .cur-chips button{ border:none; border-radius:999px; padding:7px 12px; font-size:12.5px; font-weight:600;
+    background:var(--fill); color:var(--muted); cursor:pointer; transition:background .2s, color .2s; }
+  .cur-chips button.on{ background:var(--sky); color:#fff; }
+  .cur-chips .cur-more{ background:none; border:1px dashed var(--line-2); }
+  .cur-chips .cur-more.open{ border-style:solid; color:var(--sky-deep); }
+  .cur-chips.rest{ margin-top:6px; }
+  .conv-line{ font-size:12.5px; color:var(--sky-deep); margin:2px 2px 0; line-height:1.5; }
+  .conv-line[hidden]{ display:none; }
+  .conv-line b{ font-weight:800; }
+  .mr-v{ display:flex; flex-direction:column; align-items:flex-end; }
+  .mr-v em{ font-style:normal; font-size:11px; font-weight:600; color:var(--muted); margin-top:1px; }
+  .ms-miss{ display:block; margin-top:8px; border:none; border-radius:10px; padding:7px 10px; width:100%; text-align:left;
+    background:rgba(255,255,255,.2); color:#fff; font-size:12px; font-weight:600; cursor:pointer; }
+  .rate-head{ display:flex; justify-content:space-between; align-items:center; margin:16px 0 7px; }
+  .rate-refresh{ border:none; background:var(--sky-soft); color:var(--sky-deep); border-radius:999px; padding:6px 11px;
+    font-size:12px; font-weight:700; cursor:pointer; }
+  .rate-list{ display:flex; flex-direction:column; gap:6px; }
+  .rate-row{ display:flex; align-items:center; gap:8px; background:var(--fill); border-radius:12px; padding:8px 12px;
+    font-size:13.5px; font-weight:600; color:#3F4652; }
+  .rate-row span:first-child{ flex:0 0 96px; }
+  .rate-row input{ flex:1; min-width:0; border:none !important; background:#fff !important; border-radius:8px !important;
+    padding:8px 10px !important; font-size:15px !important; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; }
+
+  .mr-amt{ white-space:nowrap; }
 </style>
 
 </head>
@@ -1902,6 +1958,7 @@ const RAW = {
   navCheck:'<path d="M4 12.5l5 5L20 6"/>',
   navBag:'<rect x="4" y="7.5" width="16" height="12.5" rx="3"/><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5"/><path d="M4 12.5h16"/>',
   heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  camera:'<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.3-2h4.8l1.3 2h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/>',
   wallet:'<rect x="3.5" y="6.5" width="17" height="13" rx="3"/><path d="M3.5 10.5h17"/><circle cx="16.5" cy="15" r="1.2"/>',
   route:'<circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>',
   grip:'<circle cx="9" cy="7" r="1.1"/><circle cx="15" cy="7" r="1.1"/><circle cx="9" cy="12" r="1.1"/><circle cx="15" cy="12" r="1.1"/><circle cx="9" cy="17" r="1.1"/><circle cx="15" cy="17" r="1.1"/>',
@@ -5391,76 +5448,168 @@ const MONEY_CATS = [
 ];
 function moneyData(){
   if(!TRIP.money) TRIP.money = { items:[], people:1 };
-  if(!Array.isArray(TRIP.money.items)) TRIP.money.items=[];
-  return TRIP.money;
+  const m = TRIP.money;
+  if(!Array.isArray(m.items)) m.items=[];
+  if(!m.rates) m.rates = {};
+  m.rates['원'] = 1;
+  // 예전 방식(1현지통화 = X원 한 개)을 새 환율표로 옮깁니다
+  if(m.rate && !m.rates[tripCountry().currency]) m.rates[tripCountry().currency] = Number(m.rate);
+  // 통화 없이 저장된 예전 지출은 그때의 기준 통화로 못 박아, 합계 통화를 바꿔도 뜻이 변하지 않게 합니다
+  const legacy = m.unit || tripCountry().currency;
+  m.items.forEach(x=>{ if(!x.cur) x.cur = legacy; });
+  return m;
+}
+
+/* ---- 통화 ----
+   환율은 '1단위 = 몇 원'으로 보관하고, 원화를 거쳐 서로 바꿉니다 */
+const CURS = [['원','KRW'],['엔','JPY'],['달러','USD'],['유로','EUR'],['위안','CNY'],['대만달러','TWD'],
+  ['동','VND'],['바트','THB'],['싱가포르달러','SGD'],['홍콩달러','HKD'],['파운드','GBP'],['호주달러','AUD']];
+const CODE_OF = Object.fromEntries(CURS);
+function curList(){
+  // 이 여행에서 쓸 법한 통화를 앞으로
+  const base = bagCur(), local = tripCountry().currency;
+  const used = [...new Set((TRIP.money?.items||[]).map(x=>x.cur).filter(Boolean))];
+  const first = [...new Set([base, local, '원', ...used].filter(u=>CODE_OF[u]))];
+  return { first, rest: CURS.map(c=>c[0]).filter(u=>!first.includes(u)) };
+}
+function rateOf(unit){ const r = moneyData().rates[unit]; return Number(r)>0 ? Number(r) : null; }
+function toBase(amount, unit){
+  const base = bagCur(); unit = unit || base;
+  if(unit===base) return Number(amount)||0;
+  const a = rateOf(unit), b = rateOf(base);
+  return (a && b) ? (Number(amount)||0) * a / b : null;
+}
+/* 환율 표시 : 작은 값은 소수 둘째 자리까지 (1엔 = 9.2원) */
+const rateFmt = r => Number(r||0).toLocaleString('ko-KR', { maximumFractionDigits: r<100 ? 2 : 0 });
+const moneyFmt = (n, unit)=>{
+  const dec = ['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 2 : 0;
+  return Number(n||0).toLocaleString('ko-KR', { maximumFractionDigits:dec, minimumFractionDigits:0 });
+};
+
+/* 최신 환율 받아오기 (키 없이 쓰는 공개 환율 · 하루 한 번이면 충분) */
+async function refreshRates(force){
+  const m = moneyData();
+  if(!force && m.ratesAt && Date.now()-m.ratesAt < 12*3600e3) return false;
+  try{
+    const res = await fetch('https://open.er-api.com/v6/latest/KRW');
+    if(!res.ok) throw new Error(res.status);
+    const j = await res.json();
+    if(j.result!=='success' || !j.rates) throw new Error('bad');
+    CURS.forEach(([u,code])=>{
+      if(u==='원') return;
+      const perKrw = Number(j.rates[code]);
+      if(!(perKrw>0)) return;
+      if(m.ratesManual && m.ratesManual[u]) return;            // 직접 고친 환율은 유지
+      m.rates[u] = Math.round((1/perKrw)*10000)/10000;
+    });
+    m.ratesAt = Date.now();
+    markChanged();
+    return true;
+  }catch(e){ console.warn('[환율]', e); return false; }
+}
+function needRates(){
+  const m = moneyData(), base = bagCur();
+  const units = new Set([base, ...m.items.map(x=>x.cur||base)]);
+  return [...units].some(u=>u!=='원' && !rateOf(u));
 }
 
 function renderMoney(){
   const el = document.getElementById('moneyBody'); if(!el) return;
   const m = moneyData(), cur = bagCur();
-  const total = m.items.reduce((a,x)=>a+(Number(x.amount)||0),0);
+  if(needRates()) refreshRates(false).then(ok=>{ if(ok) renderMoney(); });
+
+  let total=0, missing=0;
+  const conv = m.items.map(x=>{ const v=toBase(x.amount, x.cur); if(v==null) missing++; else total+=v; return v; });
   const people = Math.max(1, Number(m.people)||1);
   const budget = Number(m.budget)||0;
   const pct = budget ? Math.min(100, Math.round(total/budget*100)) : 0;
-  const krw = (m.rate && cur!=='원') ? Math.round(total*m.rate) : null;
+  const krw = (cur!=='원' && rateOf(cur)) ? Math.round(total*rateOf(cur)) : null;
 
-  const byCat = MONEY_CATS.map(([c,col])=>({ c, col, v: m.items.filter(x=>x.cat===c).reduce((a,x)=>a+(Number(x.amount)||0),0) }))
-                  .filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const byCat = MONEY_CATS.map(([c,col])=>({ c, col,
+      v: m.items.reduce((a,x,i)=> a + (x.cat===c && conv[i]!=null ? conv[i] : 0), 0) }))
+    .filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
 
   const byDay = {};
-  m.items.forEach(x=>{ (byDay[x.dayId ?? 'none'] ||= []).push(x); });
+  m.items.forEach((x,i)=>{ (byDay[x.dayId ?? 'none'] ||= []).push(i); });
   const dayOrder = TRIP.days.map(d=>d.id).filter(id=>byDay[id]).concat(byDay.none? ['none']:[]);
 
   el.innerHTML = `
     <div class="money-sum">
       <div class="ms-top"><span>함께 쓴 돈</span>
-        <button type="button" class="ms-set" id="moneySet">${budget? '예산 수정' : '예산 정하기'}</button></div>
-      <div class="ms-total">${bagMoney(total)}<small>${esc(cur)}</small></div>
+        <button type="button" class="ms-set" id="moneySet">통화·예산</button></div>
+      <div class="ms-total">${moneyFmt(total,cur)}<small>${esc(cur)}</small></div>
       ${krw!=null? `<div class="ms-krw">약 ${bagMoney(krw)}원</div>`:''}
+      ${missing? `<button type="button" class="ms-miss" id="moneyMiss">환율이 없는 ${missing}건은 합계에서 빠졌어요 · 환율 넣기</button>`:''}
       ${budget? `<div class="ms-bar ${pct>=100?'over':''}"><i style="width:${pct}%"></i></div>
-        <div class="ms-meta"><span>예산 ${bagMoney(budget)}${esc(cur)} 중 ${pct}%</span>
-        <span>${total<=budget? `${bagMoney(budget-total)}${esc(cur)} 남음` : `${bagMoney(total-budget)}${esc(cur)} 초과`}</span></div>`:''}
-      ${people>1? `<div class="ms-each">${people}명이면 1인당 <b>${bagMoney(total/people)}${esc(cur)}</b></div>`:''}
+        <div class="ms-meta"><span>예산 ${moneyFmt(budget,cur)}${esc(cur)} 중 ${pct}%</span>
+        <span>${total<=budget? `${moneyFmt(budget-total,cur)}${esc(cur)} 남음` : `${moneyFmt(total-budget,cur)}${esc(cur)} 초과`}</span></div>`:''}
+      ${people>1? `<div class="ms-each">${people}명이면 1인당 <b>${moneyFmt(total/people,cur)}${esc(cur)}</b></div>`:''}
     </div>
 
     ${byCat.length? `<div class="money-cats">${byCat.map(x=>`
       <div class="mc-row"><span class="mc-name"><i style="background:${x.col}"></i>${x.c}</span>
-        <span class="mc-bar"><i style="width:${Math.max(4, Math.round(x.v/total*100))}%;background:${x.col}"></i></span>
-        <span class="mc-v">${bagMoney(x.v)}</span></div>`).join('')}</div>`:''}
+        <span class="mc-bar"><i style="width:${Math.max(4, Math.round(x.v/(total||1)*100))}%;background:${x.col}"></i></span>
+        <span class="mc-v">${moneyFmt(x.v,cur)}</span></div>`).join('')}</div>`:''}
 
     ${m.items.length ? dayOrder.map(id=>{
         const i = TRIP.days.findIndex(d=>d.id===id);
-        const label = id==='none' ? '날짜 없음' : `${i+1}일차 · ${fmtDate(TRIP.days[i].iso)}`;
-        const list = byDay[id], sub = list.reduce((a,x)=>a+(Number(x.amount)||0),0);
-        return `<div class="bag-sub">${esc(label)}<span>${bagMoney(sub)}${esc(cur)}</span></div>
-          <div class="bag-list">${list.map(x=>{
+        const label = id==='none' ? '여행 전' : `${i+1}일차 · ${fmtDate(TRIP.days[i].iso)}`;
+        const idxs = byDay[id], sub = idxs.reduce((a,k)=>a+(conv[k]||0),0);
+        return `<div class="bag-sub">${esc(label)}<span>${moneyFmt(sub,cur)}${esc(cur)}</span></div>
+          <div class="bag-list">${idxs.map(k=>{
+            const x = m.items[k], u = x.cur || cur;
             const col = (MONEY_CATS.find(c=>c[0]===x.cat)||MONEY_CATS[5])[1];
+            const other = u!==cur;
             return `<button type="button" class="money-row" data-m="${x.id}">
               <i style="background:${col}"></i>
               <span class="mr-main"><b>${esc(x.title||x.cat)}</b><small>${esc(x.cat)}${x.payer? ' · '+esc(x.payer)+' 결제':''}</small></span>
-              <span class="mr-v">${bagMoney(x.amount)}<small>${esc(cur)}</small></span></button>`;
+              <span class="mr-v"><span class="mr-amt">${moneyFmt(x.amount,u)}<small>${esc(u)}</small></span>
+                ${other? `<em>${conv[k]!=null? `≈ ${moneyFmt(conv[k],cur)}${esc(cur)}` : '환율 필요'}</em>`:''}</span></button>`;
           }).join('')}</div>`;
       }).join('')
     : `<div class="bag-empty">
         <div class="be-ico"><span class="icon">${iconSvg('wallet')}</span></div>
         <b>여행 경비를 함께 모아봐요</b>
-        <span>쓴 돈을 적으면 분류별 합계와 1인당 금액을 알려드려요. 친구들과 같은 주머니를 봐요.</span>
+        <span>쓴 돈을 적으면 분류별 합계와 1인당 금액을 알려드려요. 통화가 달라도 한 통화로 모아서 보여줘요.</span>
         <button type="button" class="btn-primary" id="moneyFirstAdd">첫 지출 기록</button>
       </div>`}`;
 
-  const ms = document.getElementById('moneySet'); if(ms) ms.onclick = openMoneySettings;
+  document.getElementById('moneySet').onclick = openMoneySettings;
+  const mm = document.getElementById('moneyMiss'); if(mm) mm.onclick = openMoneySettings;
   const mf = document.getElementById('moneyFirstAdd'); if(mf) mf.onclick = ()=> openMoneyForm();
   el.querySelectorAll('[data-m]').forEach(b=> b.onclick = ()=> openMoneyForm(b.dataset.m));
 }
 
+/* 통화 칩 — 자주 쓸 통화만 보이고 나머지는 '다른 통화'로 */
+function curChipsHtml(sel){
+  const { first, rest } = curList();
+  const showRest = rest.includes(sel);
+  return `<div class="cur-chips" id="m_curs">
+      ${first.map(u=>`<button type="button" data-u="${u}" class="${u===sel?'on':''}">${u}</button>`).join('')}
+      <button type="button" class="cur-more ${showRest?'open':''}" id="m_curMore">다른 통화</button>
+    </div>
+    <div class="cur-chips rest" id="m_cursRest" ${showRest?'':'hidden'}>
+      ${rest.map(u=>`<button type="button" data-u="${u}" class="${u===sel?'on':''}">${u}</button>`).join('')}
+    </div>`;
+}
+
 function openMoneyForm(editId){
-  const m = moneyData(), cur = bagCur();
+  const m = moneyData(), base = bagCur();
   const x = editId ? m.items.find(i=>i.id===editId) : null;
+  let unit = x ? (x.cur || base) : base;
   const dayDef = x ? x.dayId : (currentDay() ? currentDay().id : null);
   document.querySelector('#moneyModalBg h2').textContent = x ? '지출 수정' : '지출 기록';
   document.getElementById('moneyForm').innerHTML = `
     <div class="form-card flat">
-      <div class="amt-wrap"><input type="text" inputmode="decimal" id="m_amt" placeholder="0" value="${x? bagMoney(x.amount):''}" autocomplete="off"><span>${esc(cur)}</span></div>
+      ${x? '' : `<button type="button" class="rc-scan" id="m_scan">
+          <span class="rc-ico"><span class="icon">${iconSvg('camera')}</span></span>
+          <span class="rc-txt"><b>영수증으로 채우기</b><small>사진을 찍거나 골라주면 금액과 가게를 읽어와요</small></span>
+        </button>
+        <input type="file" id="m_file" accept="image/*" hidden>
+        <div class="rc-state" id="m_scanState" hidden></div>`}
+      <div class="amt-wrap"><input type="text" inputmode="decimal" id="m_amt" placeholder="0" value="${x? moneyFmt(x.amount,unit):''}" autocomplete="off"><span id="m_unit">${esc(unit)}</span></div>
+      <div class="conv-line" id="m_conv" hidden></div>
+      ${curChipsHtml(unit)}
       <label>어디에 썼나요</label>
       <input type="text" id="m_title" value="${x? esc(x.title||''):''}" placeholder="예: 흑돼지 저녁">
       <label>분류</label>
@@ -5477,29 +5626,82 @@ function openMoneyForm(editId){
         ${x? '<button class="btn-ghost btn-danger" id="m_del">삭제</button>':''}
       </div>
     </div>`;
+
   const amt = document.getElementById('m_amt');
+  const readAmt = ()=> Number(amt.value.replace(/,/g,''))||0;
+  const conv = document.getElementById('m_conv');
+  // 다른 통화로 적으면 합계 통화로 얼마인지 바로 보여줍니다
+  const paintConv = ()=>{
+    if(unit===base){ conv.hidden=true; return; }
+    conv.hidden=false;
+    const ro = w => { const c=w.charCodeAt(w.length-1)-0xAC00; const j=(c>=0&&c<11172)?c%28:0; return (j&&j!==8)?'으로':'로'; };
+    const r = rateOf(unit), rb = rateOf(base);
+    const v = toBase(readAmt(), unit);
+    // 원화로 적을 땐 합계 통화의 환율을, 다른 통화로 적을 땐 그 통화의 환율을 보여줍니다
+    const rateTxt = unit==='원' ? (rb? `1${esc(base)} = ${rateFmt(rb)}원` : '') : `1${esc(unit)} = ${rateFmt(r)}원`;
+    conv.innerHTML = (r && rb)
+      ? `${readAmt()? `합계에는 <b>${moneyFmt(v,base)}${esc(base)}</b>${ro(base)} 더해요 · `:''}${rateTxt}`
+      : `환율을 불러오는 중이에요…`;
+    if(!(r && rb)) refreshRates(true).then(ok=>{ if(ok) paintConv(); else conv.textContent='환율을 불러오지 못했어요. 통화·예산에서 직접 넣을 수 있어요.'; });
+  };
+  const setUnit = (u)=>{
+    unit = u;
+    document.getElementById('m_unit').textContent = u;
+    document.querySelectorAll('#m_curs [data-u], #m_cursRest [data-u]').forEach(b=> b.classList.toggle('on', b.dataset.u===u));
+    paintConv();
+  };
+  document.querySelectorAll('#m_curs [data-u], #m_cursRest [data-u]').forEach(b=> b.onclick = ()=> setUnit(b.dataset.u));
+  document.getElementById('m_curMore').onclick = ()=>{
+    const r = document.getElementById('m_cursRest'); r.hidden = !r.hidden;
+    document.getElementById('m_curMore').classList.toggle('open', !r.hidden);
+  };
   amt.addEventListener('input', ()=>{
     const raw = amt.value.replace(/[^\d.]/g,''); const [a,b] = raw.split('.');
     amt.value = (a? Number(a).toLocaleString('ko-KR') : '') + (b!==undefined? '.'+b.slice(0,2) : '');
+    paintConv();
   });
+  paintConv();
+
   let cat = x ? x.cat : '식비', dayId = dayDef;
   document.querySelectorAll('#m_cats [data-c]').forEach(b=> b.onclick=()=>{
     document.querySelectorAll('#m_cats [data-c]').forEach(z=>z.classList.remove('on')); b.classList.add('on'); cat=b.dataset.c; });
   document.querySelectorAll('#m_days [data-d]').forEach(b=> b.onclick=()=>{
     document.querySelectorAll('#m_days [data-d]').forEach(z=>z.classList.remove('on')); b.classList.add('on');
     dayId = b.dataset.d==='none' ? null : Number(b.dataset.d); });
+
   document.getElementById('m_save').onclick = ()=>{
-    const v = Number(amt.value.replace(/,/g,''));
+    const v = readAmt();
     if(!v || v<0){ toast('금액을 넣어주세요'); amt.focus(); return; }
     const item = x || { id:'m'+Date.now().toString(36) };
-    Object.assign(item, { amount:v, title:document.getElementById('m_title').value.trim(), cat, dayId,
+    Object.assign(item, { amount:v, cur:unit, title:document.getElementById('m_title').value.trim(), cat, dayId,
                           payer:document.getElementById('m_payer').value.trim() });
     if(!x) m.items.push(item);
     markChanged();
     document.getElementById('moneyModalBg').classList.remove('open');
     renderMoney();
-    toast(x? '수정했어요' : `${bagMoney(v)}${cur} 기록했어요`);
+    toast(x? '수정했어요' : `${moneyFmt(v,unit)}${unit} 기록했어요`);
   };
+
+  // 영수증 스캔 — 영수증 통화가 알려진 통화면 그 통화로 바꿔 둡니다
+  const scanBtn = document.getElementById('m_scan');
+  if(scanBtn){
+    const file = document.getElementById('m_file');
+    scanBtn.onclick = ()=>{
+      if(!aiUsable()){ toast('영수증 읽기는 AI 연결이 필요해요'); return; }
+      file.value=''; file.click();
+    };
+    file.onchange = ()=>{ if(file.files && file.files[0]) scanReceipt(file.files[0], {
+      setCat:(c)=>{ const b=document.querySelector(`#m_cats [data-c="${c}"]`); if(b) b.click(); },
+      setDay:(id)=>{ const b=document.querySelector(`#m_days [data-d="${id}"]`); if(b) b.click(); },
+      setUnit:(u)=>{
+        if(!CODE_OF[u]) return;
+        if(!document.querySelector(`#m_curs [data-u="${u}"], #m_cursRest [data-u="${u}"]`)) return;
+        if(document.querySelector(`#m_cursRest [data-u="${u}"]`)){ document.getElementById('m_cursRest').hidden=false; }
+        setUnit(u);
+      }
+    }); };
+  }
+
   const del = document.getElementById('m_del');
   if(del) del.onclick = ()=>{
     m.items = m.items.filter(i=>i!==x); markChanged();
@@ -5509,29 +5711,165 @@ function openMoneyForm(editId){
   if(!x) setTimeout(()=> amt.focus(), 300);
 }
 
+/* ---- 영수증 읽기 ----
+   사진은 기기에서 긴 변 1600px로 줄여 AI에 보내고, 저장하지는 않아요 */
+const CUR_BY_CODE = { KRW:'원', JPY:'엔', CNY:'위안', TWD:'대만달러', VND:'동', THB:'바트', SGD:'싱가포르달러',
+  HKD:'홍콩달러', USD:'달러', EUR:'유로', GBP:'파운드', AUD:'호주달러' };
+
+function shrinkImage(file, maxSide=1600, quality=0.82){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const k = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth*k), h = Math.round(img.naturalHeight*k);
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      const g = c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,w,h); g.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('이미지를 열지 못했어요')); };
+    img.src = url;
+  });
+}
+
+async function scanReceipt(file, hooks){
+  const st = document.getElementById('m_scanState');
+  const btn = document.getElementById('m_scan');
+  const say = (html, cls)=>{ st.hidden=false; st.className='rc-state '+(cls||''); st.innerHTML=html; };
+  btn.disabled = true;
+  let dataUrl;
+  try{ dataUrl = await shrinkImage(file); }
+  catch(e){ say('사진을 열지 못했어요. 다른 사진으로 다시 시도해주세요.', 'err'); btn.disabled=false; return; }
+  say(`<img src="${dataUrl}" alt=""><span class="rc-reading">영수증을 읽는 중<i></i></span>`, 'busy');
+
+  const co = tripCountry();
+  const iso = TRIP.days.map(d=>d.iso).filter(Boolean).sort();
+  const period = iso.length ? `${iso[0]} ~ ${iso[iso.length-1]}` : '';
+  try{
+    let r;
+    if(aiMode()==='proxy'){
+      const res = await fetch(CFG.AI_PROXY_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ type:'receipt', image:dataUrl, currency:co.currency, period }) });
+      if(!res.ok) throw new Error(res.status===413 ? '사진이 너무 커요' : '서버 응답 '+res.status);
+      const j = await res.json();
+      if(j.error) throw new Error(j.error);
+      r = j.receipt;
+    } else {
+      const res = await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+personalKey()},
+        body: JSON.stringify({ model: (CFG.OPENAI_MODEL && CFG.OPENAI_MODEL!=='luna') ? CFG.OPENAI_MODEL : 'gpt-4o-mini',
+          temperature:0, max_tokens:400, response_format:{type:'json_object'},
+          messages:[
+            {role:'system', content:'영수증 사진에서 결제 정보를 읽어 JSON 하나만 출력해. 형식: {"total":숫자,"currency":"ISO 코드","store":"가게 이름","date":"YYYY-MM-DD 또는 빈 문자열","category":"식비|교통|숙박|관광|쇼핑|기타","confidence":"high|medium|low"}. total은 세금 포함 최종 결제 금액이고 받은 금액과 거스름돈은 아니야. 영수증이 아니면 {"error":"not_receipt"}.'},
+            {role:'user', content:[{type:'text', text:`여행지 통화: ${co.currency}, 기간: ${period}`},
+                                   {type:'image_url', image_url:{url:dataUrl, detail:'high'}}]}
+          ]})
+      });
+      if(!res.ok) throw new Error('OpenAI 응답 '+res.status);
+      const j = await res.json();
+      r = JSON.parse((j.choices?.[0]?.message?.content||'').replace(/```json|```/g,'').trim());
+    }
+    if(!r || r.error || !(Number(r.total)>0)){
+      say(`<img src="${dataUrl}" alt=""><span>금액을 찾지 못했어요. 영수증 전체가 보이게 다시 찍거나 직접 입력해주세요.</span>`, 'err');
+      btn.disabled=false; return;
+    }
+
+    // 폼 채우기
+    const amt = document.getElementById('m_amt');
+    amt.value = Number(r.total).toLocaleString('ko-KR', { maximumFractionDigits:2 });
+    amt.dispatchEvent(new Event('input'));
+    const title = document.getElementById('m_title');
+    if(r.store && !title.value.trim()) title.value = String(r.store).slice(0,40);
+    if(r.category) hooks.setCat(r.category);
+    const day = r.date ? TRIP.days.find(d=>d.iso===r.date) : null;
+    if(day) hooks.setDay(day.id);
+
+    // 확인이 필요한 경우를 알려줍니다
+    const notes = [];
+    const unit = CUR_BY_CODE[String(r.currency||'').toUpperCase()];
+    const ro = w => { const c=w.charCodeAt(w.length-1)-0xAC00; const jong = (c>=0 && c<11172) ? c%28 : 0; return (jong && jong!==8) ? '으로' : '로'; };
+    if(unit && hooks.setUnit) hooks.setUnit(unit);
+    const info = (unit && unit!==bagCur()) ? `${unit}${ro(unit)} 기록하고, 합계에는 ${bagCur()}${ro(bagCur())} 바꿔 더해요.` : '';
+    if(r.confidence==='low') notes.push('글씨가 흐려서 금액을 한 번 확인해주세요');
+    if(r.date && !day) notes.push(`영수증 날짜(${r.date})가 여행 기간과 달라요`);
+    say(`<img src="${dataUrl}" alt=""><span><b>${esc(r.store||'영수증')}</b> ${moneyFmt(r.total, unit||bagCur())}${esc(unit||bagCur())}을 채웠어요.`
+        + (info? ` ${esc(info)}` : '')
+        + (notes.length? `<em>${notes.map(esc).join('<br>')}</em>` : ' 맞는지 보고 기록하기를 눌러주세요.') + `</span>`,
+        notes.length ? 'warn' : 'ok');
+    amt.classList.add('rc-flash'); setTimeout(()=>amt.classList.remove('rc-flash'), 900);
+  }catch(e){
+    console.warn('[영수증]', e);
+    say(`<img src="${dataUrl}" alt=""><span>영수증을 읽지 못했어요. 잠시 후 다시 시도하거나 직접 입력해주세요.</span>`, 'err');
+  }finally{ btn.disabled=false; }
+}
+
 function openMoneySettings(){
-  const m = moneyData(), cur = bagCur();
-  document.querySelector('#moneyModalBg h2').textContent = '예산과 인원';
+  const m = moneyData();
+  let base = bagCur();
+  document.querySelector('#moneyModalBg h2').textContent = '통화와 예산';
+  const { first, rest } = curList();
+  const inUse = [...new Set([...first, ...m.items.map(x=>x.cur).filter(Boolean)])].filter(u=>u!=='원');
   document.getElementById('moneyForm').innerHTML = `
     <div class="form-card flat">
-      <label class="first">전체 예산 <span class="lb-opt">선택</span></label>
-      <div class="amt-wrap small"><input type="text" inputmode="numeric" id="s_budget" value="${m.budget? bagMoney(m.budget):''}" placeholder="0"><span>${esc(cur)}</span></div>
+      <label class="first">합계를 보여줄 통화</label>
+      <div class="cur-chips" id="s_base">${[...first, ...rest].map(u=>
+        `<button type="button" data-u="${u}" class="${u===base?'on':''}">${u}</button>`).join('')}</div>
+      <p class="hint">지출은 각자 다른 통화로 적어도 돼요. 합계는 여기서 고른 통화로 바꿔 보여줘요.</p>
+
+      <label>전체 예산 <span class="lb-opt">선택</span></label>
+      <div class="amt-wrap small"><input type="text" inputmode="numeric" id="s_budget" value="${m.budget? moneyFmt(m.budget,base):''}" placeholder="0"><span id="s_budgetUnit">${esc(base)}</span></div>
+
       <label>함께 가는 인원</label>
       <div class="stepper"><button type="button" id="s_minus">−</button><b id="s_people">${Math.max(1,Number(m.people)||1)}</b>명<button type="button" id="s_plus">＋</button></div>
-      ${cur!=='원'? `<label>환율 <span class="lb-opt">선택 · 원화로 보기</span></label>
-      <div class="amt-wrap small"><span class="pre">1${esc(cur)} =</span><input type="text" inputmode="decimal" id="s_rate" value="${m.rate||''}" placeholder="예: 9.2"><span>원</span></div>`:''}
+
+      <div class="rate-head"><label style="margin:0">환율</label>
+        <button type="button" class="rate-refresh" id="s_refresh">최신 환율로</button></div>
+      <div class="rate-list" id="s_rates">${inUse.map(u=>`
+        <div class="rate-row"><span>1${esc(u)} =</span>
+          <input type="text" inputmode="decimal" data-rate="${u}" value="${rateOf(u)? Math.round(rateOf(u)*100)/100:''}" placeholder="환율">
+          <span>원</span></div>`).join('') || '<p class="hint" style="margin:0">원화만 쓰고 있어서 환율이 필요 없어요.</p>'}</div>
+      <p class="hint" id="s_rateAt">${m.ratesAt? `${new Date(m.ratesAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}에 받은 환율이에요. 직접 고친 값은 그대로 유지돼요.` : '환율은 자동으로 받아와요. 환전한 실제 환율로 고쳐 써도 좋아요.'}</p>
+
       <div class="form-actions"><button class="btn-primary" id="s_save">저장</button></div>
     </div>`;
+
   let people = Math.max(1, Number(m.people)||1);
   const pv = document.getElementById('s_people');
   document.getElementById('s_minus').onclick=()=>{ people=Math.max(1,people-1); pv.textContent=people; };
   document.getElementById('s_plus').onclick=()=>{ people=Math.min(30,people+1); pv.textContent=people; };
   const bud = document.getElementById('s_budget');
-  bud.addEventListener('input', ()=>{ const d=bud.value.replace(/\D/g,''); bud.value = d? Number(d).toLocaleString('ko-KR') : ''; });
+  bud.addEventListener('input', ()=>{ const d=bud.value.replace(/[^\d]/g,''); bud.value = d? Number(d).toLocaleString('ko-KR') : ''; });
+
+  document.querySelectorAll('#s_base [data-u]').forEach(b=> b.onclick=()=>{
+    const next = b.dataset.u;
+    // 예산은 새 통화로 바꿔 둡니다
+    const cur = Number(bud.value.replace(/,/g,''))||0;
+    if(cur && rateOf(base) && rateOf(next)) bud.value = moneyFmt(cur*rateOf(base)/rateOf(next), next);
+    base = next;
+    document.getElementById('s_budgetUnit').textContent = base;
+    document.querySelectorAll('#s_base [data-u]').forEach(z=> z.classList.toggle('on', z.dataset.u===base));
+  });
+
+  document.getElementById('s_refresh').onclick = async ()=>{
+    const btn = document.getElementById('s_refresh'); btn.disabled=true; btn.textContent='받는 중…';
+    m.ratesManual = {};                                     // 최신 환율로 되돌립니다
+    const ok = await refreshRates(true);
+    btn.disabled=false; btn.textContent='최신 환율로';
+    if(!ok){ toast('환율을 받아오지 못했어요'); return; }
+    document.querySelectorAll('#s_rates [data-rate]').forEach(i=>{ const r=rateOf(i.dataset.rate); if(r) i.value=Math.round(r*100)/100; });
+    document.getElementById('s_rateAt').textContent = '방금 받은 환율이에요.';
+  };
+
   document.getElementById('s_save').onclick = ()=>{
+    m.unit = base;
     m.budget = Number(bud.value.replace(/,/g,''))||0;
     m.people = people;
-    const r = document.getElementById('s_rate'); if(r) m.rate = Number(r.value)||0;
+    m.ratesManual = m.ratesManual || {};
+    document.querySelectorAll('#s_rates [data-rate]').forEach(i=>{
+      const u=i.dataset.rate, v=Number(i.value.replace(/,/g,''));
+      if(v>0 && Math.abs(v - Math.round((rateOf(u)||0)*100)/100) > 1e-9){ m.rates[u]=v; m.ratesManual[u]=true; }
+    });
     markChanged();
     document.getElementById('moneyModalBg').classList.remove('open');
     renderMoney(); toast('저장했어요');
