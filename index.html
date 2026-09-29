@@ -1590,6 +1590,12 @@
       animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
   }
 
+
+  /* Extend the document as well as its children: otherwise body clips the footer. */
+  html.viewport-statusbar-repair,html.viewport-statusbar-repair body{
+    height:var(--document-height);min-height:var(--document-height);
+  }
+  html.viewport-statusbar-repair body{bottom:auto;}
 </style>
 
 </head>
@@ -6395,7 +6401,7 @@ document.getElementById('statusBtn').addEventListener('click', ()=>{
     + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
     + backupListHtml();
   const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260928-footer-6',standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,short:document.documentElement.classList.contains('viewport-short'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
+  const report=JSON.stringify({version:'20260929-statusbar-7',statusbarRepair:document.documentElement.classList.contains('viewport-statusbar-repair'),standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,short:document.documentElement.classList.contains('viewport-short'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
   document.getElementById('layoutInfo').textContent=report;
   document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
   bindBackupButtons();
@@ -7095,7 +7101,7 @@ async function commitTrip(){
 
 /* ================= INIT ================= */
 // Keep app controls inside the viewport the browser can actually display.
-// Never infer a usable height from screen.height or expand it with safe-area padding.
+// Correct only the measured iPhone standalone status-bar deficit; never expand a keyboard viewport.
 /* 상단 안전영역(상태바) 높이를 실제 값으로 읽습니다 */
 function safeTopInset(){
   const el=document.createElement('div');
@@ -7126,6 +7132,7 @@ function watchOnboardColor(){
 
 function bindAppViewport(){
   const vv=window.visualViewport, root=document.documentElement;
+  const safeTop=safeTopInset();
   const probe=document.createElement('div');
   probe.id='viewportProbe'; probe.setAttribute('aria-hidden','true');
   probe.style.cssText='position:fixed;inset:0;visibility:hidden;pointer-events:none;';
@@ -7145,11 +7152,22 @@ function bindAppViewport(){
     root.classList.toggle('keyboard-open',!!editable && idleHeight-height>150);
     const nativeHeight=probe.getBoundingClientRect().height;
     const rootHeight=root.clientHeight;
-    const usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
+    let usable=Math.min(...[height,nativeHeight,rootHeight].filter(v=>Number.isFinite(v) && v>0));
+    // The reported device: screen 912, all viewport measures 844, safe top 68.
+    // A positive safe top distinguishes overlay status bars from opaque system bars.
+    const portrait=window.innerHeight>=window.innerWidth;
+    const fullHeight=portrait?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
+    const deficit=fullHeight-height;
+    const repair=isIOSDevice() && isStandaloneApp() && portrait && safeTop>0
+      && Math.abs(deficit-safeTop)<=2 && Math.abs(vv?.offsetTop || 0)<1
+      && !root.classList.contains('keyboard-open');
+    if(repair) usable=fullHeight;
+    root.classList.toggle('viewport-statusbar-repair',repair);
+    root.style.setProperty('--document-height',(repair?fullHeight:height)+'px');
     // 홈 화면 앱에서 iOS가 화면 맨 아래 일부를 앱 영역으로 주지 않는 경우가 있어요.
     // 그 영역은 그릴 수 없으니 앱은 알려준 높이 안에 두고, 탭의 홈 인디케이터용 여백만 뺍니다.
-    root.classList.toggle('viewport-short', isShortStandalone(usable));
-    root.style.setProperty('--app-height',height+'px');
+    root.classList.toggle('viewport-short', !repair && isShortStandalone(usable));
+    root.style.setProperty('--app-height',(repair?usable:height)+'px');
     root.style.setProperty('--content-height',usable+'px');
     root.style.setProperty('--viewport-top',(vv?.offsetTop || 0)+'px');
     if(!editable) idleHeight=height;
