@@ -1599,6 +1599,81 @@
     top:var(--keyboard-top,0px);bottom:auto;height:var(--keyboard-height);
   }
   html.keyboard-open .modal{max-height:calc(var(--keyboard-height) - 16px);}
+
+  /* ===== 정산 ===== */
+  .settle{ margin-top:12px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:14px 14px 10px; }
+  .st-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .st-head > b{ font-size:15.5px; letter-spacing:-.02em; }
+  .st-seg{ position:relative; display:grid; grid-template-columns:1fr 1fr; background:var(--fill); border-radius:10px; padding:2px; }
+  .st-seg button{ position:relative; z-index:1; border:none; background:none; padding:6px 10px; font-size:12px; font-weight:600;
+    color:var(--muted); cursor:pointer; white-space:nowrap; transition:color .25s; }
+  .st-seg button.on{ color:var(--ink); }
+  .st-thumb{ position:absolute; top:2px; bottom:2px; left:2px; width:calc(50% - 2px); border-radius:8px; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.08); transform:translateX(calc(var(--i,0)*100%)); transition:transform .3s cubic-bezier(.32,.72,0,1); }
+  .st-desc{ font-size:12px; color:var(--muted); line-height:1.55; margin:8px 2px 10px; }
+  .st-mgr{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:8px; }
+  .st-mgr > span{ font-size:12px; font-weight:700; color:var(--muted); margin-right:2px; }
+  .st-mgr button, .pay-chips button{ border:none; border-radius:999px; padding:7px 12px; font-size:12.5px; font-weight:600;
+    background:var(--fill); color:var(--muted); cursor:pointer; transition:background .2s, color .2s; }
+  .st-mgr button.on, .pay-chips button.on{ background:var(--sky); color:#fff; }
+  .pay-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pay-chips.multi button.on{ background:var(--sky-soft); color:var(--sky-deep); box-shadow:inset 0 0 0 1.5px var(--sky); }
+  .st-pot{ background:var(--fill); border-radius:12px; padding:0 12px; margin-bottom:10px; }
+  .st-pot > summary{ list-style:none; cursor:pointer; padding:10px 0; font-size:12.5px; font-weight:600; color:#4B5563;
+    display:flex; justify-content:space-between; }
+  .st-pot > summary::-webkit-details-marker{ display:none; }
+  .st-pot > summary span{ color:var(--muted-2); font-weight:500; }
+  .pot-row{ display:flex; align-items:center; gap:8px; margin:0 0 8px; font-size:13px; font-weight:600; }
+  .pot-row span{ flex:0 0 64px; }
+  .pot-row input{ flex:1; min-width:0; border:none !important; background:#fff !important; border-radius:8px !important;
+    padding:8px 10px !important; font-size:14px !important; text-align:right; font-variant-numeric:tabular-nums; }
+  .pot-row em{ font-style:normal; color:var(--muted); font-size:12px; }
+
+  .st-rows{ display:flex; flex-direction:column; border-top:1px solid var(--line); }
+  .sr{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:10px 2px; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums; }
+  .sr-l{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .sd{ font-size:11.5px; color:var(--muted); line-height:1.45; }
+  .sn{ font-size:14px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:4px; }
+  .sn i{ font-style:normal; font-size:10px; font-weight:700; color:#fff; background:var(--sun); border-radius:5px; padding:1px 5px; }
+  .sp small, .so small{ font-size:10.5px; margin-left:1px; }
+  .sb{ font-size:12px; font-weight:800; border-radius:999px; padding:4px 9px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .sb.plus{ background:#E7F6EF; color:#1F8A55; }
+  .sb.minus{ background:#FDEEEC; color:#C2412F; }
+  .sb.zero{ background:var(--fill); color:var(--muted); }
+  .st-tx-head{ font-size:12px; font-weight:700; color:var(--muted); margin:12px 2px 6px; }
+  .st-tx{ display:flex; flex-direction:column; gap:6px; }
+  .tx{ display:flex; align-items:center; gap:10px; background:linear-gradient(150deg, var(--sky-soft), #fff 85%);
+    border:1px solid rgba(47,147,221,.14); border-radius:14px; padding:10px 10px 10px 12px;
+    transition:opacity .3s ease, transform .3s ease; }
+  .tx.done{ opacity:0; transform:translateX(16px); }
+  .tx-who{ flex:1; min-width:0; display:flex; align-items:center; gap:6px; font-size:14px; }
+  .tx-who i{ font-style:normal; color:var(--sky); font-weight:700; }
+  .tx-amt{ font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .tx-amt small{ font-size:11px; font-weight:600; color:var(--muted); margin-left:1px; }
+  .tx-done{ border:none; border-radius:999px; padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer;
+    background:#fff; color:var(--sky-deep); box-shadow:inset 0 0 0 1px rgba(47,147,221,.3); }
+  .st-clear{ text-align:center; font-size:13px; font-weight:600; color:#1F8A55; background:#E7F6EF; border-radius:12px; padding:12px; }
+  .st-note{ font-size:11.5px; color:#A15C07; margin:8px 2px 0; }
+  .st-foot{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .st-foot button{ border:none; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer;
+    background:var(--fill); color:#3F4652; display:inline-flex; align-items:center; gap:5px; }
+  .st-foot button .icon{ width:13px; height:13px; }
+  .st-foot #stCopy{ background:var(--sky); color:#fff; }
+  .st-empty{ text-align:center; font-size:12.5px; color:var(--muted); line-height:1.65; padding:12px 6px 6px;
+    display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .st-empty .btn-primary{ flex:none; padding:10px 18px; font-size:13.5px; }
+
+  .mem-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .mem-chips:empty{ display:none; }
+  .mem{ display:inline-flex; align-items:center; gap:2px; background:var(--sky-soft); color:var(--sky-deep);
+    border-radius:999px; padding:6px 6px 6px 12px; font-size:13px; animation:optIn .25s var(--ease); }
+  .mem b{ font-weight:700; }
+  .mem button{ border:none; background:none; color:var(--sky-deep); opacity:.55; font-size:11px; padding:2px 5px; cursor:pointer; }
+  .mem-add{ display:flex; gap:6px; }
+  .mem-add input{ flex:1; min-width:0; }
+  .mem-add button{ flex:0 0 auto; border:none; border-radius:11px; padding:0 14px; font-weight:700; font-size:13px;
+    background:var(--fill); color:var(--ink); cursor:pointer; }
 </style>
 
 </head>
@@ -5593,6 +5668,93 @@ function needRates(){
   return [...units].some(u=>u!=='원' && !rateOf(u));
 }
 
+/* ================= 정산 =================
+   사람마다  잔액 = 낸 돈 − 자기 몫  (+ 총무에게 낸 회비, 이미 보낸 송금)
+   · 각자 결제 : 송금 횟수가 가장 적게 사람끼리 직접 주고받기
+   · 총무 관리 : 모두가 총무하고만 주고받기 (먼저 걷은 회비 반영) */
+function moneyMembers(){ const m=moneyData(); return Array.isArray(m.members) ? m.members.filter(Boolean) : []; }
+function settleStep(unit){ return unit==='원' ? 10 : (['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 0.01 : 1); }
+function roundStep(v, step){ return Math.round(v/step)*step; }
+
+function computeSettle(){
+  const m = moneyData(), base = bagCur();
+  const members = moneyMembers();
+  const mode = m.settleMode==='manager' ? 'manager' : 'each';
+  const manager = members.includes(m.manager) ? m.manager : members[0];
+  const paid={}, owed={}, bal={};
+  members.forEach(p=>{ paid[p]=0; owed[p]=0; bal[p]=0; });
+  let unassigned=0, noRate=0, shared=0;
+
+  m.items.forEach(x=>{
+    const v = toBase(x.amount, x.cur);
+    if(v==null){ noRate++; return; }
+    let payer = members.includes(x.payer) ? x.payer : null;
+    if(!payer && mode==='manager') payer = manager;           // 총무 관리: 결제자가 없으면 회비에서 낸 것
+    if(!payer){ unassigned++; return; }
+    const sel = Array.isArray(x.with) ? x.with.filter(p=>members.includes(p)) : [];
+    const withP = sel.length ? sel : members;
+    paid[payer] += v; shared += v;
+    withP.forEach(p=> owed[p] += v/withP.length);
+  });
+  members.forEach(p=> bal[p] = paid[p] - owed[p]);
+
+  // 총무에게 먼저 낸 회비 : 낸 사람은 그만큼 갚은 셈, 총무는 그만큼 들고 있는 셈
+  const pot = {};
+  if(mode==='manager' && manager){
+    members.forEach(p=>{
+      if(p===manager) return;
+      const c = Number(m.pot?.[p])||0;
+      if(c>0){ pot[p]=c; bal[p]+=c; bal[manager]-=c; }
+    });
+  }
+  // 이미 보낸 송금
+  (m.settled||[]).forEach(t=>{
+    if(bal[t.from]!=null && bal[t.to]!=null){ bal[t.from]+=t.amount; bal[t.to]-=t.amount; }
+  });
+
+  const step = settleStep(base), eps = step/2;
+  const transfers = [];
+  if(mode==='manager' && manager){
+    members.forEach(p=>{
+      if(p===manager) return;
+      const v = roundStep(bal[p], step);
+      if(v < -eps) transfers.push({ from:p, to:manager, amount:-v });
+      else if(v > eps) transfers.push({ from:manager, to:p, amount:v });
+    });
+  } else {
+    // 가장 많이 받을 사람과 가장 많이 보낼 사람부터 맞춥니다
+    const cred = members.filter(p=>bal[p]>eps).map(p=>({p, v:bal[p]})).sort((a,b)=>b.v-a.v);
+    const debt = members.filter(p=>bal[p]<-eps).map(p=>({p, v:-bal[p]})).sort((a,b)=>b.v-a.v);
+    let i=0, j=0;
+    while(i<debt.length && j<cred.length){
+      const a = Math.min(debt[i].v, cred[j].v);
+      const r = roundStep(a, step);
+      if(r>eps) transfers.push({ from:debt[i].p, to:cred[j].p, amount:r });
+      debt[i].v-=a; cred[j].v-=a;
+      if(debt[i].v<=eps) i++;
+      if(cred[j].v<=eps) j++;
+    }
+  }
+  return { members, mode, manager, paid, owed, bal, pot, transfers, unassigned, noRate, shared, base, step };
+}
+
+/* 카톡에 붙여넣기 좋은 정산 글 */
+function settleText(S){
+  const u = S.base, f = v=> `${moneyFmt(v,u)}${u}`;
+  const lines = [`[${TRIP.title||'여행'}] 정산`, `함께 쓴 돈 ${f(S.shared)} (${S.members.length}명)`, ''];
+  S.members.forEach(p=> lines.push(`${p}  낸 돈 ${f(S.paid[p])}, 몫 ${f(S.owed[p])}`));
+  if(S.mode==='manager' && Object.keys(S.pot).length){
+    lines.push('', `총무 ${S.manager}에게 낸 회비`);
+    Object.entries(S.pot).forEach(([p,c])=> lines.push(`${p} ${f(c)}`));
+  }
+  lines.push('');
+  if(S.transfers.length){
+    lines.push('보낼 돈');
+    S.transfers.forEach(t=> lines.push(`${t.from} → ${t.to}  ${f(t.amount)}`));
+  } else lines.push('정산할 돈이 없어요. 모두 끝!');
+  return lines.join('\n');
+}
+
 function renderMoney(){
   const el = document.getElementById('moneyBody'); if(!el) return;
   const m = moneyData(), cur = bagCur();
@@ -5616,15 +5778,17 @@ function renderMoney(){
   el.innerHTML = `
     <div class="money-sum">
       <div class="ms-top"><span>함께 쓴 돈</span>
-        <button type="button" class="ms-set" id="moneySet">통화·예산</button></div>
+        <button type="button" class="ms-set" id="moneySet">설정</button></div>
       <div class="ms-total">${moneyFmt(total,cur)}<small>${esc(cur)}</small></div>
       ${krw!=null? `<div class="ms-krw">약 ${bagMoney(krw)}원</div>`:''}
       ${missing? `<button type="button" class="ms-miss" id="moneyMiss">환율이 없는 ${missing}건은 합계에서 빠졌어요 · 환율 넣기</button>`:''}
       ${budget? `<div class="ms-bar ${pct>=100?'over':''}"><i style="width:${pct}%"></i></div>
         <div class="ms-meta"><span>예산 ${moneyFmt(budget,cur)}${esc(cur)} 중 ${pct}%</span>
         <span>${total<=budget? `${moneyFmt(budget-total,cur)}${esc(cur)} 남음` : `${moneyFmt(total-budget,cur)}${esc(cur)} 초과`}</span></div>`:''}
-      ${people>1? `<div class="ms-each">${people}명이면 1인당 <b>${moneyFmt(total/people,cur)}${esc(cur)}</b></div>`:''}
+      ${people>1 && !moneyMembers().length? `<div class="ms-each">${people}명이면 1인당 <b>${moneyFmt(total/people,cur)}${esc(cur)}</b></div>`:''}
     </div>
+
+    ${m.items.length ? settleCardHtml() : ''}
 
     ${byCat.length? `<div class="money-cats">${byCat.map(x=>`
       <div class="mc-row"><span class="mc-name"><i style="background:${x.col}"></i>${x.c}</span>
@@ -5642,7 +5806,7 @@ function renderMoney(){
             const other = u!==cur;
             return `<button type="button" class="money-row" data-m="${x.id}">
               <i style="background:${col}"></i>
-              <span class="mr-main"><b>${esc(x.title||x.cat)}</b><small>${esc(x.cat)}${x.payer? ' · '+esc(x.payer)+' 결제':''}</small></span>
+              <span class="mr-main"><b>${esc(x.title||x.cat)}</b><small>${esc(x.cat)}${x.payer? ' · '+esc(x.payer)+' 결제':''}${Array.isArray(x.with)&&x.with.length&&moneyMembers().length&&x.with.length<moneyMembers().length? ' · '+x.with.length+'명이 나눔':''}</small></span>
               <span class="mr-v"><span class="mr-amt">${moneyFmt(x.amount,u)}<small>${esc(u)}</small></span>
                 ${other? `<em>${conv[k]!=null? `≈ ${moneyFmt(conv[k],cur)}${esc(cur)}` : '환율 필요'}</em>`:''}</span></button>`;
           }).join('')}</div>`;
@@ -5655,6 +5819,7 @@ function renderMoney(){
       </div>`}`;
 
   document.getElementById('moneySet').onclick = openMoneySettings;
+  bindSettleCard();
   const mm = document.getElementById('moneyMiss'); if(mm) mm.onclick = openMoneySettings;
   const mf = document.getElementById('moneyFirstAdd'); if(mf) mf.onclick = ()=> openMoneyForm();
   el.querySelectorAll('[data-m]').forEach(b=> b.onclick = ()=> openMoneyForm(b.dataset.m));
@@ -5671,6 +5836,152 @@ function curChipsHtml(sel){
     <div class="cur-chips rest" id="m_cursRest" ${showRest?'':'hidden'}>
       ${rest.map(u=>`<button type="button" data-u="${u}" class="${u===sel?'on':''}">${u}</button>`).join('')}
     </div>`;
+}
+
+
+/* ---- 정산 카드 ---- */
+function settleCardHtml(){
+  const members = moneyMembers();
+  const m = moneyData();
+  if(members.length < 2){
+    return `<div class="settle">
+      <div class="st-head"><b>정산</b></div>
+      <div class="st-empty">함께 간 사람 이름을 넣으면<br>누가 누구에게 얼마를 보내면 되는지 계산해드려요.
+        <button type="button" class="btn-primary" id="stAddPeople">함께 간 사람 넣기</button></div>
+    </div>`;
+  }
+  const S = computeSettle(), u = S.base, f = v=> `${moneyFmt(v,u)}<small>${esc(u)}</small>`;
+  const sentN = (m.settled||[]).length;
+  const rows = S.members.map(p=>{
+    const b = roundStep(S.bal[p], S.step);
+    const tag = Math.abs(b) < S.step/2 ? '<span class="sb zero">끝</span>'
+              : b>0 ? `<span class="sb plus">${moneyFmt(b,u)} 받기</span>` : `<span class="sb minus">${moneyFmt(-b,u)} 보내기</span>`;
+    const potTxt = (S.mode==='manager' && S.pot[p]) ? `, 회비 ${moneyFmt(S.pot[p],u)}${esc(u)}` : '';
+    return `<div class="sr"><div class="sr-l">
+        <span class="sn">${esc(p)}${S.mode==='manager'&&p===S.manager? '<i>총무</i>':''}</span>
+        <span class="sd">낸 돈 ${moneyFmt(S.paid[p],u)}${esc(u)}, 몫 ${moneyFmt(S.owed[p],u)}${esc(u)}${potTxt}</span>
+      </div>${tag}</div>`;
+  }).join('');
+  return `<div class="settle">
+    <div class="st-head"><b>정산</b>
+      <div class="st-seg"><span class="st-thumb" style="--i:${S.mode==='manager'?1:0}"></span>
+        <button type="button" data-sm="each" class="${S.mode==='each'?'on':''}">각자 결제</button>
+        <button type="button" data-sm="manager" class="${S.mode==='manager'?'on':''}">총무가 관리</button></div></div>
+    <p class="st-desc">${S.mode==='manager'
+      ? '총무가 회비를 걷어 결제하는 방식이에요. 모두 총무하고만 주고받아요. 결제한 사람을 안 적은 지출은 회비에서 낸 걸로 봐요.'
+      : '그때그때 아무나 계산한 경우예요. 송금 횟수가 가장 적게 짜드려요.'}</p>
+    ${S.mode==='manager' ? `<div class="st-mgr"><span>총무</span>${S.members.map(p=>
+        `<button type="button" data-mgr="${esc(p)}" class="${p===S.manager?'on':''}">${esc(p)}</button>`).join('')}</div>
+      <details class="st-pot" ${Object.keys(S.pot).length?'':''}>
+        <summary>먼저 걷은 회비 ${Object.keys(S.pot).length? `<b>${moneyFmt(Object.values(S.pot).reduce((a,c)=>a+c,0),u)}${esc(u)}</b>`:'<span>없음</span>'}</summary>
+        ${S.members.filter(p=>p!==S.manager).map(p=>`<label class="pot-row"><span>${esc(p)}</span>
+          <input type="text" inputmode="numeric" data-pot="${esc(p)}" value="${S.pot[p]? moneyFmt(S.pot[p],u):''}" placeholder="0"><em>${esc(u)}</em></label>`).join('')}
+      </details>` : ''}
+    <div class="st-rows">${rows}</div>
+    <div class="st-tx-head">보낼 돈</div>
+    ${S.transfers.length ? `<div class="st-tx">${S.transfers.map((t,i)=>`
+      <div class="tx"><span class="tx-who"><b>${esc(t.from)}</b><i>→</i><b>${esc(t.to)}</b></span>
+        <span class="tx-amt">${moneyFmt(t.amount,u)}<small>${esc(u)}</small></span>
+        <button type="button" class="tx-done" data-tx="${i}">보냈어요</button></div>`).join('')}</div>`
+      : `<div class="st-clear">주고받을 돈이 없어요. 정산 끝!</div>`}
+    ${S.unassigned? `<p class="st-note">결제한 사람을 안 적은 지출 ${S.unassigned}건은 정산에서 빠졌어요.</p>`:''}
+    ${S.noRate? `<p class="st-note">환율이 없는 지출 ${S.noRate}건은 정산에서 빠졌어요.</p>`:''}
+    <div class="st-foot">
+      <button type="button" id="stCopy"><span class="icon">${iconSvg('share')}</span>정산 내용 복사</button>
+      <button type="button" id="stPeople">사람 편집</button>
+      ${sentN? `<button type="button" id="stUndo">보낸 기록 ${sentN}건 되돌리기</button>`:''}
+    </div>
+  </div>`;
+}
+
+function bindSettleCard(){
+  const m = moneyData();
+  const add = document.getElementById('stAddPeople'); if(add) add.onclick = openMembersSheet;
+  const ppl = document.getElementById('stPeople'); if(ppl) ppl.onclick = openMembersSheet;
+  document.querySelectorAll('.st-seg [data-sm]').forEach(b=> b.onclick = ()=>{
+    m.settleMode = b.dataset.sm; if(!m.manager) m.manager = moneyMembers()[0];
+    markChanged(); renderMoney();
+  });
+  document.querySelectorAll('.st-mgr [data-mgr]').forEach(b=> b.onclick = ()=>{
+    m.manager = b.dataset.mgr; if(m.pot) delete m.pot[m.manager]; markChanged(); renderMoney();
+  });
+  document.querySelectorAll('.st-pot [data-pot]').forEach(i=>{
+    i.addEventListener('input', ()=>{ const d=i.value.replace(/[^\d]/g,''); i.value = d? Number(d).toLocaleString('ko-KR') : ''; });
+    i.addEventListener('change', ()=>{
+      m.pot = m.pot || {}; const v = Number(i.value.replace(/,/g,''))||0;
+      if(v>0) m.pot[i.dataset.pot]=v; else delete m.pot[i.dataset.pot];
+      markChanged(); renderMoney();
+      const d=document.querySelector('.st-pot'); if(d) d.open=true;
+    });
+  });
+  document.querySelectorAll('[data-tx]').forEach(b=> b.onclick = ()=>{
+    const S = computeSettle(), t = S.transfers[Number(b.dataset.tx)]; if(!t) return;
+    m.settled = m.settled || [];
+    m.settled.push({ from:t.from, to:t.to, amount:t.amount, at:Date.now() });
+    markChanged();
+    b.closest('.tx').classList.add('done');
+    setTimeout(renderMoney, 320);
+    toast(`${t.from} → ${t.to} ${moneyFmt(t.amount,S.base)}${S.base} 보낸 걸로 표시했어요`);
+  });
+  const undo = document.getElementById('stUndo');
+  if(undo) undo.onclick = ()=>{
+    if(!confirm('보냈다고 표시한 송금 기록을 모두 되돌릴까요?')) return;
+    m.settled = []; markChanged(); renderMoney();
+  };
+  const copy = document.getElementById('stCopy');
+  if(copy) copy.onclick = async ()=>{
+    const text = settleText(computeSettle());
+    try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요. 단톡방에 붙여넣어 보세요'); }
+    catch(e){ prompt('아래 내용을 복사해주세요', text); }
+  };
+}
+
+/* ---- 함께 간 사람 ---- */
+function membersEditorHtml(list){
+  return `<div class="mem-chips" id="memChips">${list.map(n=>
+      `<span class="mem"><b>${esc(n)}</b><button type="button" data-rm="${esc(n)}" aria-label="${esc(n)} 빼기">✕</button></span>`).join('')}</div>
+    <div class="mem-add"><input type="text" id="memInput" maxlength="12" placeholder="이름 넣고 추가 (예: 지환)" enterkeyhint="done">
+      <button type="button" id="memAddBtn">추가</button></div>`;
+}
+function bindMembersEditor(list, onChange){
+  const repaint = ()=>{
+    const box = document.getElementById('memChips');
+    box.innerHTML = list.map(n=>`<span class="mem"><b>${esc(n)}</b><button type="button" data-rm="${esc(n)}" aria-label="${esc(n)} 빼기">✕</button></span>`).join('');
+    box.querySelectorAll('[data-rm]').forEach(b=> b.onclick=()=>{ list.splice(list.indexOf(b.dataset.rm),1); repaint(); onChange&&onChange(); });
+  };
+  const inp = document.getElementById('memInput');
+  const add = ()=>{
+    inp.value.split(/[,\s]+/).map(v=>v.trim()).filter(Boolean).forEach(n=>{ if(!list.includes(n) && list.length<20) list.push(n); });
+    inp.value=''; repaint(); onChange&&onChange(); inp.focus();
+  };
+  document.getElementById('memAddBtn').onclick = add;
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); add(); } });
+  repaint();
+}
+function openMembersSheet(){
+  const m = moneyData();
+  const list = moneyMembers().slice();
+  if(!list.length){                                   // 이미 적어둔 결제자 이름을 먼저 넣어줍니다
+    m.items.forEach(x=>{ if(x.payer && !list.includes(x.payer)) list.push(x.payer); });
+  }
+  document.querySelector('#moneyModalBg h2').textContent = '함께 간 사람';
+  document.getElementById('moneyForm').innerHTML = `
+    <div class="form-card flat">
+      <p class="hint" style="margin-top:0">정산할 사람 이름을 넣어주세요. 지출마다 누가 냈는지, 누구와 나눴는지 고를 수 있게 돼요.</p>
+      ${membersEditorHtml(list)}
+      <div class="form-actions"><button class="btn-primary" id="memSave">저장</button></div>
+    </div>`;
+  bindMembersEditor(list);
+  document.getElementById('memSave').onclick = ()=>{
+    m.members = list.slice();
+    if(list.length) m.people = list.length;
+    if(m.manager && !list.includes(m.manager)) m.manager = list[0];
+    markChanged();
+    document.getElementById('moneyModalBg').classList.remove('open');
+    renderMoney(); toast('저장했어요');
+  };
+  document.getElementById('moneyModalBg').classList.add('open');
+  setTimeout(()=> document.getElementById('memInput').focus(), 300);
 }
 
 function openMoneyForm(editId){
@@ -5699,8 +6010,26 @@ function openMoneyForm(editId){
       <div class="money-days" id="m_days">${TRIP.days.map((d,i)=>
         `<button type="button" data-d="${d.id}" class="${d.id===dayDef?'on':''}">${i+1}일차</button>`).join('')}
         <button type="button" data-d="none" class="${dayDef==null?'on':''}">여행 전</button></div>
-      <label>결제한 사람 <span class="lb-opt">선택</span></label>
-      <input type="text" id="m_payer" value="${x? esc(x.payer||''):''}" placeholder="예: 지환">
+      ${moneyMembers().length ? (()=>{
+          const mem = moneyMembers();
+          const mgrMode = m.settleMode==='manager';
+          const defPayer = x ? (x.payer||'') : (mgrMode ? '' : (m.lastPayer && mem.includes(m.lastPayer) ? m.lastPayer : ''));
+          const withSel = x && Array.isArray(x.with) && x.with.length ? x.with : mem;
+          return `<label>결제한 사람</label>
+            <div class="pay-chips" id="m_payers">
+              ${mgrMode? `<button type="button" data-p="" class="${!defPayer?'on':''}">회비에서</button>`:''}
+              ${mem.map(n=>`<button type="button" data-p="${esc(n)}" class="${n===defPayer?'on':''}">${esc(n)}</button>`).join('')}
+            </div>
+            <div class="lbl-row" style="margin:14px 0 7px"><label style="margin:0">나눌 사람</label>
+              <button type="button" class="ai-mini" id="m_withAll">모두</button></div>
+            <div class="pay-chips multi" id="m_with">
+              ${mem.map(n=>`<button type="button" data-w="${esc(n)}" class="${withSel.includes(n)?'on':''}">${esc(n)}</button>`).join('')}
+            </div>
+            <p class="hint" id="m_withHint"></p>`;
+        })()
+      : `<label>결제한 사람 <span class="lb-opt">선택</span></label>
+         <input type="text" id="m_payer" value="${x? esc(x.payer||''):''}" placeholder="예: 지환">
+         <button type="button" class="link-btn" id="m_toPeople">함께 간 사람을 넣으면 1인당 정산까지 계산해드려요</button>`}
       <div class="form-actions">
         <button class="btn-primary" id="m_save">${x? '저장':'기록하기'}</button>
         ${x? '<button class="btn-ghost btn-danger" id="m_del">삭제</button>':''}
@@ -5749,12 +6078,42 @@ function openMoneyForm(editId){
     document.querySelectorAll('#m_days [data-d]').forEach(z=>z.classList.remove('on')); b.classList.add('on');
     dayId = b.dataset.d==='none' ? null : Number(b.dataset.d); });
 
+  // 결제한 사람 · 나눌 사람
+  let payer = x ? (x.payer||'') : '';
+  const payBox = document.getElementById('m_payers');
+  if(payBox){
+    const on = payBox.querySelector('.on'); payer = on ? on.dataset.p : '';
+    payBox.querySelectorAll('[data-p]').forEach(b=> b.onclick=()=>{
+      payBox.querySelectorAll('[data-p]').forEach(z=>z.classList.remove('on')); b.classList.add('on'); payer=b.dataset.p; });
+  }
+  const withBox = document.getElementById('m_with');
+  const paintWith = ()=>{
+    if(!withBox) return;
+    const n = withBox.querySelectorAll('.on').length, all = withBox.querySelectorAll('[data-w]').length;
+    const v = toBase(readAmt(), unit);
+    document.getElementById('m_withHint').textContent = n
+      ? `${n===all? '모두' : n+'명이'} 나눠서 1인당 ${v!=null && v>0 ? moneyFmt(v/n, base)+base : '-'}`
+      : '한 명 이상 골라주세요';
+  };
+  if(withBox){
+    withBox.querySelectorAll('[data-w]').forEach(b=> b.onclick=()=>{ b.classList.toggle('on'); paintWith(); });
+    document.getElementById('m_withAll').onclick = ()=>{ withBox.querySelectorAll('[data-w]').forEach(b=>b.classList.add('on')); paintWith(); };
+    amt.addEventListener('input', paintWith);
+    paintWith();
+  }
+  const toPeople = document.getElementById('m_toPeople'); if(toPeople) toPeople.onclick = openMembersSheet;
+
   document.getElementById('m_save').onclick = ()=>{
     const v = readAmt();
     if(!v || v<0){ toast('금액을 넣어주세요'); amt.focus(); return; }
+    const payerText = document.getElementById('m_payer');
+    const withSel = withBox ? [...withBox.querySelectorAll('.on')].map(b=>b.dataset.w) : null;
+    if(withBox && !withSel.length){ toast('나눌 사람을 한 명 이상 골라주세요'); return; }
     const item = x || { id:'m'+Date.now().toString(36) };
     Object.assign(item, { amount:v, cur:unit, title:document.getElementById('m_title').value.trim(), cat, dayId,
-                          payer:document.getElementById('m_payer').value.trim() });
+                          payer: payerText ? payerText.value.trim() : payer });
+    if(withSel && withSel.length < moneyMembers().length) item.with = withSel; else delete item.with;
+    if(item.payer) m.lastPayer = item.payer;
     if(!x) m.items.push(item);
     markChanged();
     document.getElementById('moneyModalBg').classList.remove('open');
@@ -5887,7 +6246,7 @@ async function scanReceipt(file, hooks){
 function openMoneySettings(){
   const m = moneyData();
   let base = bagCur();
-  document.querySelector('#moneyModalBg h2').textContent = '통화와 예산';
+  document.querySelector('#moneyModalBg h2').textContent = '통화·예산·사람';
   const { first, rest } = curList();
   const inUse = [...new Set([...first, ...m.items.map(x=>x.cur).filter(Boolean)])].filter(u=>u!=='원');
   document.getElementById('moneyForm').innerHTML = `
@@ -5900,8 +6259,8 @@ function openMoneySettings(){
       <label>전체 예산 <span class="lb-opt">선택</span></label>
       <div class="amt-wrap small"><input type="text" inputmode="numeric" id="s_budget" value="${m.budget? moneyFmt(m.budget,base):''}" placeholder="0"><span id="s_budgetUnit">${esc(base)}</span></div>
 
-      <label>함께 가는 인원</label>
-      <div class="stepper"><button type="button" id="s_minus">−</button><b id="s_people">${Math.max(1,Number(m.people)||1)}</b>명<button type="button" id="s_plus">＋</button></div>
+      <label>함께 간 사람</label>
+      ${membersEditorHtml(moneyMembers())}
 
       <div class="rate-head"><label style="margin:0">환율</label>
         <button type="button" class="rate-refresh" id="s_refresh">최신 환율로</button></div>
@@ -5914,10 +6273,8 @@ function openMoneySettings(){
       <div class="form-actions"><button class="btn-primary" id="s_save">저장</button></div>
     </div>`;
 
-  let people = Math.max(1, Number(m.people)||1);
-  const pv = document.getElementById('s_people');
-  document.getElementById('s_minus').onclick=()=>{ people=Math.max(1,people-1); pv.textContent=people; };
-  document.getElementById('s_plus').onclick=()=>{ people=Math.min(30,people+1); pv.textContent=people; };
+  const memList = moneyMembers().slice();
+  bindMembersEditor(memList);
   const bud = document.getElementById('s_budget');
   bud.addEventListener('input', ()=>{ const d=bud.value.replace(/[^\d]/g,''); bud.value = d? Number(d).toLocaleString('ko-KR') : ''; });
 
@@ -5944,7 +6301,9 @@ function openMoneySettings(){
   document.getElementById('s_save').onclick = ()=>{
     m.unit = base;
     m.budget = Number(bud.value.replace(/,/g,''))||0;
-    m.people = people;
+    m.members = memList.slice();
+    if(memList.length) m.people = memList.length;
+    if(m.manager && !memList.includes(m.manager)) m.manager = memList[0];
     m.ratesManual = m.ratesManual || {};
     document.querySelectorAll('#s_rates [data-rate]').forEach(i=>{
       const u=i.dataset.rate, v=Number(i.value.replace(/,/g,''));
@@ -7311,7 +7670,7 @@ const GUIDE_STEPS = [
     body:'날짜를 정하지 않고 장소부터 모아두세요. 일정에 넣기를 누르면 원하는 날에 들어가고, 일정표에서 장소를 추가할 때도 모아둔 곳을 바로 고를 수 있어요.' },
   { screen:'prep', bag:'money', target:'.bag-seg [data-bag="money"]',
     title:'경비 주머니',
-    body:'쓴 돈을 오른쪽 위 기록으로 적어두면 합계와 분류별 지출, 예산 대비 남은 돈, 1인당 금액을 보여줘요. 친구들과 같은 주머니를 함께 봐요.' },
+    body:'쓴 돈을 오른쪽 위 기록으로 적어두면 합계와 분류별 지출을 보여줘요. 함께 간 사람을 넣으면 누가 누구에게 얼마를 보내면 되는지 정산까지 해줘요. 총무가 회비를 걷는 경우도 따로 계산해요.' },
   { screen:'schedule', target:null,
     title:'준비 끝!',
     body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정이나 내 여행 목록에서 언제든 다시 볼 수 있어요.' }
