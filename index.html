@@ -1659,7 +1659,7 @@
   .st-foot button{ border:none; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer;
     background:var(--fill); color:#3F4652; display:inline-flex; align-items:center; gap:5px; }
   .st-foot button .icon{ width:13px; height:13px; }
-  .st-foot #stCopy{ background:var(--sky); color:#fff; }
+  .st-foot #stShare{ background:linear-gradient(135deg,#4FAAE8,#2F8FD8); color:#fff; box-shadow:0 3px 10px rgba(47,147,221,.25); }
   .st-empty{ text-align:center; font-size:12.5px; color:var(--muted); line-height:1.65; padding:12px 6px 6px;
     display:flex; flex-direction:column; align-items:center; gap:10px; }
   .st-empty .btn-primary{ flex:none; padding:10px 18px; font-size:13.5px; }
@@ -1674,6 +1674,9 @@
   .mem-add input{ flex:1; min-width:0; }
   .mem-add button{ flex:0 0 auto; border:none; border-radius:11px; padding:0 14px; font-weight:700; font-size:13px;
     background:var(--fill); color:var(--ink); cursor:pointer; }
+
+  .mc-row{ grid-template-columns:64px 1fr 78px; }
+  .mc-v{ text-align:right; }
 </style>
 
 </head>
@@ -5673,7 +5676,9 @@ function needRates(){
    · 각자 결제 : 송금 횟수가 가장 적게 사람끼리 직접 주고받기
    · 총무 관리 : 모두가 총무하고만 주고받기 (먼저 걷은 회비 반영) */
 function moneyMembers(){ const m=moneyData(); return Array.isArray(m.members) ? m.members.filter(Boolean) : []; }
-function settleStep(unit){ return unit==='원' ? 10 : (['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 0.01 : 1); }
+/* 정산은 반올림 없이 최소 화폐 단위(원·엔 1, 달러 0.01)의 정수로 계산합니다.
+   1/n로 안 나눠떨어지는 자투리는 그 지출을 결제한 사람이 떠안아, 모두의 합이 항상 정확히 0이 돼요. */
+function settleStep(unit){ return ['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 0.01 : 1; }
 function roundStep(v, step){ return Math.round(v/step)*step; }
 
 function computeSettle(){
@@ -5681,9 +5686,11 @@ function computeSettle(){
   const members = moneyMembers();
   const mode = m.settleMode==='manager' ? 'manager' : 'each';
   const manager = members.includes(m.manager) ? m.manager : members[0];
-  const paid={}, owed={}, bal={};
-  members.forEach(p=>{ paid[p]=0; owed[p]=0; bal[p]=0; });
-  let unassigned=0, noRate=0, shared=0;
+  const step = settleStep(base);
+  const U = v => Math.round((Number(v)||0)/step);          // 금액 → 정수 단위
+  const paidU={}, owedU={}, balU={};
+  members.forEach(p=>{ paidU[p]=0; owedU[p]=0; balU[p]=0; });
+  let unassigned=0, noRate=0, sharedU=0, uneven=false;
 
   m.items.forEach(x=>{
     const v = toBase(x.amount, x.cur);
@@ -5693,66 +5700,91 @@ function computeSettle(){
     if(!payer){ unassigned++; return; }
     const sel = Array.isArray(x.with) ? x.with.filter(p=>members.includes(p)) : [];
     const withP = sel.length ? sel : members;
-    paid[payer] += v; shared += v;
-    withP.forEach(p=> owed[p] += v/withP.length);
+    if(withP.length < members.length) uneven = true;
+    const amt = U(v);
+    paidU[payer] += amt; sharedU += amt;
+    // 똑같이 나누고, 남는 자투리는 결제한 사람부터 1단위씩
+    const q = Math.floor(amt / withP.length), r = amt - q*withP.length;
+    const order = withP.includes(payer) ? [payer, ...withP.filter(p=>p!==payer)] : withP;
+    order.forEach((p,i)=> owedU[p] += q + (i<r ? 1 : 0));
   });
-  members.forEach(p=> bal[p] = paid[p] - owed[p]);
+  members.forEach(p=> balU[p] = paidU[p] - owedU[p]);
 
   // 총무에게 먼저 낸 회비 : 낸 사람은 그만큼 갚은 셈, 총무는 그만큼 들고 있는 셈
-  const pot = {};
+  const potU = {};
   if(mode==='manager' && manager){
     members.forEach(p=>{
       if(p===manager) return;
-      const c = Number(m.pot?.[p])||0;
-      if(c>0){ pot[p]=c; bal[p]+=c; bal[manager]-=c; }
+      const c = U(m.pot?.[p]);
+      if(c>0){ potU[p]=c; balU[p]+=c; balU[manager]-=c; }
     });
   }
   // 이미 보낸 송금
   (m.settled||[]).forEach(t=>{
-    if(bal[t.from]!=null && bal[t.to]!=null){ bal[t.from]+=t.amount; bal[t.to]-=t.amount; }
+    if(balU[t.from]!=null && balU[t.to]!=null){ const a=U(t.amount); balU[t.from]+=a; balU[t.to]-=a; }
   });
 
-  const step = settleStep(base), eps = step/2;
-  const transfers = [];
+  const tU = [];
   if(mode==='manager' && manager){
     members.forEach(p=>{
       if(p===manager) return;
-      const v = roundStep(bal[p], step);
-      if(v < -eps) transfers.push({ from:p, to:manager, amount:-v });
-      else if(v > eps) transfers.push({ from:manager, to:p, amount:v });
+      if(balU[p] < 0) tU.push({ from:p, to:manager, u:-balU[p] });
+      else if(balU[p] > 0) tU.push({ from:manager, to:p, u:balU[p] });
     });
   } else {
     // 가장 많이 받을 사람과 가장 많이 보낼 사람부터 맞춥니다
-    const cred = members.filter(p=>bal[p]>eps).map(p=>({p, v:bal[p]})).sort((a,b)=>b.v-a.v);
-    const debt = members.filter(p=>bal[p]<-eps).map(p=>({p, v:-bal[p]})).sort((a,b)=>b.v-a.v);
+    const cred = members.filter(p=>balU[p]>0).map(p=>({p, v:balU[p]})).sort((a,b)=>b.v-a.v);
+    const debt = members.filter(p=>balU[p]<0).map(p=>({p, v:-balU[p]})).sort((a,b)=>b.v-a.v);
     let i=0, j=0;
     while(i<debt.length && j<cred.length){
       const a = Math.min(debt[i].v, cred[j].v);
-      const r = roundStep(a, step);
-      if(r>eps) transfers.push({ from:debt[i].p, to:cred[j].p, amount:r });
+      if(a>0) tU.push({ from:debt[i].p, to:cred[j].p, u:a });
       debt[i].v-=a; cred[j].v-=a;
-      if(debt[i].v<=eps) i++;
-      if(cred[j].v<=eps) j++;
+      if(debt[i].v===0) i++;
+      if(cred[j].v===0) j++;
     }
   }
-  return { members, mode, manager, paid, owed, bal, pot, transfers, unassigned, noRate, shared, base, step };
+  const V = u => Math.round(u*step*100)/100;                 // 정수 단위 → 금액
+  const out = o => Object.fromEntries(Object.entries(o).map(([k,u])=>[k, V(u)]));
+  return { members, mode, manager, base, step, uneven,
+           paid:out(paidU), owed:out(owedU), bal:out(balU), pot:out(potU),
+           transfers: tU.map(t=>({ from:t.from, to:t.to, amount:V(t.u) })),
+           unassigned, noRate, shared:V(sharedU) };
 }
 
-/* 카톡에 붙여넣기 좋은 정산 글 */
+/* 문자·카톡으로 보낼 정산 글 */
 function settleText(S){
   const u = S.base, f = v=> `${moneyFmt(v,u)}${u}`;
-  const lines = [`[${TRIP.title||'여행'}] 정산`, `함께 쓴 돈 ${f(S.shared)} (${S.members.length}명)`, ''];
-  S.members.forEach(p=> lines.push(`${p}  낸 돈 ${f(S.paid[p])}, 몫 ${f(S.owed[p])}`));
-  if(S.mode==='manager' && Object.keys(S.pot).length){
-    lines.push('', `총무 ${S.manager}에게 낸 회비`);
-    Object.entries(S.pot).forEach(([p,c])=> lines.push(`${p} ${f(c)}`));
-  }
+  const lines = [`[${TRIP.title||'여행'}] 경비 정산`];
+  lines.push(`함께 쓴 돈 ${f(S.shared)}` + (S.uneven ? ` (${S.members.length}명)` : ` (${S.members.length}명, 1인당 ${f(S.shared/S.members.length)})`));
+  lines.push('');
+  S.members.forEach(p=>{
+    const b = S.bal[p];
+    const res = Math.abs(b) < S.step/2 ? '정산 끝' : (b>0 ? `${f(b)} 받기` : `${f(-b)} 보내기`);
+    const role = (S.mode==='manager' && p===S.manager) ? ' (총무)' : '';
+    const pot = (S.mode==='manager' && S.pot[p]) ? `, 회비 ${f(S.pot[p])}` : '';
+    lines.push(`${p}${role}: 낸 돈 ${f(S.paid[p])}, 몫 ${f(S.owed[p])}${pot}`);
+    lines.push(`  → ${res}`);
+  });
   lines.push('');
   if(S.transfers.length){
     lines.push('보낼 돈');
-    S.transfers.forEach(t=> lines.push(`${t.from} → ${t.to}  ${f(t.amount)}`));
-  } else lines.push('정산할 돈이 없어요. 모두 끝!');
+    S.transfers.forEach(t=> lines.push(`${t.from} → ${t.to} ${f(t.amount)}`));
+  } else lines.push('주고받을 돈이 없어요. 정산 끝!');
+  if((moneyData().settled||[]).length) lines.push('', '이미 보낸 송금은 빼고 계산했어요.');
   return lines.join('\n');
+}
+
+/* 공유 시트(메시지·카카오톡 등)로 보내고, 안 되면 복사로 */
+async function shareSettle(){
+  const S = computeSettle();
+  const text = settleText(S);
+  if(navigator.share){
+    try{ await navigator.share({ title:`${TRIP.title||'여행'} 경비 정산`, text }); return; }
+    catch(e){ if(e && e.name==='AbortError') return; }      // 사용자가 닫은 경우는 조용히
+  }
+  try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요. 단톡방이나 문자에 붙여넣어 주세요'); }
+  catch(e){ prompt('아래 내용을 복사해주세요', text); }
 }
 
 function renderMoney(){
@@ -5887,7 +5919,8 @@ function settleCardHtml(){
     ${S.unassigned? `<p class="st-note">결제한 사람을 안 적은 지출 ${S.unassigned}건은 정산에서 빠졌어요.</p>`:''}
     ${S.noRate? `<p class="st-note">환율이 없는 지출 ${S.noRate}건은 정산에서 빠졌어요.</p>`:''}
     <div class="st-foot">
-      <button type="button" id="stCopy"><span class="icon">${iconSvg('share')}</span>정산 내용 복사</button>
+      <button type="button" id="stShare"><span class="icon">${iconSvg('share')}</span>문자·카톡으로 보내기</button>
+      <button type="button" id="stCopy">복사</button>
       <button type="button" id="stPeople">사람 편집</button>
       ${sentN? `<button type="button" id="stUndo">보낸 기록 ${sentN}건 되돌리기</button>`:''}
     </div>
@@ -5928,10 +5961,11 @@ function bindSettleCard(){
     if(!confirm('보냈다고 표시한 송금 기록을 모두 되돌릴까요?')) return;
     m.settled = []; markChanged(); renderMoney();
   };
+  const share = document.getElementById('stShare'); if(share) share.onclick = shareSettle;
   const copy = document.getElementById('stCopy');
   if(copy) copy.onclick = async ()=>{
     const text = settleText(computeSettle());
-    try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요. 단톡방에 붙여넣어 보세요'); }
+    try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요'); }
     catch(e){ prompt('아래 내용을 복사해주세요', text); }
   };
 }
@@ -7670,7 +7704,10 @@ const GUIDE_STEPS = [
     body:'날짜를 정하지 않고 장소부터 모아두세요. 일정에 넣기를 누르면 원하는 날에 들어가고, 일정표에서 장소를 추가할 때도 모아둔 곳을 바로 고를 수 있어요.' },
   { screen:'prep', bag:'money', target:'.bag-seg [data-bag="money"]',
     title:'경비 주머니',
-    body:'쓴 돈을 오른쪽 위 기록으로 적어두면 합계와 분류별 지출을 보여줘요. 함께 간 사람을 넣으면 누가 누구에게 얼마를 보내면 되는지 정산까지 해줘요. 총무가 회비를 걷는 경우도 따로 계산해요.' },
+    body:'오른쪽 위 기록으로 쓴 돈을 적어요. 영수증을 찍으면 금액과 가게를 읽어서 채워주고, 엔이나 달러로 적어도 합계는 한 통화로 모아 보여줘요. 함께 간 사람을 넣으면 정산까지 해줘요.' },
+  { screen:'prep', bag:'money', target:['.settle .st-foot', '.settle'],
+    title:'정산',
+    body:'누가 누구에게 얼마를 보내면 되는지 1원 단위까지 맞춰 계산해요. 각자 결제와 총무가 관리 중에 고를 수 있고, 문자·카톡으로 보내기를 누르면 정산 내용을 바로 보낼 수 있어요.' },
   { screen:'schedule', target:null,
     title:'준비 끝!',
     body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정이나 내 여행 목록에서 언제든 다시 볼 수 있어요.' }
@@ -7687,8 +7724,10 @@ function gdVisible(el){
 }
 function gdFind(step){
   if(!step.target) return null;
-  const els = document.querySelectorAll(step.target);
-  for(const el of els){ if(gdVisible(el)) return el; }
+  // 대상 후보를 여러 개 줄 수 있어요. 앞에서부터 화면에 보이는 첫 번째를 씁니다
+  for(const sel of [].concat(step.target)){
+    for(const el of document.querySelectorAll(sel)){ if(gdVisible(el)) return el; }
+  }
   return null;
 }
 
