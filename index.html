@@ -1899,6 +1899,16 @@
   .navbtn.active{ color:var(--brand) !important; }
   .navbtn.active .lb{ font-weight:700 !important; }
   .navbtn.active .icon{ transform:none !important; }
+
+  /* ---------- 일정 흐름선 ---------- */
+  .tbl{ position:relative; }
+  .tl-rail{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+  .tl-rail i{ position:absolute; width:2px; border-radius:2px; opacity:.5;
+    background-image:linear-gradient(to bottom, var(--c1), var(--c2)); background-repeat:no-repeat; }
+  .trow .tc-num, .tmove .tm-ico{ position:relative; z-index:2; }
+  .tmove .tm-ico{ box-shadow:0 0 0 3px rgba(250,251,253,.9); }
+  .tbl:has(.drag-src) .tl-rail{ opacity:0; }
+  @media (prefers-reduced-motion: no-preference){ .tl-rail i{ transition:opacity .25s ease; } }
 </style>
 
 </head>
@@ -3296,6 +3306,7 @@ function renderScheduleScreenInner(){
     if(next) tbl.appendChild(moveBar(s, next));
   });
   wrap.appendChild(tbl);
+  drawTimeline(tbl);
 
   // 장소가 하나 이하인 날에는 다음에 할 일을 부드럽게 안내합니다
   const realStops = list.filter(x=>!x.stay && !x.stayEnd && !x.flight);
@@ -3369,6 +3380,54 @@ function refreshTightMarks(){
       } else { badge?.remove(); msg?.remove(); }
     }
   });
+}
+
+
+/* ---- 일정 흐름선 ----
+   번호 칸 사이를 가는 세로선으로 잇고, 앞 일정 분류 색 → 다음 일정 분류 색으로 은은하게 이어집니다.
+   펼친 이동 구간이나 편집 폼 위로는 선을 지나가지 않게 끊되, 색의 흐름은 끊긴 앞뒤가 이어지도록 맞춥니다. */
+function drawTimeline(tbl){
+  if(!tbl) return;
+  let rail = tbl.querySelector(':scope > .tl-rail');
+  if(!rail){ rail = document.createElement('div'); rail.className = 'tl-rail'; rail.setAttribute('aria-hidden','true'); tbl.prepend(rail); }
+  const paint = ()=>{
+    if(!tbl.isConnected) return;
+    const nums = [...tbl.querySelectorAll('.trow:not(.drag-src) .tc-num')];
+    const tb = tbl.getBoundingClientRect();
+    // 선이 지나가면 안 되는 곳 (펼친 이동 구간, 편집 폼)
+    const blocks = [...tbl.querySelectorAll('.tm-detail:not([hidden]), .form-card')]
+      .map(el=>el.getBoundingClientRect()).filter(r=>r.height>0)
+      .map(r=>({ top:r.top - tb.top - 6, bottom:r.bottom - tb.top + 6 }));
+    let html = '';
+    for(let i=0;i<nums.length-1;i++){
+      const a = nums[i].getBoundingClientRect(), b = nums[i+1].getBoundingClientRect();
+      if(!a.height || !b.height) continue;
+      const x = a.left - tb.left + a.width/2 - 1;
+      const y1 = a.bottom - tb.top + 2, y2 = b.top - tb.top - 2, full = y2 - y1;
+      if(full <= 4) continue;
+      const c1 = nums[i].style.getPropertyValue('--cc') || '#C4C4C8';
+      const c2 = nums[i+1].style.getPropertyValue('--cc') || '#C4C4C8';
+      // 막힌 구간을 빼고 남은 조각들
+      let parts = [[y1, y2]];
+      blocks.forEach(bl=>{
+        parts = parts.flatMap(([s0,e0])=>{
+          if(bl.bottom <= s0 || bl.top >= e0) return [[s0,e0]];
+          const out=[]; if(bl.top > s0) out.push([s0, bl.top]); if(bl.bottom < e0) out.push([bl.bottom, e0]); return out;
+        });
+      });
+      parts.filter(([s0,e0])=> e0 - s0 > 3).forEach(([s0,e0])=>{
+        html += `<i style="left:${x}px;top:${s0}px;height:${e0-s0}px;--c1:${c1};--c2:${c2};`
+              + `background-size:2px ${full}px;background-position:0 ${-(s0-y1)}px"></i>`;
+      });
+    }
+    rail.innerHTML = html;
+  };
+  paint();
+  if(!tbl._tlObs && 'ResizeObserver' in window){
+    tbl._tlObs = new ResizeObserver(()=> requestAnimationFrame(paint));
+    tbl._tlObs.observe(tbl);
+  }
+  tbl._tlPaint = paint;
 }
 
 function rowEl(s, idx, prev, next, todayMinute){
