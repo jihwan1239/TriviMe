@@ -1677,6 +1677,190 @@
 
   .mc-row{ grid-template-columns:64px 1fr 78px; }
   .mc-v{ text-align:right; }
+
+  /* 공유 창 */
+  .share-url{ display:flex; align-items:center; gap:10px; background:var(--fill); border-radius:14px; padding:13px 14px;
+    margin:4px 0 12px; font-size:13.5px; color:#3F4652; overflow:hidden; }
+  .share-url .icon{ flex:0 0 16px; width:16px; height:16px; color:var(--sky); }
+  .su-text{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; }
+  .share-main{ width:100%; padding:15px; font-size:15.5px; }
+  .share-sub{ display:block; width:100%; margin-top:6px; border:none; background:none; padding:12px;
+    font-size:13.5px; font-weight:600; color:var(--sky-deep); cursor:pointer; }
+
+  /* 시간 입력 : 24시간제 하나 + 읽기 쉬운 말 + ±30분 */
+  .tf-row{ display:flex; align-items:stretch; gap:8px; }
+  .tf-row .tf-box{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .tf-say{ font-size:12px; font-weight:600; color:var(--sky-deep); margin-top:-4px; padding-bottom:8px; min-height:16px; }
+  .tf.bad .tf-say{ color:#C2412F; }
+  .tf-step{ flex:0 0 64px; border:none; border-radius:var(--r-sm); background:var(--fill); color:#3F4652;
+    font-size:13px; font-weight:700; cursor:pointer; transition:transform .12s ease, background .2s; }
+  .tf-step:active{ transform:scale(.95); background:var(--sky-soft); color:var(--sky-deep); }
+  .tf.nudge .tf-input{ animation:tfNudge .3s ease; }
+  @keyframes tfNudge{ 0%{ color:var(--sky); } 100%{ color:inherit; } }
+  .tf-ctrl{ display:none !important; }
+
+  /* 일관화 : 선택·추가 버튼도 브랜드 하늘색 */
+  .sugg-add{ background:linear-gradient(135deg,#4FAAE8,#2F8FD8) !important; color:#fff; }
+  .mini-btn.on{ background:var(--sky) !important; border-color:var(--sky) !important; color:#fff; }
+  .money-days button.on{ background:var(--sky) !important; color:#fff; }
+
+  /* 시간 칸 : 회색 상자가 시간과 읽는 말을 함께 감싸도록 */
+  .tf-row .tf-box{ background:var(--fill); border:1px solid var(--line-2); border-radius:var(--r-sm); padding:8px 6px 9px;
+    transition:border-color .2s, box-shadow .2s; }
+  .tf-row .tf-box:focus-within{ border-color:rgba(47,147,221,.55); box-shadow:0 0 0 3px rgba(47,147,221,.16); }
+  .tf-row .tf-input{ background:none !important; border:none !important; box-shadow:none !important; padding:2px 4px !important; }
+  .tf-row .tf-input:focus-visible{ box-shadow:none !important; }
+  .tf-row .tf-say{ margin-top:2px; padding:0; }
+  .tf.bad .tf-box{ border-color:#E4A39A; }
+
+  /* =====================================================================
+     디자인 정리 — 유리 면 + 절제된 색
+     · 하늘색 : 주요 버튼 하나와 선택된 상태에만
+     · 햇살색 : '지금, 오늘, 여행 중'에만
+     · 분류 색 : 작은 점으로만
+     · 버튼은 단색, 그림자는 떠 있는 것에만
+     · 둥글기 : 조작 요소 12 · 카드 16 · 칩은 완전히 둥글게
+     ===================================================================== */
+  :root{
+    --glass:rgba(255,255,255,.62);
+    --glass-2:rgba(255,255,255,.80);
+    --glass-line:rgba(255,255,255,.88);
+    --glass-blur:saturate(180%) blur(22px);
+    --glass-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 6px 22px rgba(25,45,75,.06);
+    --lift:0 12px 32px rgba(25,45,75,.12);
+    --ink-2:#3F4652;
+    --soft:rgba(28,28,30,.055);
+    --brand:#2F8FD8;
+    --r-ctl:12px; --r-box:16px;
+  }
+
+  /* 바탕 : 유리가 비칠 수 있도록 아주 옅은 빛 */
+  .app{ background:
+      radial-gradient(120% 55% at 105% -8%, rgba(108,192,242,.22) 0%, rgba(108,192,242,0) 62%),
+      radial-gradient(95% 45% at -12% 108%, rgba(240,168,30,.10) 0%, rgba(240,168,30,0) 60%),
+      #F2F5F9 !important; }
+  #screen-schedule, #screen-prep{ background:transparent !important; }
+  html:not(.splash-active), html:not(.splash-active) body{ background:#F4F7FA; }
+
+  /* ---------- 유리 면 : 넓은 것에만 흐림 ---------- */
+  .sec-header{ background:rgba(244,247,251,.66) !important;
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border-bottom:1px solid rgba(255,255,255,.75) !important; box-shadow:none !important; }
+  .bottom-controls{ background:transparent !important; }
+  .day-dock, .bottomnav{ background:rgba(248,250,253,.70) !important;
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border-top:1px solid rgba(255,255,255,.8) !important; box-shadow:0 -6px 24px rgba(25,45,75,.05) !important; }
+  .day-dock + .bottomnav{ border-top:1px solid rgba(25,45,75,.05) !important; }
+  .tbl, .settle, .money-sum, .money-cats{
+    background:var(--glass) !important; border:1px solid var(--glass-line) !important;
+    -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-shadow) !important; border-radius:var(--r-box) !important; }
+  .modal{ background:rgba(250,252,255,.84) !important;
+    -webkit-backdrop-filter:saturate(180%) blur(28px); backdrop-filter:saturate(180%) blur(28px);
+    border:1px solid rgba(255,255,255,.9) !important; border-bottom:0 !important; }
+  .modal-bg{ background:rgba(20,34,52,.28) !important; }
+
+  /* 목록 한 줄 한 줄은 흐림 없이 반투명만 (스크롤 성능) */
+  .wish-card, .money-row, .bag-empty, .day-hint, .tx, .prep-item, .rc-scan, .wish-pick, .st-pot, .rate-row{
+    background:rgba(255,255,255,.72) !important; border:1px solid rgba(255,255,255,.9) !important;
+    box-shadow:0 1px 2px rgba(25,45,75,.04) !important; }
+  .wish-card, .money-row, .bag-empty, .day-hint, .tx{ border-radius:var(--r-box) !important; }
+  .tmove{ background:rgba(250,251,253,.55) !important; }
+  .rc-scan{ border:1px dashed rgba(47,147,221,.4) !important; }
+
+  /* ---------- 버튼 : 단색, 색 그림자 없음 ---------- */
+  .btn-primary, .geo-btn, .tl-new, .share-main, .st-foot #stShare, .sugg-add, .tl-link .btn-primary{
+    background:var(--brand) !important; color:#fff !important; box-shadow:none !important; }
+  .btn-primary:active, .geo-btn:active, .tl-new:active{ background:#2A80C2 !important; }
+  .btn-ghost, .mini-btn, .head-btn, .stay-row, .plan-chip, .tf-step, .mem-add button, .st-foot button:not(#stShare){
+    background:var(--glass-2) !important; border:1px solid rgba(255,255,255,.95) !important;
+    box-shadow:0 1px 2px rgba(25,45,75,.05) !important; color:var(--ink-2); }
+  .mini-btn, .head-btn, .stay-row, .tf-step, .geo-btn, .btn-ghost{ border-radius:var(--r-ctl) !important; }
+  /* 동선 최적화는 보조 버튼으로 */
+  .ds-opt{ background:var(--glass-2) !important; color:var(--brand) !important;
+    border:1px solid rgba(47,147,221,.32) !important; box-shadow:none !important; }
+  .ds-opt.dim{ color:var(--muted) !important; border-color:rgba(28,28,30,.08) !important; }
+  /* 항공편·숙소 : 회색 톤으로 */
+  .stay-row, .stay-row *{ color:var(--ink-2); }
+  .stay-row .icon{ color:var(--muted) !important; }
+  .stay-row b, .stay-lb{ color:var(--muted) !important; font-weight:600; }
+  /* 선택된 것만 하늘색 */
+  .plan-chip.on, .plan-chip.active{ background:rgba(47,147,221,.12) !important; color:var(--brand) !important;
+    border-color:rgba(47,147,221,.25) !important; }
+  .daychip{ background:var(--glass-2) !important; border:1px solid rgba(255,255,255,.95) !important; }
+  .daychip.active{ background:var(--brand) !important; border-color:var(--brand) !important; box-shadow:none !important; }
+  .navbtn.active{ background:rgba(255,255,255,.9) !important; box-shadow:0 2px 10px rgba(25,45,75,.08) !important; }
+  .nav-pill{ background:rgba(255,255,255,.9) !important; box-shadow:0 2px 10px rgba(25,45,75,.08) !important; }
+
+  /* ---------- 일정 번호 : 숫자는 무채색, 분류는 작은 점 ---------- */
+  .tc-num{ background:var(--soft) !important; color:var(--ink) !important; position:relative; font-weight:700; }
+  .tc-num::after{ content:''; position:absolute; right:-3px; bottom:-3px; width:9px; height:9px; border-radius:50%;
+    background:var(--cc, #C4C4C8); box-shadow:0 0 0 2px #fff; }
+  .mini-badge, .mini-badge.opt, .mini-badge.stay, .mini-badge.fl{ background:var(--soft) !important; color:var(--ink-2) !important; }
+  .prep-group h2::before{ display:none !important; }
+  .prep-group h2{ padding-left:2px !important; color:var(--ink-2); }
+
+  /* ---------- 경비 : 파란 덩어리 대신 유리 카드 ---------- */
+  .money-sum{ color:var(--ink) !important; }
+  .ms-top{ color:var(--muted) !important; opacity:1 !important; }
+  .ms-set{ background:var(--soft) !important; color:var(--ink-2) !important; }
+  .ms-total{ color:var(--ink) !important; }
+  .ms-total small, .ms-krw, .ms-meta{ color:var(--muted) !important; opacity:1 !important; }
+  .ms-bar{ background:var(--soft) !important; }
+  .ms-bar i{ background:var(--brand) !important; }
+  .ms-bar.over i{ background:var(--sun) !important; }
+  .ms-miss{ background:#FFF6E5 !important; color:#A15C07 !important; }
+  .sb.minus{ background:var(--soft) !important; color:var(--ink-2) !important; }
+  .sn i{ background:var(--soft) !important; color:var(--ink-2) !important; }
+  .tx{ background:rgba(255,255,255,.72) !important; }
+  .tx-done{ background:transparent !important; box-shadow:inset 0 0 0 1px rgba(47,147,221,.35) !important; }
+
+  /* ---------- 아이콘 타일·진행 막대 : 그라데이션 없이 ---------- */
+  .be-ico, .gc-ico, .rc-ico{ background:rgba(47,147,221,.12) !important; color:var(--brand) !important; box-shadow:none !important; }
+  .gd-progress span{ background:var(--brand) !important; }
+  .tl-flag{ background:rgba(255,255,255,.85) !important; }
+  .opt-save{ background:rgba(42,160,106,.12) !important; }
+
+  /* ---------- 글꼴 : 하나로, 숫자만 폭 맞춤 ---------- */
+  .tf-input{ font-family:inherit !important; font-variant-numeric:tabular-nums; letter-spacing:.01em !important; font-weight:700 !important; }
+
+  /* 항공편·숙소 빠른 버튼 : 하늘색 대신 차분한 회색, 등록된 것만 진하게 */
+  .quick-actions .stay-row{ background:var(--glass-2) !important; border:1px solid rgba(255,255,255,.95) !important; }
+  .quick-actions .stay-txt, .quick-actions .icon{ color:var(--muted) !important; }
+  .quick-actions .stay-row.set .stay-txt{ color:var(--ink) !important; }
+  .quick-actions .stay-row.set .icon{ color:var(--ink-2) !important; }
+  .stay-txt b{ color:var(--muted) !important; }
+  /* 지도 카드 번호도 일정표와 같은 규칙 */
+  .pc-num{ background:var(--soft) !important; color:var(--ink) !important; position:relative; }
+  .pc-num::after{ content:''; position:absolute; right:-3px; bottom:-3px; width:9px; height:9px; border-radius:50%;
+    background:var(--cc,#C4C4C8); box-shadow:0 0 0 2px #fff; }
+  /* 온보딩도 같은 바탕 위 유리 카드로 */
+  .onboard{ background:
+      radial-gradient(120% 50% at 105% -8%, rgba(108,192,242,.24) 0%, rgba(108,192,242,0) 62%),
+      radial-gradient(90% 40% at -12% 108%, rgba(240,168,30,.10) 0%, rgba(240,168,30,0) 60%),
+      #F2F5F9 !important; }
+  html.ob-open:not(.splash-active), html.ob-open:not(.splash-active) body{ background:#F3F5F7 !important; }
+  .onboard input[type=text], .onboard input[type=url], .onboard .ob-input, .onboard .ob-c, .onboard .ob-range-toggle,
+  .onboard .ob-share-link, .onboard .ob-saved{
+    background:var(--glass-2) !important; border:1px solid rgba(255,255,255,.95) !important;
+    box-shadow:0 1px 2px rgba(25,45,75,.05) !important; }
+  .onboard .ob-c.on{ background:rgba(47,147,221,.12) !important; border-color:rgba(47,147,221,.45) !important; }
+
+  /* 분류 고르기 : 선택은 하늘색, 분류 색은 앞의 작은 점으로 */
+  .money-catpick button{ display:inline-flex; align-items:center; gap:6px; background:var(--glass-2) !important;
+    border:1px solid rgba(255,255,255,.95) !important; color:var(--ink-2) !important; }
+  .money-catpick button::before{ content:''; width:7px; height:7px; border-radius:50%; background:var(--mc); }
+  .money-catpick button.on{ background:rgba(47,147,221,.12) !important; color:var(--brand) !important;
+    border-color:rgba(47,147,221,.35) !important; }
+  .money-days button, .cur-chips button, .pay-chips button, .st-mgr button{
+    background:var(--glass-2) !important; border:1px solid rgba(255,255,255,.95) !important; color:var(--ink-2) !important; }
+  .money-days button.on, .cur-chips button.on, .pay-chips button.on, .st-mgr button.on{
+    background:var(--brand) !important; border-color:var(--brand) !important; color:#fff !important; }
+  .pay-chips.multi button.on{ background:rgba(47,147,221,.12) !important; color:var(--brand) !important;
+    border-color:rgba(47,147,221,.4) !important; box-shadow:none !important; }
+  /* '모두' 같은 작은 보조 동작은 글자 버튼으로 (햇살색은 '지금'에만) */
+  .ai-mini{ background:none !important; color:var(--brand) !important; box-shadow:none !important; border:none !important;
+    font-weight:700; padding:4px 2px !important; }
 </style>
 
 </head>
@@ -1708,8 +1892,8 @@
                 stroke="#fff" stroke-width="6" stroke-linecap="butt"
                 stroke-dasharray="100 100" stroke-dashoffset="100">
             <animate attributeName="stroke-dashoffset" values="100;100;0"
-                     begin="0s" dur="2.2s" fill="freeze"
-                     calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1" keyTimes="0;0.2;1"/>
+                     begin="0s" dur="1.35s" fill="freeze"
+                     calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1" keyTimes="0;0.14;1"/>
           </path>
         </mask>
       </defs>
@@ -1728,8 +1912,8 @@
                  M-8.5 -0.2 L-10.5 -4 L-8.6 -4 L-6 -0.9 Z M-8.5 0.2 L-10.5 4 L-8.6 4 L-6 0.9 Z"
               fill="#fff"/>
         </g>
-        <animateMotion begin="0s" dur="2.2s" fill="freeze" rotate="auto"
-                       keyPoints="0;0;1" keyTimes="0;0.2;1"
+        <animateMotion begin="0s" dur="1.35s" fill="freeze" rotate="auto"
+                       keyPoints="0;0;1" keyTimes="0;0.14;1"
                        calcMode="spline" keySplines="0 0 1 1;0.55 0 0.25 1"
                        path="M0 0 C 62 0, 112 -12, 152 -28 S 222 -48, 244 -50"/>
        </g>
@@ -1754,14 +1938,9 @@
           <div class="tsub" id="syncBadge"><i></i><span id="syncLabel">내 기기 저장</span></div>
         </div>
         <div class="share-anchor">
-          <button class="head-btn" id="shareBtn" title="일정 공유 · 백업"><span class="icon" data-i="share"></span></button>
-          <div class="share-tip" id="shareTip" role="note" hidden>
-            <strong>친구와 여행 계획하기</strong><br><span id="shareTipText"></span>
-            <button type="button" class="share-tip-close" id="shareTipClose" aria-label="공유 안내 닫기">×</button>
-          </div>
+          <button class="head-btn" id="shareBtn" title="친구와 공유"><span class="icon" data-i="share"></span></button>
         </div>
         <button class="head-btn" id="tripLibraryBtn" title="내 여행 목록">☰</button>
-        <button class="head-btn" id="statusBtn" title="연동 상태"><span class="icon" data-i="info"></span></button>
       </div>
       <div class="plan-bar map-plan" id="planBarMap" hidden></div>
     </div>
@@ -1806,10 +1985,9 @@
           <button class="mini-btn" id="addDayBtn"><span class="icon" data-i="plus"></span>날짜 추가</button>
         </div>
         <div class="set-actions" style="margin-top:8px">
-          <button type="button" class="mini-btn" id="scheduleShareBtn"><span class="icon" data-i="share"></span>공유 · 백업</button>
-          <button type="button" class="mini-btn" id="scheduleStatusBtn">저장 · 연결 상태</button>
+          <button type="button" class="mini-btn" id="scheduleShareBtn"><span class="icon" data-i="share"></span>친구와 공유</button>
+          <button type="button" class="mini-btn" id="scheduleBackupBtn">백업과 복구</button>
         </div>
-        <button type="button" class="mini-btn" id="scheduleTripsBtn" style="width:100%;margin-top:8px">내 여행 목록 · 다른 여행 열기</button>
         <button type="button" class="mini-btn guide-again" id="guideAgainBtn" style="width:100%;margin-top:8px">
           <span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
       </div>
@@ -1830,8 +2008,8 @@
   <div class="screen" id="screen-prep">
     <div class="sec-header">
       <div class="sec-title-row">
-        <h1><span class="h1-emoji" id="prepEmoji">🧳</span>여행 가방</h1>
-        <button class="mini-btn" id="prepAiBtn"><span class="icon" data-i="star"></span>AI 맞춤</button>
+        <h1>여행 가방</h1>
+        <button class="mini-btn" id="prepAiBtn"><span class="icon" data-i="star"></span>AI 추천</button>
         <button class="mini-btn bag-add" id="bagAddBtn" hidden><span class="icon" data-i="plus"></span><span id="bagAddLb">추가</span></button>
       </div>
       <div class="bag-seg" role="tablist" aria-label="여행 가방">
@@ -1849,8 +2027,7 @@
         <div class="top"><span>준비 진행률</span><span id="prepCount">0 / 0</span></div>
         <div class="bar"><div class="fill" id="prepFill"></div></div>
       </div>
-      <p class="prep-caption">체크는 각자 기기에만 저장돼요. 친구 화면에는 반영되지 않습니다.
-        <button type="button" class="link-btn" id="prepResetBtn" style="display:inline;padding:0;margin-left:6px;">기본 목록으로</button></p>
+      <p class="prep-caption"><button type="button" class="link-btn" id="prepResetBtn" style="display:inline;padding:0;margin-left:6px;">기본 목록으로</button></p>
       <div id="prepGroups"></div>
     </div>
   </div>
@@ -1952,7 +2129,7 @@
   <div class="modal-bg" id="wishModalBg">
     <div class="modal">
       <button class="modal-close" data-close="wishModalBg"><span class="icon" data-i="close"></span></button>
-      <h2 id="wishModalTitle">가고 싶은 곳 담기</h2>
+      <h2 id="wishModalTitle">가고 싶은 곳 추가</h2>
       <p class="sub">날짜를 정하지 않고 먼저 모아두세요. 나중에 원하는 날에 넣을 수 있어요.</p>
       <div id="wishForm"></div>
     </div>
@@ -1961,7 +2138,7 @@
   <div class="modal-bg" id="moneyModalBg">
     <div class="modal">
       <button class="modal-close" data-close="moneyModalBg"><span class="icon" data-i="close"></span></button>
-      <h2 id="moneyModalTitle">지출 기록</h2>
+      <h2 id="moneyModalTitle">지출 추가</h2>
       <div id="moneyForm"></div>
     </div>
   </div>
@@ -1982,8 +2159,8 @@
   <div class="modal-bg" id="statusModalBg">
     <div class="modal">
       <button class="modal-close" data-close="statusModalBg"><span class="icon" data-i="close"></span></button>
-      <h2>연동 상태</h2>
-      <p class="sub">현재 사용할 수 있는 기능과 일정 저장 상태를 확인하세요.</p>
+      <h2>백업과 복구</h2>
+      <p class="sub">일정을 고칠 때마다 이 기기에 자동으로 백업돼요. 실수로 지웠다면 이전 상태로 되돌릴 수 있어요.</p>
       <div id="statusList"></div>
     </div>
   </div>
@@ -1992,7 +2169,7 @@
   <div class="modal-bg" id="shareModalBg">
     <div class="modal">
       <button class="modal-close" data-close="shareModalBg"><span class="icon" data-i="close"></span></button>
-      <h2>TriviMe로 친구들과 공유</h2>
+      <h2>친구와 함께 보기</h2>
       <div id="sharePanel"></div>
     </div>
   </div>
@@ -2018,7 +2195,6 @@
           <p>Safari에서 공유 → <b>홈 화면에 추가</b> → <b>웹 앱으로 열기</b>를 선택하면 됩니다. 이미 웹앱을 설치했다면 링크를 복사해서 위에 붙여넣으세요.</p>
         </details>
       </details>
-      <button type="button" class="tl-guide" id="tripLibraryGuideBtn" hidden><span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
     </div>
   </div>
 
@@ -2094,11 +2270,9 @@ const LS_AIKEY = 'sapporo-aikey';
    personal : 각자 자기 OpenAI 키를 이 기기에만 저장해서 사용
    off      : 사용 불가                                        */
 function personalKey(){ try{ return localStorage.getItem(LS_AIKEY)||''; }catch(e){ return ''; } }
-function aiMode(){
-  if(HAS_PROXY) return 'proxy';
-  if(personalKey()) return 'personal';
-  return CFG.ALLOW_PERSONAL_AI_KEY ? 'needkey' : 'off';
-}
+/* AI는 공용 연결(프록시)로만 씁니다. 예전에 저장된 개인 키는 지웁니다 */
+try{ localStorage.removeItem('sapporo-aikey'); }catch(e){}
+function aiMode(){ return HAS_PROXY ? 'proxy' : 'off'; }
 function aiUsable(){ const m=aiMode(); return m==='proxy'||m==='personal'; }
 
 /* ================= ICONS ================= */
@@ -2802,7 +2976,7 @@ function renderCarousel(){
     const brief=next? `<div class="pc-brief">${esc(mode.label)}${ai? ` · AI 추정 약 ${esc(ai.minutes||'?')}분`:''} · ${esc(next.name)}까지</div>`:'';
     card.innerHTML=`
       <div class="pc-top">
-        <span class="pc-num" style="background:${cc}">${idx>=0? idx+1:'–'}</span>
+        <span class="pc-num" style="--cc:${cc}">${idx>=0? idx+1:'–'}</span>
         <span class="pc-time">${fmtClock(s.time)}</span>
         <span class="pc-chip" style="background:${catS(s.cat)};color:${cc}">
           <span class="icon">${iconSvg(CATS[s.cat])}</span>${s.cat}</span>
@@ -3092,7 +3266,7 @@ function renderScheduleScreenInner(){
     hint.innerHTML = `
       <div class="dh-title">아직 이 날 일정이 비어 있어요</div>
       <div class="dh-sub">가고 싶은 곳을 하나씩 넣거나, AI에게 코스를 추천받아보세요.</div>
-      <button type="button" class="dh-ai"><span class="icon">${iconSvg('star')}</span>AI 코스 추천 받기</button>`;
+      <button type="button" class="dh-ai"><span class="icon">${iconSvg('star')}</span>AI 추천 받기</button>`;
     const ai = hint.querySelector('.dh-ai');
     ai.addEventListener('click', ()=>{
       const fab = document.getElementById('aiFab');
@@ -3170,7 +3344,7 @@ function rowEl(s, idx, prev, next, todayMinute){
   if(tight) el.classList.add('tight');
 
   el.innerHTML=`
-    <div class="tc-num" style="background:${cc}">${idx>=0? idx+1:'?'}</div>
+    <div class="tc-num" style="--cc:${cc}">${idx>=0? idx+1:'?'}</div>
     <div class="tc-time">${esc(fmtClock(s.time))}</div>
     <div class="tc-main">
       <div class="tc-name">${esc(s.name)}
@@ -3342,10 +3516,6 @@ function moveBar(from, to){
   if(mode==='transit' && barAi && barAi.fare){
     extra = `<span class="tm-fare">${esc(String(barAi.fare))}</span>`;
   }
-  if(mode==='taxi' && stopTaxiFare(from)){
-    extra = `<span class="tm-fare">${esc(String(stopTaxiFare(from)))}</span>`;
-  }
-
   bar.innerHTML=`
     <button type="button" class="tm-open" style="--mc:${m.c}">
       <span class="tm-ico" style="background:${m.s};color:${m.c}">${iconSvg(m.icon)}</span>
@@ -3393,7 +3563,7 @@ function moveBar(from, to){
       const icon=bar.querySelector('.tm-ico');
       if(icon){ icon.style.background=selected.s;icon.style.color=selected.c;icon.innerHTML=iconSvg(selected.icon); }
       openBtn.style.setProperty('--mc',selected.c);
-      const fare=stopMode(from)==='transit'? stopAiRoute(from)?.fare : stopMode(from)==='taxi'? stopTaxiFare(from) : '';
+      const fare=stopMode(from)==='transit'? stopAiRoute(from)?.fare : '';
       bar.querySelector('.tm-fare')?.remove();
       if(fare){ const span=document.createElement('span');span.className='tm-fare';span.textContent=String(fare);openBtn.querySelector('.tm-caret').before(span); }
       renderMapForDay();
@@ -4151,7 +4321,7 @@ async function fillLegDetail(from,to,legEl,km){
         <div class="rd-actions">
           ${gmapLink}
           ${byAi? `<button type="button" class="ai-btn" data-ai-route>
-            <span class="icon">${iconSvg('star')}</span>${saved? 'AI 경로 다시 받기':'AI로 경로 추천'}
+            <span class="icon">${iconSvg('star')}</span>${saved? 'AI 경로 다시 추천':'AI 경로 추천'}
           </button>`:''}
         </div>
         <div class="ai-route-box">${saved? renderAiRoute(saved):''}</div>
@@ -4231,21 +4401,9 @@ async function fillLegDetail(from,to,legEl,km){
     if(lis) stepsHtml = `<ol class="rd-steps">${lis}</ol>`;
   }
 
-  const taxiBtn = (cur==='taxi')
-    ? `<button type="button" class="ai-btn" data-ai-taxi>
-         <span class="icon">${iconSvg('star')}</span>${stopTaxiFare(from)? '요금 다시 계산':'AI로 택시 요금'}
-       </button>` : '';
-
   detailEl.innerHTML =
     `<div class="rd-head">${bits.join('<span class="rd-sep">·</span>')}</div>${chain}${stepsHtml}`
-    + `<div class="rd-actions">${gmapLink}${taxiBtn}</div>`
-    + `<div class="taxi-box">${stopTaxiFare(from)? renderTaxiFare(stopTaxiFare(from), stopTaxiNote(from)):''}</div>`;
-
-  const tb = detailEl.querySelector('[data-ai-taxi]');
-  if(tb){
-    const tbox = detailEl.querySelector('.taxi-box');
-    tb.addEventListener('click', ()=> askTaxiFare(from, to, tb, tbox, r));
-  }
+    + `<div class="rd-actions">${gmapLink}</div>`;
   tickEtas();
 
   metaEl.innerHTML = `직선거리 약 ${km.toFixed(1)}km · 구글 경로 기준`
@@ -4823,7 +4981,7 @@ function openForm(stopId, prefill){
         <button class="geo-btn" id="f_geoSearch"><span class="icon">${iconSvg('search')}</span>검색</button>
       </div>
       <div class="geo-results" id="f_geoResults"></div>
-      <p class="hint" id="f_geoStatus">${ed&&!ed.tbd? '기존 위치가 저장되어 있어요. 다시 검색하면 위치가 바뀌어요.':'두 글자 이상 입력하면 후보가 바로 떠요.'}</p>
+      <p class="hint" id="f_geoStatus">${ed&&!ed.tbd&&ed.place? `위치: ${esc(shortPlace(ed.place))}`:''}</p>
       <button type="button" class="link-btn" id="f_pickMap">지도에서 직접 찍기</button>
       <div id="f_miniMap" class="mini-map" style="display:none;"></div>
 
@@ -4843,12 +5001,7 @@ function openForm(stopId, prefill){
           </button>`).join('')}
       </div>
       <input type="hidden" id="f_cat" value="${ed? ed.cat : '관광'}">
-      <div class="lbl-row">
-        <label style="margin:0;">메모</label>
-        <button type="button" class="ai-mini" id="f_aiNote">
-          <span class="icon">${iconSvg('star')}</span>AI로 채우기
-        </button>
-      </div>
+      <label>메모</label>
       <textarea id="f_note" placeholder="간단한 메모">${ed? esc(ed.note||''):''}</textarea>
       <div class="form-actions sticky">
         <button class="btn-primary" id="f_save">${ed? '수정 저장':'일정에 추가'}</button>
@@ -4877,7 +5030,6 @@ function openForm(stopId, prefill){
   });
   document.getElementById('f_geoSearch').addEventListener('click', ()=> doGeoSearch(false));
   document.getElementById('f_pickMap').addEventListener('click', toggleMiniMap);
-  document.getElementById('f_aiNote').addEventListener('click', aiFillNote);
   document.getElementById('f_geoQuery').addEventListener('input', onGeoInput);
   document.getElementById('f_geoQuery').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); clearTimeout(searchTimer); doGeoSearch(false); } });
   document.getElementById('f_save').addEventListener('click', saveForm);
@@ -4995,7 +5147,7 @@ function clampTime(hhmm){
 }
 
 /* 12시간제 / 24시간제 — 기기에 저장되는 개인 설정 */
-let TIME_FMT = (()=>{ try{ return localStorage.getItem('sapporo:timeFmt')==='12' ? 12 : 24; }catch(e){ return 24; } })();
+let TIME_FMT = 24;   /* 시간은 24시간제 하나로, 읽기 쉬운 말은 입력칸 아래에 보여줍니다 */
 function setTimeFmt(v){
   TIME_FMT = v;
   try{ localStorage.setItem('sapporo:timeFmt', String(v)); }catch(e){}
@@ -5043,26 +5195,30 @@ function digitsToTime(d, pmHint){
   return from12(h, m, !!pmHint);
 }
 
+/* "14:30" → "오후 2시 30분" */
+function sayTime(hhmm){
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm||''); if(!m) return '';
+  const h = +m[1], mi = +m[2];
+  const ap = h<12 ? '오전' : '오후', h12 = h%12===0 ? 12 : h%12;
+  if(h===0 && mi===0) return '자정';
+  if(h===12 && mi===0) return '정오';
+  return `${ap} ${h12}시${mi? ` ${mi}분`:''}`;
+}
+
 function timeFieldHtml(id, value){
   const v = clampTime(value || '09:00');
-  const t = to12(v);
   return `
-    <div class="tf ${TIME_FMT===12?'h12':'h24'}" data-tf="${id}">
+    <div class="tf h24" data-tf="${id}">
       <input type="hidden" id="${id}" value="${v}">
-      <div class="tf-box">
-        <input class="tf-input" type="text" inputmode="numeric" pattern="[0-9]*"
-               maxlength="5" value="${displayTime(v)}" placeholder="${TIME_FMT===12?'230':'1430'}"
-               autocomplete="off" enterkeyhint="done">
-      </div>
-      <div class="tf-ctrl">
-        <div class="tf-seg tf-ampm">
-          <button type="button" class="${t.pm?'':'on'}" data-ampm="am">오전</button>
-          <button type="button" class="${t.pm?'on':''}" data-ampm="pm">오후</button>
+      <div class="tf-row">
+        <button type="button" class="tf-step" data-step="-30" aria-label="30분 앞으로">−30분</button>
+        <div class="tf-box">
+          <input class="tf-input" type="text" inputmode="numeric" pattern="[0-9]*"
+                 maxlength="5" value="${displayTime(v)}" placeholder="1430"
+                 autocomplete="off" enterkeyhint="done" aria-label="시간 (숫자 네 자리)">
+          <span class="tf-say">${sayTime(v)}</span>
         </div>
-        <div class="tf-seg tf-fmt">
-          <button type="button" class="${TIME_FMT===24?'on':''}" data-fmt="24">24h</button>
-          <button type="button" class="${TIME_FMT===12?'on':''}" data-fmt="12">12h</button>
-        </div>
+        <button type="button" class="tf-step" data-step="30" aria-label="30분 뒤로">+30분</button>
       </div>
     </div>`;
 }
@@ -5072,31 +5228,20 @@ function bindTimeField(id){
   if(!root) return;
   const hidden = document.getElementById(id);
   const box = root.querySelector('.tf-input');
+  const say = root.querySelector('.tf-say');
 
-  const paint = ()=>{
-    const t = to12(hidden.value);
-    box.value = displayTime(hidden.value);
-    box.placeholder = TIME_FMT===12 ? '230' : '1430';
-    root.classList.toggle('h12', TIME_FMT===12);
-    root.classList.toggle('h24', TIME_FMT===24);
-    root.querySelectorAll('[data-ampm]').forEach(b=>
-      b.classList.toggle('on', (b.dataset.ampm==='pm') === t.pm));
-    root.querySelectorAll('[data-fmt]').forEach(b=>
-      b.classList.toggle('on', +b.dataset.fmt === TIME_FMT));
-  };
-
-  const isPm = ()=> !!root.querySelector('[data-ampm="pm"].on');
+  const paint = ()=>{ box.value = displayTime(hidden.value); say.textContent = sayTime(hidden.value); };
 
   box.addEventListener('input', ()=>{
     const d = box.value.replace(/\D/g,'').slice(0,4);
     box.value = d.length>2 ? `${d.slice(0,d.length-2)}:${d.slice(-2)}` : d;
-    const t = digitsToTime(box.value, isPm());
-    if(t){ hidden.value = t; root.classList.remove('bad'); }
-    else { root.classList.add('bad'); }
+    const t = digitsToTime(box.value, false);
+    if(t){ hidden.value = t; root.classList.remove('bad'); say.textContent = sayTime(t); }
+    else { root.classList.add('bad'); say.textContent = d ? '시간을 확인해주세요' : ''; }
   });
   box.addEventListener('focus', ()=> box.select());
   box.addEventListener('blur', ()=>{
-    const t = digitsToTime(box.value, isPm());
+    const t = digitsToTime(box.value, false);
     if(t){ hidden.value = t; root.classList.remove('bad','shake'); paint(); return; }
     root.classList.add('bad','shake');
     if(navigator.vibrate) navigator.vibrate(18);
@@ -5108,25 +5253,15 @@ function bindTimeField(id){
     }, 330);
   });
 
-  root.querySelectorAll('[data-ampm]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const t = to12(hidden.value);
-      hidden.value = from12(t.h12, t.min, b.dataset.ampm==='pm');
-      paint();
-    });
-  });
-  root.querySelectorAll('[data-fmt]').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      setTimeFmt(+b.dataset.fmt);
-      document.querySelectorAll('.tf').forEach(el=>{
-        el.classList.toggle('h12', TIME_FMT===12);
-        el.classList.toggle('h24', TIME_FMT===24);
-      });
-      paint();
-      renderScheduleScreen();       // 목록 표기도 함께 바꿔요
-      renderCarousel();
-    });
-  });
+  // ±30분 : 키보드 없이 살짝 옮기기
+  root.querySelectorAll('[data-step]').forEach(b=> b.addEventListener('click', ()=>{
+    const cur = toMinutes(hidden.value) ?? 9*60;
+    const next = Math.min(23*60+59, Math.max(0, cur + Number(b.dataset.step)));
+    hidden.value = `${String(Math.floor(next/60)).padStart(2,'0')}:${String(next%60).padStart(2,'0')}`;
+    root.classList.remove('bad');
+    paint();
+    root.classList.remove('nudge'); void root.offsetWidth; root.classList.add('nudge');
+  }));
 
   paint();
 }
@@ -5412,7 +5547,7 @@ function setBagTab(t){
   document.getElementById('prepSub').hidden = t!=='prep';
   const add = document.getElementById('bagAddBtn');
   add.hidden = t==='prep';
-  document.getElementById('bagAddLb').textContent = t==='wish' ? '담기' : '기록';
+  document.getElementById('bagAddLb').textContent = '추가';
   const em = document.getElementById('prepEmoji');
   if(em) em.textContent = t==='wish' ? '💙' : t==='money' ? '👛' : ((tripCountry().code==='KR') ? '🧳' : '🛂');
   if(t==='prep') renderPrep(); else if(t==='wish') renderWish(); else renderMoney();
@@ -5439,7 +5574,7 @@ function renderWish(){
         <div class="be-ico"><span class="icon">${iconSvg('heart')}</span></div>
         <b>가고 싶은 곳을 먼저 모아두세요</b>
         <span>날짜를 정하지 않아도 괜찮아요. 모아둔 곳은 나중에 원하는 날에 한 번에 넣을 수 있어요.</span>
-        <button type="button" class="btn-primary" id="wishFirstAdd">첫 장소 담기</button>
+        <button type="button" class="btn-primary" id="wishFirstAdd">첫 장소 추가</button>
       </div>`;
     document.getElementById('wishFirstAdd').onclick = openWishForm;
     return;
@@ -5463,7 +5598,7 @@ function renderWish(){
     ${todo.length? `<div class="bag-list">${todo.map(card).join('')}</div>`
                  : `<p class="bag-note">모아둔 곳을 모두 일정에 넣었어요.</p>`}
     ${done.length? `<div class="bag-sub">일정에 넣은 곳 ${done.length}</div><div class="bag-list">${done.map(card).join('')}</div>`:''}
-    <p class="bag-note">넣은 장소는 시간이 <b>선택</b>으로 들어가서, 동선 최적화로 자리를 잡아줄 수 있어요.</p>`;
+`;
 
   el.querySelectorAll('[data-go]').forEach(b=> b.onclick = ()=> showWishDays(b.closest('.wish-card'), b.dataset.go));
   el.querySelectorAll('[data-more]').forEach(b=> b.onclick = ()=>{
@@ -5521,7 +5656,7 @@ function openWishForm(editId){
   if(typeof closeForm==='function') closeForm();          // 일정 폼과 입력칸 이름이 겹치지 않도록
   const w = editId ? wishList().find(x=>x.id===editId) : null;
   geoPicked = w && w.lat!=null ? { lat:w.lat, lng:w.lng, label:w.place||w.name } : null;
-  document.querySelector('#wishModalBg h2').textContent = w ? '가고 싶은 곳 수정' : '가고 싶은 곳 담기';
+  document.querySelector('#wishModalBg h2').textContent = w ? '가고 싶은 곳 수정' : '가고 싶은 곳 추가';
   document.getElementById('wishForm').innerHTML = `
     <div class="form-card flat">
       <label class="first">이름</label>
@@ -5532,7 +5667,7 @@ function openWishForm(editId){
         <button class="geo-btn" id="f_geoSearch"><span class="icon">${iconSvg('search')}</span>검색</button>
       </div>
       <div class="geo-results" id="f_geoResults"></div>
-      <p class="hint" id="f_geoStatus">${w&&w.lat!=null? '위치가 저장되어 있어요.' : '위치를 정해두면 동선 최적화에 쓰여요.'}</p>
+      <p class="hint" id="f_geoStatus">${w&&w.lat!=null&&w.place? `위치: ${esc(w.place)}` : ''}</p>
       <button type="button" class="link-btn" id="f_pickMap">지도에서 직접 찍기</button>
       <div id="f_miniMap" class="mini-map" style="display:none;"></div>
       <label>분류</label>
@@ -5542,7 +5677,7 @@ function openWishForm(editId){
       <label>메모 <span class="lb-opt">선택</span></label>
       <textarea id="w_note" placeholder="예: 해 질 녘에 가면 좋다고 함">${w? esc(w.note||''):''}</textarea>
       <div class="form-actions">
-        <button class="btn-primary" id="w_save">${w? '저장':'담기'}</button>
+        <button class="btn-primary" id="w_save">${w? '저장':'추가'}</button>
       </div>
     </div>`;
   let cat = w ? w.cat : '관광';
@@ -5566,7 +5701,7 @@ function openWishForm(editId){
     document.getElementById('wishForm').innerHTML='';
     geoPicked=null;
     renderWish();
-    toast(w? '수정했어요' : '가고 싶은 곳에 담았어요');
+    toast(w? '수정했어요' : '가고 싶은 곳에 추가했어요');
   };
   document.getElementById('wishModalBg').classList.add('open');
 }
@@ -5777,14 +5912,8 @@ function settleText(S){
 
 /* 공유 시트(메시지·카카오톡 등)로 보내고, 안 되면 복사로 */
 async function shareSettle(){
-  const S = computeSettle();
-  const text = settleText(S);
-  if(navigator.share){
-    try{ await navigator.share({ title:`${TRIP.title||'여행'} 경비 정산`, text }); return; }
-    catch(e){ if(e && e.name==='AbortError') return; }      // 사용자가 닫은 경우는 조용히
-  }
-  try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요. 단톡방이나 문자에 붙여넣어 주세요'); }
-  catch(e){ prompt('아래 내용을 복사해주세요', text); }
+  shareOrCopy({ title:`${TRIP.title||'여행'} 경비 정산`, text: settleText(computeSettle()) },
+              '정산 내용을 복사했어요. 단톡방이나 문자에 붙여넣어 주세요');
 }
 
 function renderMoney(){
@@ -5810,14 +5939,13 @@ function renderMoney(){
   el.innerHTML = `
     <div class="money-sum">
       <div class="ms-top"><span>함께 쓴 돈</span>
-        <button type="button" class="ms-set" id="moneySet">설정</button></div>
+        <button type="button" class="ms-set" id="moneySet">통화·예산</button></div>
       <div class="ms-total">${moneyFmt(total,cur)}<small>${esc(cur)}</small></div>
       ${krw!=null? `<div class="ms-krw">약 ${bagMoney(krw)}원</div>`:''}
       ${missing? `<button type="button" class="ms-miss" id="moneyMiss">환율이 없는 ${missing}건은 합계에서 빠졌어요 · 환율 넣기</button>`:''}
       ${budget? `<div class="ms-bar ${pct>=100?'over':''}"><i style="width:${pct}%"></i></div>
         <div class="ms-meta"><span>예산 ${moneyFmt(budget,cur)}${esc(cur)} 중 ${pct}%</span>
         <span>${total<=budget? `${moneyFmt(budget-total,cur)}${esc(cur)} 남음` : `${moneyFmt(total-budget,cur)}${esc(cur)} 초과`}</span></div>`:''}
-      ${people>1 && !moneyMembers().length? `<div class="ms-each">${people}명이면 1인당 <b>${moneyFmt(total/people,cur)}${esc(cur)}</b></div>`:''}
     </div>
 
     ${m.items.length ? settleCardHtml() : ''}
@@ -5847,7 +5975,7 @@ function renderMoney(){
         <div class="be-ico"><span class="icon">${iconSvg('wallet')}</span></div>
         <b>여행 경비를 함께 모아봐요</b>
         <span>쓴 돈을 적으면 분류별 합계와 1인당 금액을 알려드려요. 통화가 달라도 한 통화로 모아서 보여줘요.</span>
-        <button type="button" class="btn-primary" id="moneyFirstAdd">첫 지출 기록</button>
+        <button type="button" class="btn-primary" id="moneyFirstAdd">첫 지출 추가</button>
       </div>`}`;
 
   document.getElementById('moneySet').onclick = openMoneySettings;
@@ -5899,9 +6027,7 @@ function settleCardHtml(){
       <div class="st-seg"><span class="st-thumb" style="--i:${S.mode==='manager'?1:0}"></span>
         <button type="button" data-sm="each" class="${S.mode==='each'?'on':''}">각자 결제</button>
         <button type="button" data-sm="manager" class="${S.mode==='manager'?'on':''}">총무가 관리</button></div></div>
-    <p class="st-desc">${S.mode==='manager'
-      ? '총무가 회비를 걷어 결제하는 방식이에요. 모두 총무하고만 주고받아요. 결제한 사람을 안 적은 지출은 회비에서 낸 걸로 봐요.'
-      : '그때그때 아무나 계산한 경우예요. 송금 횟수가 가장 적게 짜드려요.'}</p>
+    ${S.mode==='manager' ? `<p class="st-desc">결제한 사람을 안 적은 지출은 회비에서 낸 걸로 봐요.</p>` : ''}
     ${S.mode==='manager' ? `<div class="st-mgr"><span>총무</span>${S.members.map(p=>
         `<button type="button" data-mgr="${esc(p)}" class="${p===S.manager?'on':''}">${esc(p)}</button>`).join('')}</div>
       <details class="st-pot" ${Object.keys(S.pot).length?'':''}>
@@ -5919,8 +6045,7 @@ function settleCardHtml(){
     ${S.unassigned? `<p class="st-note">결제한 사람을 안 적은 지출 ${S.unassigned}건은 정산에서 빠졌어요.</p>`:''}
     ${S.noRate? `<p class="st-note">환율이 없는 지출 ${S.noRate}건은 정산에서 빠졌어요.</p>`:''}
     <div class="st-foot">
-      <button type="button" id="stShare"><span class="icon">${iconSvg('share')}</span>문자·카톡으로 보내기</button>
-      <button type="button" id="stCopy">복사</button>
+      <button type="button" id="stShare"><span class="icon">${iconSvg('share')}</span>정산 보내기</button>
       <button type="button" id="stPeople">사람 편집</button>
       ${sentN? `<button type="button" id="stUndo">보낸 기록 ${sentN}건 되돌리기</button>`:''}
     </div>
@@ -5962,12 +6087,6 @@ function bindSettleCard(){
     m.settled = []; markChanged(); renderMoney();
   };
   const share = document.getElementById('stShare'); if(share) share.onclick = shareSettle;
-  const copy = document.getElementById('stCopy');
-  if(copy) copy.onclick = async ()=>{
-    const text = settleText(computeSettle());
-    try{ await navigator.clipboard.writeText(text); toast('정산 내용을 복사했어요'); }
-    catch(e){ prompt('아래 내용을 복사해주세요', text); }
-  };
 }
 
 /* ---- 함께 간 사람 ---- */
@@ -6001,7 +6120,7 @@ function openMembersSheet(){
   document.querySelector('#moneyModalBg h2').textContent = '함께 간 사람';
   document.getElementById('moneyForm').innerHTML = `
     <div class="form-card flat">
-      <p class="hint" style="margin-top:0">정산할 사람 이름을 넣어주세요. 지출마다 누가 냈는지, 누구와 나눴는지 고를 수 있게 돼요.</p>
+      
       ${membersEditorHtml(list)}
       <div class="form-actions"><button class="btn-primary" id="memSave">저장</button></div>
     </div>`;
@@ -6023,7 +6142,7 @@ function openMoneyForm(editId){
   const x = editId ? m.items.find(i=>i.id===editId) : null;
   let unit = x ? (x.cur || base) : base;
   const dayDef = x ? x.dayId : (currentDay() ? currentDay().id : null);
-  document.querySelector('#moneyModalBg h2').textContent = x ? '지출 수정' : '지출 기록';
+  document.querySelector('#moneyModalBg h2').textContent = x ? '지출 수정' : '지출 추가';
   document.getElementById('moneyForm').innerHTML = `
     <div class="form-card flat">
       ${x? '' : `<button type="button" class="rc-scan" id="m_scan">
@@ -6065,7 +6184,7 @@ function openMoneyForm(editId){
          <input type="text" id="m_payer" value="${x? esc(x.payer||''):''}" placeholder="예: 지환">
          <button type="button" class="link-btn" id="m_toPeople">함께 간 사람을 넣으면 1인당 정산까지 계산해드려요</button>`}
       <div class="form-actions">
-        <button class="btn-primary" id="m_save">${x? '저장':'기록하기'}</button>
+        <button class="btn-primary" id="m_save">${x? '저장':'추가'}</button>
         ${x? '<button class="btn-ghost btn-danger" id="m_del">삭제</button>':''}
       </div>
     </div>`;
@@ -6152,7 +6271,7 @@ function openMoneyForm(editId){
     markChanged();
     document.getElementById('moneyModalBg').classList.remove('open');
     renderMoney();
-    toast(x? '수정했어요' : `${moneyFmt(v,unit)}${unit} 기록했어요`);
+    toast(x? '수정했어요' : `${moneyFmt(v,unit)}${unit} 추가했어요`);
   };
 
   // 영수증 스캔 — 영수증 통화가 알려진 통화면 그 통화로 바꿔 둡니다
@@ -6268,7 +6387,7 @@ async function scanReceipt(file, hooks){
     if(r.date && !day) notes.push(`영수증 날짜(${r.date})가 여행 기간과 달라요`);
     say(`<img src="${dataUrl}" alt=""><span><b>${esc(r.store||'영수증')}</b> ${moneyFmt(r.total, unit||bagCur())}${esc(unit||bagCur())}을 채웠어요.`
         + (info? ` ${esc(info)}` : '')
-        + (notes.length? `<em>${notes.map(esc).join('<br>')}</em>` : ' 맞는지 보고 기록하기를 눌러주세요.') + `</span>`,
+        + (notes.length? `<em>${notes.map(esc).join('<br>')}</em>` : ' 맞는지 보고 추가를 눌러주세요.') + `</span>`,
         notes.length ? 'warn' : 'ok');
     amt.classList.add('rc-flash'); setTimeout(()=>amt.classList.remove('rc-flash'), 900);
   }catch(e){
@@ -6280,7 +6399,7 @@ async function scanReceipt(file, hooks){
 function openMoneySettings(){
   const m = moneyData();
   let base = bagCur();
-  document.querySelector('#moneyModalBg h2').textContent = '통화·예산·사람';
+  document.querySelector('#moneyModalBg h2').textContent = '통화와 예산';
   const { first, rest } = curList();
   const inUse = [...new Set([...first, ...m.items.map(x=>x.cur).filter(Boolean)])].filter(u=>u!=='원');
   document.getElementById('moneyForm').innerHTML = `
@@ -6288,13 +6407,10 @@ function openMoneySettings(){
       <label class="first">합계를 보여줄 통화</label>
       <div class="cur-chips" id="s_base">${[...first, ...rest].map(u=>
         `<button type="button" data-u="${u}" class="${u===base?'on':''}">${u}</button>`).join('')}</div>
-      <p class="hint">지출은 각자 다른 통화로 적어도 돼요. 합계는 여기서 고른 통화로 바꿔 보여줘요.</p>
 
       <label>전체 예산 <span class="lb-opt">선택</span></label>
       <div class="amt-wrap small"><input type="text" inputmode="numeric" id="s_budget" value="${m.budget? moneyFmt(m.budget,base):''}" placeholder="0"><span id="s_budgetUnit">${esc(base)}</span></div>
 
-      <label>함께 간 사람</label>
-      ${membersEditorHtml(moneyMembers())}
 
       <div class="rate-head"><label style="margin:0">환율</label>
         <button type="button" class="rate-refresh" id="s_refresh">최신 환율로</button></div>
@@ -6307,8 +6423,7 @@ function openMoneySettings(){
       <div class="form-actions"><button class="btn-primary" id="s_save">저장</button></div>
     </div>`;
 
-  const memList = moneyMembers().slice();
-  bindMembersEditor(memList);
+
   const bud = document.getElementById('s_budget');
   bud.addEventListener('input', ()=>{ const d=bud.value.replace(/[^\d]/g,''); bud.value = d? Number(d).toLocaleString('ko-KR') : ''; });
 
@@ -6335,9 +6450,7 @@ function openMoneySettings(){
   document.getElementById('s_save').onclick = ()=>{
     m.unit = base;
     m.budget = Number(bud.value.replace(/,/g,''))||0;
-    m.members = memList.slice();
-    if(memList.length) m.people = memList.length;
-    if(m.manager && !memList.includes(m.manager)) m.manager = memList[0];
+
     m.ratesManual = m.ratesManual || {};
     document.querySelectorAll('#s_rates [data-rate]').forEach(i=>{
       const u=i.dataset.rate, v=Number(i.value.replace(/,/g,''));
@@ -6360,7 +6473,7 @@ function renderPrep(){
     const co=tripCountry(), city=(TRIP.country&&TRIP.country.city)||'';
     const custom = TRIP && Array.isArray(TRIP.prep) && TRIP.prep.length;
     sub.innerHTML = `<span>${co.flag} ${esc(co.name)}${city? ' · '+esc(city):''}</span>`
-      + (custom? `<span class="wx-sep">·</span><span class="wx-pop">AI 맞춤</span>`
+      + (custom? `<span class="wx-sep">·</span><span class="wx-pop">AI 추천 목록</span>`
                : `<span class="wx-sep">·</span><span class="wx-none">기본 목록</span>`);
   }
   let total=0,done=0;
@@ -6387,26 +6500,10 @@ function renderPrep(){
 const SHARE_TIP_KEY = 'trivime-share-tip-dismissed:' + TRIP_ID;
 let shareTipDismissed = false;
 try{ shareTipDismissed = localStorage.getItem(SHARE_TIP_KEY)==='1'; }catch(e){}
-function hideShareTip(){
-  const tip=document.getElementById('shareTip');
-  tip.hidden=true;
-  document.getElementById('shareBtn').removeAttribute('aria-describedby');
-}
-function dismissShareTip(){
-  shareTipDismissed=true;
-  try{ localStorage.setItem(SHARE_TIP_KEY,'1'); }catch(e){}
-  hideShareTip();
-}
-function showShareTip(){
-  if(window.__gdRunning) return;          // 사용 가이드가 보이는 동안에는 띄우지 않습니다
-  if(shareTipDismissed || needOnboarding() || !document.getElementById('onboard').hidden) return;
-  document.getElementById('shareTipText').textContent = HAS_SYNC
-    ? '링크를 공유해 친구들과 여행 일정을 함께 계획해보세요.'
-    : '링크를 보내 친구들과 여행을 계획해보세요. 수정한 내용은 링크를 다시 보내야 반영돼요.';
-  document.getElementById('shareTip').hidden=false;
-  document.getElementById('shareBtn').setAttribute('aria-describedby','shareTipText');
-}
-document.getElementById('shareTipClose').onclick=dismissShareTip;
+/* 공유 안내 말풍선은 사용 가이드로 대신합니다 */
+function hideShareTip(){}
+function dismissShareTip(){}
+function showShareTip(){}
 function isIOSDevice(){
   return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 }
@@ -6447,7 +6544,6 @@ function tlAgo(time){
 function openTripLibrary(fromStartup){
   const startup = fromStartup===true;
   const bg=document.getElementById('tripLibraryModalBg');
-  document.getElementById('tripLibraryGuideBtn').hidden=needOnboarding() || !document.getElementById('onboard').hidden;
   document.getElementById('tripLibraryIosGuide').hidden=!isIOSDevice();
   document.getElementById('tripLibraryKakaoStep').hidden=!isKakaoBrowser();
   document.getElementById('tlHello').textContent = startup ? '다시 오셨네요' : 'TriviMe';
@@ -6522,7 +6618,6 @@ document.getElementById('tlEdit').addEventListener('click', ()=>{
 });
 document.getElementById('tripLibraryBtn').onclick=openTripLibrary;
 document.getElementById('scheduleTripsTopBtn').onclick=openTripLibrary;
-document.getElementById('scheduleTripsBtn').onclick=openTripLibrary;
 document.getElementById('ob_saved_trips').onclick=openTripLibrary;
 document.getElementById('tripLibraryNew').onclick=()=>location.assign(tripUrl(randomTripId()));
 function updateOnboardingTripActions(editMode=false){
@@ -6705,7 +6800,7 @@ document.getElementById('optApply').addEventListener('click', ()=>{
   document.getElementById('optModalBg').classList.remove('open');
   optResult = null;
   renderScheduleScreen(); try{ renderMapForDay(); }catch(e){}
-  toast('동선을 정리했어요. 이전 순서는 ⓘ에서 되돌릴 수 있어요');
+  toast('동선을 정리했어요. 이전 순서는 여행 설정의 백업과 복구에서 되돌릴 수 있어요');
 });
 
 function switchScreen(name){
@@ -6780,102 +6875,58 @@ document.addEventListener('keydown',event=>{
 });
 
 /* ================= STATUS ================= */
-document.getElementById('statusBtn').addEventListener('click', ()=>{
-  const aiLabelMap = { proxy:'공용 연결 사용 중', personal:'내 키로 사용 중', needkey:'내 키 입력 필요', off:'비활성화' };
-  const rows=[
-    ['구글 지도', engine==='google' ? '사용 중' : '기본 지도', engine==='google'],
-    ['구글 경로 안내', HAS_DIR? '사용 중':'비활성화', HAS_DIR],
-    ['AI 장소 추천', aiLabelMap[aiMode()], aiUsable()],
-    ['친구들과 실시간 공유', HAS_SYNC? '사용 중':'비활성화', HAS_SYNC]
-  ];
-  document.getElementById('statusList').innerHTML = rows.map(([k,label,on])=>
-    `<div class="status-row"><span class="k">${k}</span><span class="v ${on?'on':'off'}">${label}</span></div>`
-  ).join('')
-    + (lastDirStatus && lastDirStatus!=='OK' && lastDirStatus!=='ZERO_RESULTS'
-        ? `<p class="hint err-hint">최근 경로 조회 응답: <code>${esc(lastDirStatus)}</code><br>${dirStatusMsg(lastDirStatus)}</p>` : '')
-    + `<p class="hint">실시간 공유가 꺼져 있으면 일정은 이 브라우저에만 저장돼요. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 공유 링크나 백업 파일을 보관해주세요.</p>`
-    + '<details style="margin-top:16px"><summary>화면 문제 진단</summary><p class="hint">하단이 잘리면 아래 정보를 복사해 전달해주세요.</p><button type="button" class="btn-ghost" id="copyLayoutInfo">진단 정보 복사</button><pre id="layoutInfo" style="font-size:11px;white-space:pre-wrap;user-select:text"></pre></details>'
-    + backupListHtml();
-  const bounds=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{top:Math.round(r.top),bottom:Math.round(r.bottom),height:Math.round(r.height)}:null;};
-  const report=JSON.stringify({version:'20260929-native-layout-11',statusBarStyle:document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.content,standalone:isStandaloneApp(),safeTop:safeTopInset(),screenH:screen.height,layoutHeight:getComputedStyle(document.documentElement).getPropertyValue('--app-height'),innerHeight,clientHeight:document.documentElement.clientHeight,visualHeight:window.visualViewport?.height,visualTop:window.visualViewport?.offsetTop,app:bounds('.app'),controls:bounds('#bottomControls'),nav:bounds('.bottomnav'),probe:bounds('#viewportProbe')},null,2);
-  document.getElementById('layoutInfo').textContent=report;
-  document.getElementById('copyLayoutInfo').onclick=async()=>{try{await navigator.clipboard.writeText(report);toast('진단 정보를 복사했어요');}catch(e){toast('아래 진단 정보를 길게 눌러 복사해주세요');}};
+function openBackupSheet(){
+  document.getElementById('statusList').innerHTML = backupListHtml()
+    + `<button type="button" class="btn-ghost" id="backupFileBtn" style="width:100%;margin-top:12px">백업 파일로 내려받기</button>`
+    + (HAS_SYNC ? '' : `<p class="hint">지금은 일정이 이 기기에만 저장돼요. 기기를 바꾸기 전에 백업 파일을 받아두세요.</p>`);
   bindBackupButtons();
+  document.getElementById('backupFileBtn').onclick = downloadBackup;
   document.getElementById('statusModalBg').classList.add('open');
-});
+}
 
 document.getElementById('scheduleShareBtn').onclick=()=>document.getElementById('shareBtn').click();
-document.getElementById('scheduleStatusBtn').onclick=()=>document.getElementById('statusBtn').click();
+document.getElementById('scheduleBackupBtn').onclick=openBackupSheet;
+
+/* 보내기 하나로 : 휴대폰은 공유 창(메시지·카카오톡 등), 공유 창이 없으면 복사 */
+async function shareOrCopy({ title, text, url }, copiedMsg){
+  if(navigator.share){
+    try{ await navigator.share(Object.fromEntries(Object.entries({ title, text, url }).filter(([,v])=>v))); return 'shared'; }
+    catch(e){ if(e && e.name==='AbortError') return 'cancel'; }
+  }
+  const body = [text, url].filter(Boolean).join('\n');
+  try{ await navigator.clipboard.writeText(body); toast(copiedMsg || '복사했어요. 원하는 곳에 붙여넣어 주세요'); return 'copied'; }
+  catch(e){ prompt('아래 내용을 복사해주세요', body); return 'prompt'; }
+}
 
 /* ================= SHARE ================= */
 document.getElementById('shareBtn').addEventListener('click', ()=>{
-  dismissShareTip();
   const panel=document.getElementById('sharePanel');
-  const base = tripUrl();
-  const nativeShare = typeof navigator.share === 'function';
-  if(HAS_SYNC){
-    panel.innerHTML=`
-      <p class="share-mode">실시간 공유 · 친구가 수정한 일정도 함께 확인할 수 있어요.</p>
-      <p class="sub">이 주소를 친구들에게 보내세요. 한 사람이 일정을 고치면 모두의 화면에 반영돼요.</p>
-      <label class="share-link-label" for="shareUrl">여행 공유 링크</label>
-      <div class="share-box"><input id="shareUrl" readonly value="${esc(base)}"><button id="copyBtn">복사</button></div>
-      ${nativeShare?'<button type="button" class="btn-ghost" id="shareNativeBtn" style="width:100%;margin-top:8px;">휴대폰 공유 메뉴로 보내기</button>':''}
-      <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
-      <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
-      <p class="hint">새 여행을 만들면 별도의 링크가 생기고, 그 링크를 받은 사람만 그 일정을 함께 봅니다.</p>
-      <p class="hint">휴대폰 브라우저에서 열고 <b>홈 화면에 추가</b>하면 앱처럼 쓸 수 있어요.<br>
-      아이폰은 공유 버튼 → 홈 화면에 추가, 안드로이드는 메뉴 → 앱 설치를 누르면 됩니다.</p>`;
-  } else {
-    const url = base + '#trip=' + encodeTrip();
-    panel.innerHTML=`
-      <p class="share-mode">현재 일정 복사 · 이후 변경한 내용은 다시 공유해야 해요.</p>
-      <p class="sub">현재 일정을 담은 링크예요. 친구가 이 링크를 열면 지금 이 일정이 그대로 보여요.</p>
-      <label class="share-link-label" for="shareUrl">여행 공유 링크</label>
-      <div class="share-box"><input id="shareUrl" readonly value="${esc(url)}"><button id="copyBtn">복사</button></div>
-      ${nativeShare?'<button type="button" class="btn-ghost" id="shareNativeBtn" style="width:100%;margin-top:8px;">휴대폰 공유 메뉴로 보내기</button>':''}
-      <button type="button" class="btn-ghost" id="copyTextBtn" style="width:100%;margin-top:8px;">일정을 텍스트로 복사</button>
-      <button type="button" class="btn-ghost" id="newTripBtn" style="width:100%;margin-top:8px;">새 여행 만들기</button>
-      <p class="hint">새 여행을 만든 뒤 공유 링크를 보내면 그때의 일정을 전달할 수 있어요.</p>
-      <p class="hint">지금은 <b>실시간 공유가 꺼져 있어요.</b> 이 링크는 보내는 순간의 일정을 복사해 전달하는 방식이라,
-      이후 각자 수정한 내용은 서로에게 반영되지 않아요.<br>
-      수정한 일정을 보내려면 링크를 다시 공유해주세요.</p>
-      <p class="hint">휴대폰에서 열고 <b>홈 화면에 추가</b>하면 앱처럼 쓸 수 있어요.</p>`;
-  }
-  const backup=document.createElement('button'); backup.type='button'; backup.className='btn-ghost'; backup.style.cssText='width:100%;margin-top:8px'; backup.textContent='여행 백업 파일 다운로드'; backup.onclick=downloadBackup; panel.appendChild(backup);
-  const ntBtn = document.getElementById('newTripBtn');
-  if(ntBtn) ntBtn.addEventListener('click', ()=>{
-    if(!confirm('새 여행을 만들까요? 새 주소가 열리고, 지금 일정은 이 링크에 그대로 남습니다.')) return;
-    location.href = tripUrl(randomTripId());
-  });
+  const url = HAS_SYNC ? tripUrl() : tripUrl() + '#trip=' + encodeTrip();
+  const shown = url.replace(/^https?:\/\//,'');
+  panel.innerHTML=`
+    <p class="sub">${HAS_SYNC
+      ? '이 링크를 받은 친구는 같은 일정을 함께 보고 고칠 수 있어요.'
+      : '지금 일정을 담은 링크예요. 이후에 고친 내용은 링크를 다시 보내야 친구에게 전달돼요.'}</p>
+    <div class="share-url"><span class="icon">${iconSvg('share')}</span><span class="su-text">${esc(shown)}</span></div>
+    <button type="button" class="btn-primary share-main" id="shareLinkBtn">링크 보내기</button>
+    <button type="button" class="share-sub" id="shareTextBtn">일정을 글로 보내기</button>`;
 
-  const nativeBtn=document.getElementById('shareNativeBtn');
-  if(nativeBtn) nativeBtn.onclick=async()=>{
-    try{
-      await navigator.share({title:TRIP.title||'TriviMe 여행 일정',url:document.getElementById('shareUrl').value});
-    }catch(e){ if(e.name!=='AbortError') toast('공유하지 못했어요. 링크 복사를 이용해주세요.'); }
-  };
+  document.getElementById('shareLinkBtn').onclick = ()=> shareOrCopy(
+    { title: TRIP.title||'TriviMe 여행', text: `${TRIP.title||'여행'} 일정을 TriviMe에서 같이 봐요`, url },
+    '링크를 복사했어요. 친구에게 붙여넣어 보내주세요');
 
-  const txtBtn = document.getElementById('copyTextBtn');
-  if(txtBtn) txtBtn.addEventListener('click', async ()=>{
+  document.getElementById('shareTextBtn').onclick = ()=>{
     const lines = [];
-    TRIP.days.forEach(d=>{
-      lines.push(`\n[${fmtDate(d.iso)} ${fmtDow(d.iso)}] ${d.label||''}`);
-      const prevActive = d.activePlan;
-      visibleStops(d).forEach(st=>{
-        lines.push(`${fmtClock(st.time)}  ${st.name}${st.opt? ' (선택)':''}`);
-      });
-      d.activePlan = prevActive;
+    TRIP.days.forEach((d,i)=>{
+      const label = (d.label && d.label.trim()!==`${i+1}일차`) ? ' '+d.label.trim() : '';
+      lines.push('', `${i+1}일차 ${fmtDate(d.iso)} (${fmtDow(d.iso)})${label}`);
+      const list = visibleStops(d);
+      if(list.length) list.forEach(st=> lines.push(`${fmtClock(st.time)}  ${st.name}`));
+      else lines.push('아직 일정 없음');
     });
-    const text = `${TRIP.title||'여행 일정'}\n${lines.join('\n')}`.trim();
-    try{ await navigator.clipboard.writeText(text); toast('일정을 텍스트로 복사했어요'); }
-    catch(e){ toast('복사하지 못했어요'); }
-  });
-
-  document.getElementById('copyBtn').addEventListener('click', async ()=>{
-    const inp=document.getElementById('shareUrl');
-    try{ await navigator.clipboard.writeText(inp.value); toast('링크를 복사했어요'); }
-    catch(e){ inp.focus(); inp.select(); try{ if(!document.execCommand('copy')) throw new Error('copy'); toast('링크를 복사했어요'); }catch(err){ toast('링크를 길게 눌러 직접 복사해주세요'); } }
-  });
+    const text = `[${TRIP.title||'여행 일정'}]\n${lines.join('\n').trim()}`;
+    shareOrCopy({ title: TRIP.title||'여행 일정', text }, '일정을 복사했어요');
+  };
   document.getElementById('shareModalBg').classList.add('open');
 });
 
@@ -6889,7 +6940,7 @@ function backupListHtml(){
   };
   return `<div class="bk-wrap">
       <div class="bk-title">이전 일정으로 되돌리기</div>
-      <p class="hint" style="margin:0 0 10px;">일정이 바뀌기 직전 상태를 최근 8개까지 이 기기에 보관해요.</p>
+      
       ${list.map((b,i)=>`
         <div class="bk-row">
           <span class="bk-meta"><b>${fmt(b.at)}</b> · 일정 ${b.count}개${b.why? ` · ${esc(b.why)}`:''}</span>
@@ -6922,27 +6973,8 @@ function openAiModal(){
       <div class="dtitle">${DISABLED_MSG}</div>
       <div class="ddesc">AI 추천은 아직 준비 중이에요.<br>장소를 직접 검색해서 일정에 추가할 수 있어요.</div></div>`;
   }
-  else if(mode==='needkey'){
-    panel.innerHTML=`<div class="disabled-box" style="text-align:left;">
-        <div class="dtitle" style="text-align:center;">${DISABLED_MSG}</div>
-        <div class="ddesc" style="text-align:center;">공용 AI 연결이 설정되어 있지 않아요.<br>대신 <b>내 OpenAI 키</b>로 사용할 수 있어요.</div>
-      </div>
-      <label class="field-lbl">내 OpenAI API Key</label>
-      <input type="password" id="myKey" class="key-input" placeholder="sk-...">
-      <p class="hint">이 키는 <b>이 기기에만</b> 저장되고 친구들에게 전달되지 않아요. 사용료는 키 주인에게 청구됩니다.</p>
-      <button class="btn-primary" id="saveKeyBtn" style="margin-top:12px;">키 저장하고 사용하기</button>`;
-    document.getElementById('saveKeyBtn').addEventListener('click', ()=>{
-      const v=document.getElementById('myKey').value.trim();
-      if(!v){ toast('키를 입력해주세요'); return; }
-      try{ localStorage.setItem(LS_AIKEY, v); }catch(e){}
-      document.getElementById('aiFab').classList.remove('off');
-      openAiModal(); toast('키를 저장했어요');
-    });
-  }
   else {
-    const badge = mode==='proxy'
-      ? '공용 AI 연결을 사용 중이에요.'
-      : '내 기기에 저장된 개인 키를 사용 중이에요.';
+    const badge = '';
     const anchor = activeStopId ? (stopById(activeStopId)||{}).stop : null;
     const anchorOk = anchor && currentDay() && currentDay().stops.some(x=>x.id===anchor.id);
     panel.innerHTML=`
@@ -6954,17 +6986,10 @@ function openAiModal(){
         ? `<b>${esc(anchor.name)}</b> 다음에 들를 만한 곳을 찾아줘요.`
         : '지도 탭에서 장소를 고르면 그 다음 코스를 추천받을 수 있어요.'}</p>
       <div class="ai-status" id="aiStatus">${badge}</div>
-      <div id="aiResults"></div>
-      ${mode==='personal'? '<button class="link-btn" id="clearKeyBtn">저장된 내 키 삭제</button>':''}`;
+      <div id="aiResults"></div>`;
     document.getElementById('aiRunDay').addEventListener('click', ()=> runAiRecommend('day'));
     const nextBtn = document.getElementById('aiRunNext');
     if(anchorOk) nextBtn.addEventListener('click', ()=> runAiRecommend('next'));
-    const ck=document.getElementById('clearKeyBtn');
-    if(ck) ck.addEventListener('click', ()=>{
-      try{ localStorage.removeItem(LS_AIKEY); }catch(e){}
-      document.getElementById('aiFab').classList.add('off');
-      openAiModal(); toast('저장된 키를 삭제했어요');
-    });
   }
   aiModalBg.classList.add('open');
 }
@@ -7098,7 +7123,7 @@ function showChangeCountry(){
 /* ---- 준비물을 여행지에 맞게 다시 만들기 ---- */
 async function generatePrep(){
   const btn = document.getElementById('prepAiBtn');
-  if(!aiUsable()){ toast(`AI 맞춤은 연결이 필요해요. ${DISABLED_MSG}`); return; }
+  if(!aiUsable()){ toast(`AI 추천은 연결이 필요해요. ${DISABLED_MSG}`); return; }
 
   const co = tripCountry();
   const city = (TRIP.country && TRIP.country.city) || '';
@@ -7677,7 +7702,7 @@ const GUIDE_STEPS = [
     body:'새로운 장소는 여기서 넣어요. 일정 사이에 끼워 넣고 싶다면 구간의 ＋ 일정 추가를 눌러도 돼요.' },
   { screen:'schedule', target:'#tripSetBtn',
     title:'여행 설정',
-    body:'여행지와 날짜를 바꾸거나 사용 가이드를 다시 볼 수 있어요. 항공편과 숙소는 바로 아래 버튼에서 등록해요.' },
+    body:'여행지와 날짜를 바꾸고, 친구와 공유하거나 이전 일정으로 되돌릴 수 있어요. 사용 가이드도 여기서 다시 볼 수 있어요.' },
   { screen:'map', target:'.navbtn[data-screen="map"]',
     title:'지도로 동선 보기',
     body:'하루 일정을 지도 위 핀과 선으로 한눈에 확인할 수 있어요.' },
@@ -7689,10 +7714,7 @@ const GUIDE_STEPS = [
     body:'지금 동선에 어울리는 카페나 명소를 AI가 추천해줘요.' },
   { screen:'map', target:'#shareBtn',
     title:'친구와 함께 짜기',
-    body:HAS_SYNC ? '링크를 보내면 친구들과 같은 일정을 함께 보고 고칠 수 있어요. 공유 메뉴에서 일정을 텍스트로 복사할 수도 있어요.' : '현재 일정이 담긴 링크를 친구에게 보내세요. 이후 수정한 내용은 링크를 다시 보내야 반영돼요. 공유 메뉴에서 텍스트 복사도 할 수 있어요.' },
-  { screen:'map', target:'#statusBtn',
-    title:'이전 일정으로 되돌리기',
-    body:'일정을 잘못 바꿨다면 이 메뉴의 백업 목록에서 이전 상태로 되돌릴 수 있어요. 동선 최적화 전 일정도 여기서 찾을 수 있어요.' },
+    body:HAS_SYNC ? '링크 보내기를 누르면 메시지나 카카오톡으로 바로 보낼 수 있어요. 받은 친구는 같은 일정을 함께 보고 고쳐요.' : '링크 보내기로 지금 일정을 친구에게 보내요. 이후에 고친 내용은 링크를 다시 보내야 반영돼요.' },
   { screen:'prep', bag:'prep', target:'.navbtn[data-screen="prep"]',
     title:'여행 가방',
     body:'일정표 밖에서 챙길 것들이 여기 모여 있어요. 위의 세 칸으로 준비물, 가고 싶은 곳, 경비를 오가요.' },
@@ -7704,13 +7726,13 @@ const GUIDE_STEPS = [
     body:'날짜를 정하지 않고 장소부터 모아두세요. 일정에 넣기를 누르면 원하는 날에 들어가고, 일정표에서 장소를 추가할 때도 모아둔 곳을 바로 고를 수 있어요.' },
   { screen:'prep', bag:'money', target:'.bag-seg [data-bag="money"]',
     title:'경비 주머니',
-    body:'오른쪽 위 기록으로 쓴 돈을 적어요. 영수증을 찍으면 금액과 가게를 읽어서 채워주고, 엔이나 달러로 적어도 합계는 한 통화로 모아 보여줘요. 함께 간 사람을 넣으면 정산까지 해줘요.' },
+    body:'오른쪽 위 추가로 쓴 돈을 적어요. 영수증을 찍으면 금액과 가게를 읽어서 채워주고, 엔이나 달러로 적어도 합계는 한 통화로 모아 보여줘요. 함께 간 사람을 넣으면 정산까지 해줘요.' },
   { screen:'prep', bag:'money', target:['.settle .st-foot', '.settle'],
     title:'정산',
     body:'누가 누구에게 얼마를 보내면 되는지 1원 단위까지 맞춰 계산해요. 각자 결제와 총무가 관리 중에 고를 수 있고, 문자·카톡으로 보내기를 누르면 정산 내용을 바로 보낼 수 있어요.' },
   { screen:'schedule', target:null,
     title:'준비 끝!',
-    body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정이나 내 여행 목록에서 언제든 다시 볼 수 있어요.' }
+    body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정에서 언제든 다시 볼 수 있어요.' }
 ];
 
 let gdSteps = [], gdIdx = 0, gdRunning = false, gdDir = 1;
@@ -7882,7 +7904,6 @@ function replayGuide(){
   startGuide(true);
 }
 document.getElementById('guideAgainBtn').addEventListener('click', replayGuide);
-document.getElementById('tripLibraryGuideBtn').addEventListener('click', replayGuide);
 document.addEventListener('keydown', e=>{
   if(!gdRunning) return;
   if(e.key==='Escape') endGuide(false);
@@ -7930,7 +7951,7 @@ function finishSplash(){
       document.querySelector('meta[name="theme-color"]').content='#F8FBFF';
     }, 180);
     setTimeout(()=> splash.remove(), 800);
-  }, Math.max(0, (splashReducedMotion ? 900 : 2450) - (performance.now() - splashStartedAt)));
+  }, Math.max(0, (splashReducedMotion ? 700 : 1500) - (performance.now() - splashStartedAt)));
 }
 // Keep the opening animation from blocking the app on a slow connection.
 setTimeout(finishSplash, 4000);
