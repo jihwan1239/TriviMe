@@ -1862,8 +1862,8 @@
   .ai-mini{ background:none !important; color:var(--brand) !important; box-shadow:none !important; border:none !important;
     font-weight:700; padding:4px 2px !important; }
 
-  /* ---------- 일정표 머리 : 날씨가 없을 땐 자리를 비우지 않기 ---------- */
-  .wx-line:empty{ display:none !important; }
+  /* ---------- 일정표 머리 : 예보가 없어도 안내 줄 높이를 유지 ---------- */
+  #wxLine{ min-height:18px; }
   .sec-title-row{ margin-bottom:12px !important; }
   #wxLine:not(:empty){ margin-top:-4px; margin-bottom:12px; }
 
@@ -2010,7 +2010,7 @@
         <button type="button" class="head-btn" id="scheduleTripsTopBtn" title="내 여행 목록" aria-label="내 여행 목록"><span class="icon" data-i="navList"></span></button>
         <button class="mini-btn ghost" id="tripSetBtn" aria-expanded="false" aria-controls="tripSet"><span class="icon" data-i="pencil"></span>여행 설정</button>
       </div>
-      <div class="wx-line" id="wxLine"></div>
+      <div class="wx-line" id="wxLine" aria-live="polite"><span class="wx-none">날씨 안내</span></div>
       <aside class="ios-inline-guide" id="iosInlineGuide" hidden role="note"><span id="iosInlineText"></span><br><button type="button" id="iosInlineTrips">내 여행 목록</button><button type="button" id="iosInlineClose">닫기</button></aside>
       <div class="quick-actions" aria-label="항공편과 숙소">
         <button class="stay-row" id="flightBtn">
@@ -3280,9 +3280,9 @@ function renderScheduleScreenInner(){
     const hdr=document.querySelector('#screen-schedule .sec-header');
     if(hdr) hdr.appendChild(sumEl);
   }
+  renderWeather(day);
   if(!day){ wrap.innerHTML=`<div class="empty-note">날짜가 없어요.<br>여행 설정 → 날짜 추가에서 여행 날짜를 정해주세요.</div>`; sumEl.innerHTML=''; return; }
 
-  renderWeather(day);
   renderPlanBar(day);
   renderPlanBarMap();
   renderDaySummary(day, sumEl);
@@ -3755,10 +3755,16 @@ async function fetchWeather(iso, lat, lng){
     return null;
   }
 }
+let weatherRenderId = 0;
 async function renderWeather(day){
   const el = document.getElementById('wxLine');
   if(!el) return;
-  if(!day || !day.iso){ el.innerHTML=''; return; }
+  const renderId = ++weatherRenderId;
+  el.hidden = false;
+  if(!day || !day.iso){
+    el.innerHTML = `<span class="wx-none">여행 날짜를 정하면 날씨를 확인할 수 있어요</span>`;
+    return;
+  }
 
   // 그 날 첫 장소 좌표 (없으면 여행지 중심)
   const spot = (day.stops||[]).find(x=>!x.tbd && x.lat!=null);
@@ -3767,15 +3773,22 @@ async function renderWeather(day){
   const lng = spot? spot.lng : c.lng;
 
   const daysAhead = Math.round((new Date(day.iso+'T00:00:00') - new Date(new Date().toDateString()))/86400000);
-  if(daysAhead < 0){ el.innerHTML=''; return; }
+  if(daysAhead < 0){
+    el.innerHTML = `<span class="wx-none">지난 일정의 날씨 예보는 제공되지 않아요</span>`;
+    return;
+  }
   if(daysAhead > 15){
     el.innerHTML = `<span class="wx-none">예보는 출발 2주 전부터 볼 수 있어요</span>`;
     return;
   }
 
-  if(!el.innerHTML.trim()) el.innerHTML = `<span class="wx-none">날씨 확인 중…</span>`;
+  el.innerHTML = `<span class="wx-none">날씨 확인 중…</span>`;
   const w = await fetchWeather(day.iso, lat, lng);
-  if(!w){ el.innerHTML = ''; return; }     // 실패는 조용히 숨깁니다 (깨진 화면처럼 보이지 않도록)
+  if(renderId !== weatherRenderId) return; // 날짜 전환 전의 응답은 현재 안내를 덮지 않습니다.
+  if(!w){
+    el.innerHTML = `<span class="wx-none">이 날짜의 날씨 예보를 확인할 수 없어요</span>`;
+    return;
+  }
   const [label, emoji] = WX_CODE[w.code] || ['—','·'];
   el.innerHTML = `
     <span class="wx-ico">${emoji}</span>
