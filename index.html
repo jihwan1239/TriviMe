@@ -1861,6 +1861,44 @@
   /* '모두' 같은 작은 보조 동작은 글자 버튼으로 (햇살색은 '지금'에만) */
   .ai-mini{ background:none !important; color:var(--brand) !important; box-shadow:none !important; border:none !important;
     font-weight:700; padding:4px 2px !important; }
+
+  /* ---------- 일정표 머리 : 날씨가 없을 땐 자리를 비우지 않기 ---------- */
+  .wx-line:empty{ display:none !important; }
+  .sec-title-row{ margin-bottom:12px !important; }
+  #wxLine:not(:empty){ margin-top:-4px; margin-bottom:12px; }
+
+  /* ---------- 분류 색 : 점 대신 번호 칸의 테두리 ---------- */
+  .tc-num, .pc-num{ background:rgba(255,255,255,.85) !important; color:var(--ink) !important;
+    box-shadow:inset 0 0 0 1.6px var(--cc, #C4C4C8) !important; }
+  .tc-num::after, .pc-num::after{ display:none !important; }
+
+  /* ---------- 지도 상단 제목 : 누르면 바로 고치기 ---------- */
+  #tripTitle{ cursor:text; border-radius:6px; transition:background .2s; }
+  #tripTitle:active{ background:rgba(28,28,30,.05); }
+  #tripTitle.editing{ overflow:visible; }
+  .tt-input{ width:100%; font:inherit; font-size:16px; font-weight:600; letter-spacing:-.025em; color:var(--ink);
+    background:rgba(255,255,255,.9) !important; border:1px solid rgba(47,147,221,.45) !important; border-radius:8px !important;
+    padding:3px 8px !important; margin:-4px 0 -4px -9px; outline:none; box-shadow:0 0 0 3px rgba(47,147,221,.14) !important; }
+
+  /* ---------- 경비 내역 : 날짜별 한 장의 카드, 줄마다 구분선 ---------- */
+  .money-list{ gap:0 !important; background:var(--glass) !important; border:1px solid var(--glass-line);
+    border-radius:var(--r-box); overflow:hidden; box-shadow:var(--glass-shadow); }
+  .money-list .money-row{ background:transparent !important; border:none !important; border-radius:0 !important;
+    box-shadow:none !important; border-bottom:1px solid rgba(28,28,30,.07) !important; padding:13px 14px !important;
+    color:var(--ink) !important; -webkit-tap-highlight-color:transparent; }
+  .money-list .money-row:last-child{ border-bottom:none !important; }
+  .money-list .money-row:active{ background:rgba(28,28,30,.04) !important; }
+  .money-row b, .money-row .mr-v{ color:var(--ink) !important; }
+  .money-row .mr-main small, .money-row .mr-v small, .money-row .mr-v em{ color:var(--muted) !important; }
+
+  /* ---------- 하단 탭 : 알약 없이, 선택된 탭은 색으로만 ---------- */
+  .bottomnav::before{ display:none !important; }
+  .navbtn, .navbtn.active{ background:none !important; box-shadow:none !important; border:none !important; }
+  .navbtn{ color:#8C97A5 !important; }
+  .navbtn .lb{ font-weight:600 !important; }
+  .navbtn.active{ color:var(--brand) !important; }
+  .navbtn.active .lb{ font-weight:700 !important; }
+  .navbtn.active .icon{ transform:none !important; }
 </style>
 
 </head>
@@ -2008,11 +2046,11 @@
   <div class="screen" id="screen-prep">
     <div class="sec-header">
       <div class="sec-title-row">
-        <h1>여행 가방</h1>
+        <h1>여행 노트</h1>
         <button class="mini-btn" id="prepAiBtn"><span class="icon" data-i="star"></span>AI 추천</button>
         <button class="mini-btn bag-add" id="bagAddBtn" hidden><span class="icon" data-i="plus"></span><span id="bagAddLb">추가</span></button>
       </div>
-      <div class="bag-seg" role="tablist" aria-label="여행 가방">
+      <div class="bag-seg" role="tablist" aria-label="여행 노트">
         <span class="bag-thumb" aria-hidden="true"></span>
         <button type="button" role="tab" data-bag="prep" class="on">준비물</button>
         <button type="button" role="tab" data-bag="wish">가고 싶은 곳<span class="bag-n" id="wishN"></span></button>
@@ -2111,7 +2149,7 @@
   <nav class="bottomnav" aria-label="주요 메뉴">
     <button class="navbtn active" data-screen="schedule"><span class="icon" data-i="navList"></span><span class="lb">일정표</span></button>
     <button class="navbtn" data-screen="map"><span class="icon" data-i="navMap"></span><span class="lb">지도</span></button>
-    <button class="navbtn" data-screen="prep"><span class="icon" data-i="navBag"></span><span class="lb">여행 가방</span></button>
+    <button class="navbtn" data-screen="prep"><span class="icon" data-i="navNote"></span><span class="lb">노트</span></button>
   </nav>
   </div>
 
@@ -2289,6 +2327,7 @@ const RAW = {
   navList:'<path d="M4 6h16M4 12h16M4 18h10"/>',
   navCheck:'<path d="M4 12.5l5 5L20 6"/>',
   navBag:'<rect x="4" y="7.5" width="16" height="12.5" rx="3"/><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5"/><path d="M4 12.5h16"/>',
+  navNote:'<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
   heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   camera:'<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.3-2h4.8l1.3 2h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/>',
   wallet:'<rect x="3.5" y="6.5" width="17" height="13" rx="3"/><path d="M3.5 10.5h17"/><circle cx="16.5" cy="15" r="1.2"/>',
@@ -5960,7 +5999,7 @@ function renderMoney(){
         const label = id==='none' ? '여행 전' : `${i+1}일차 · ${fmtDate(TRIP.days[i].iso)}`;
         const idxs = byDay[id], sub = idxs.reduce((a,k)=>a+(conv[k]||0),0);
         return `<div class="bag-sub">${esc(label)}<span>${moneyFmt(sub,cur)}${esc(cur)}</span></div>
-          <div class="bag-list">${idxs.map(k=>{
+          <div class="bag-list money-list">${idxs.map(k=>{
             const x = m.items[k], u = x.cur || cur;
             const col = (MONEY_CATS.find(c=>c[0]===x.cat)||MONEY_CATS[5])[1];
             const other = u!==cur;
@@ -6662,6 +6701,44 @@ function showIosGuideForExistingTrip(){
     : 'Safari의 공유 → 홈 화면에 추가 → 웹 앱으로 열기로 앱처럼 사용할 수 있어요. 공유받은 여행은 내 여행 목록에 링크를 붙여넣어 열 수 있습니다.';
   document.getElementById('iosInlineGuide').hidden=false;
 }
+
+/* 지도 상단의 여행 제목을 눌러 바로 바꿉니다 */
+(function bindTitleEdit(){
+  const h = document.getElementById('tripTitle');
+  if(!h) return;
+  h.setAttribute('role','button'); h.setAttribute('tabindex','0');
+  h.setAttribute('aria-label','여행 이름 바꾸기');
+  const start = ()=>{
+    if(h.querySelector('input')) return;
+    const old = TRIP.title || '';
+    h.classList.add('editing');
+    h.innerHTML = `<input type="text" class="tt-input" maxlength="30" enterkeyhint="done" value="${esc(old)}" aria-label="여행 이름">`;
+    const inp = h.querySelector('input');
+    inp.focus(); inp.select();
+    let done = false;
+    const finish = (save)=>{
+      if(done) return; done = true;
+      const v = inp.value.trim();
+      h.classList.remove('editing');
+      if(save && v && v!==old){
+        TRIP.title = v; markChanged(); refreshAll();
+        toast('여행 이름을 바꿨어요');
+      } else {
+        h.textContent = old || '여행 일정';
+      }
+    };
+    inp.addEventListener('keydown', e=>{
+      e.stopPropagation();                                  // 제목으로 번져 다시 열리지 않게
+      if(e.key==='Enter'){ e.preventDefault(); finish(true); }
+      if(e.key==='Escape'){ finish(false); }
+    });
+    inp.addEventListener('click', e=> e.stopPropagation());
+    inp.addEventListener('blur', ()=> finish(true));
+  };
+  h.addEventListener('click', start);
+  h.addEventListener('keydown', e=>{ if(e.target===h && e.key==='Enter'){ e.preventDefault(); start(); } });
+})();
+
 function refreshAll(){
   const t=document.getElementById('tripTitle');
   if(t) t.textContent = TRIP.title||'여행 일정';
@@ -7716,8 +7793,8 @@ const GUIDE_STEPS = [
     title:'친구와 함께 짜기',
     body:HAS_SYNC ? '링크 보내기를 누르면 메시지나 카카오톡으로 바로 보낼 수 있어요. 받은 친구는 같은 일정을 함께 보고 고쳐요.' : '링크 보내기로 지금 일정을 친구에게 보내요. 이후에 고친 내용은 링크를 다시 보내야 반영돼요.' },
   { screen:'prep', bag:'prep', target:'.navbtn[data-screen="prep"]',
-    title:'여행 가방',
-    body:'일정표 밖에서 챙길 것들이 여기 모여 있어요. 위의 세 칸으로 준비물, 가고 싶은 곳, 경비를 오가요.' },
+    title:'여행 노트',
+    body:'일정 밖의 기록은 여기 모여 있어요. 위의 세 칸으로 준비물, 가고 싶은 곳, 경비를 오가요.' },
   { screen:'prep', bag:'prep', target:'#prepAiBtn',
     title:'준비물',
     body:'여행지와 기간에 맞는 준비물 목록을 AI가 만들어줘요. 국내 여행이면 내국인 기준으로 맞춰요. 체크는 내 기기에만 저장돼요.' },
