@@ -1909,6 +1909,8 @@
   .tmove .tm-ico{ box-shadow:0 0 0 3px rgba(250,251,253,.9); }
   .tbl:has(.drag-src) .tl-rail{ opacity:0; }
   @media (prefers-reduced-motion: no-preference){ .tl-rail i{ transition:opacity .25s ease; } }
+
+  .st-krw{ font-size:11.5px; color:var(--muted); margin:2px 2px 8px; }
 </style>
 
 </head>
@@ -5947,8 +5949,22 @@ function moneyMembers(){ const m=moneyData(); return Array.isArray(m.members) ? 
 function settleStep(unit){ return ['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 0.01 : 1; }
 function roundStep(v, step){ return Math.round(v/step)*step; }
 
+/* 정산은 합계 통화와 상관없이 항상 원화로 계산합니다 (송금은 원으로 하니까요) */
+function toKRW(amount, unit){
+  unit = unit || bagCur();
+  if(unit==='원') return Number(amount)||0;
+  const r = rateOf(unit);
+  return r ? (Number(amount)||0) * r : null;
+}
+/* 예전에 합계 통화로 적어둔 회비·송금 기록은 원화로 바꿔 읽습니다 */
+function legacyKRW(v){
+  const m = moneyData();
+  if(m.krwSettle) return Number(v)||0;
+  const k = toKRW(v, m.unit || tripCountry().currency);
+  return k==null ? (Number(v)||0) : k;
+}
 function computeSettle(){
-  const m = moneyData(), base = bagCur();
+  const m = moneyData(), base = '원';
   const members = moneyMembers();
   const mode = m.settleMode==='manager' ? 'manager' : 'each';
   const manager = members.includes(m.manager) ? m.manager : members[0];
@@ -5959,7 +5975,7 @@ function computeSettle(){
   let unassigned=0, noRate=0, sharedU=0, uneven=false;
 
   m.items.forEach(x=>{
-    const v = toBase(x.amount, x.cur);
+    const v = toKRW(x.amount, x.cur);
     if(v==null){ noRate++; return; }
     let payer = members.includes(x.payer) ? x.payer : null;
     if(!payer && mode==='manager') payer = manager;           // 총무 관리: 결제자가 없으면 회비에서 낸 것
@@ -5981,13 +5997,13 @@ function computeSettle(){
   if(mode==='manager' && manager){
     members.forEach(p=>{
       if(p===manager) return;
-      const c = U(m.pot?.[p]);
+      const c = U(legacyKRW(m.pot?.[p]));
       if(c>0){ potU[p]=c; balU[p]+=c; balU[manager]-=c; }
     });
   }
   // 이미 보낸 송금
   (m.settled||[]).forEach(t=>{
-    if(balU[t.from]!=null && balU[t.to]!=null){ const a=U(t.amount); balU[t.from]+=a; balU[t.to]-=a; }
+    if(balU[t.from]!=null && balU[t.to]!=null){ const a=U(t.cur==='원' ? t.amount : legacyKRW(t.amount)); balU[t.from]+=a; balU[t.to]-=a; }
   });
 
   const tU = [];
@@ -6166,6 +6182,8 @@ function settleCardHtml(){
         ${S.members.filter(p=>p!==S.manager).map(p=>`<label class="pot-row"><span>${esc(p)}</span>
           <input type="text" inputmode="numeric" data-pot="${esc(p)}" value="${S.pot[p]? moneyFmt(S.pot[p],u):''}" placeholder="0"><em>${esc(u)}</em></label>`).join('')}
       </details>` : ''}
+    ${(()=>{ const us=[...new Set(m.items.map(x=>x.cur||bagCur()).filter(c=>c!=='원'))].filter(c=>rateOf(c));
+        return us.length ? `<p class="st-krw">원화로 바꿔 정산해요. ${us.map(c=>`1${esc(c)} = ${rateFmt(rateOf(c))}원`).join(', ')}</p>` : ''; })()}
     <div class="st-rows">${rows}</div>
     <div class="st-tx-head">보낼 돈</div>
     ${S.transfers.length ? `<div class="st-tx">${S.transfers.map((t,i)=>`
@@ -6197,6 +6215,11 @@ function bindSettleCard(){
   document.querySelectorAll('.st-pot [data-pot]').forEach(i=>{
     i.addEventListener('input', ()=>{ const d=i.value.replace(/[^\d]/g,''); i.value = d? Number(d).toLocaleString('ko-KR') : ''; });
     i.addEventListener('change', ()=>{
+      if(!m.krwSettle){                                   // 예전 회비를 원화로 옮겨 적고 이후로는 원화로
+        Object.keys(m.pot||{}).forEach(k=> m.pot[k] = Math.round(legacyKRW(m.pot[k])));
+        (m.settled||[]).forEach(t=>{ if(t.cur!=='원'){ t.amount = Math.round(legacyKRW(t.amount)); t.cur='원'; } });
+        m.krwSettle = true;
+      }
       m.pot = m.pot || {}; const v = Number(i.value.replace(/,/g,''))||0;
       if(v>0) m.pot[i.dataset.pot]=v; else delete m.pot[i.dataset.pot];
       markChanged(); renderMoney();
@@ -6206,7 +6229,7 @@ function bindSettleCard(){
   document.querySelectorAll('[data-tx]').forEach(b=> b.onclick = ()=>{
     const S = computeSettle(), t = S.transfers[Number(b.dataset.tx)]; if(!t) return;
     m.settled = m.settled || [];
-    m.settled.push({ from:t.from, to:t.to, amount:t.amount, at:Date.now() });
+    m.settled.push({ from:t.from, to:t.to, amount:t.amount, cur:'원', at:Date.now() });
     markChanged();
     b.closest('.tx').classList.add('done');
     setTimeout(renderMoney, 320);
@@ -6224,7 +6247,7 @@ function bindSettleCard(){
 function membersEditorHtml(list){
   return `<div class="mem-chips" id="memChips">${list.map(n=>
       `<span class="mem"><b>${esc(n)}</b><button type="button" data-rm="${esc(n)}" aria-label="${esc(n)} 빼기">✕</button></span>`).join('')}</div>
-    <div class="mem-add"><input type="text" id="memInput" maxlength="12" placeholder="이름 넣고 추가 (예: 지환)" enterkeyhint="done">
+    <div class="mem-add"><input type="text" id="memInput" maxlength="40" placeholder="이름 (여러 명은 쉼표로)" enterkeyhint="enter" autocomplete="off">
       <button type="button" id="memAddBtn">추가</button></div>`;
 }
 function bindMembersEditor(list, onChange){
@@ -6234,12 +6257,47 @@ function bindMembersEditor(list, onChange){
     box.querySelectorAll('[data-rm]').forEach(b=> b.onclick=()=>{ list.splice(list.indexOf(b.dataset.rm),1); repaint(); onChange&&onChange(); });
   };
   const inp = document.getElementById('memInput');
+  const btn = document.getElementById('memAddBtn');
+  let composing = false, pending = false;
+
   const add = ()=>{
-    inp.value.split(/[,\s]+/).map(v=>v.trim()).filter(Boolean).forEach(n=>{ if(!list.includes(n) && list.length<20) list.push(n); });
-    inp.value=''; repaint(); onChange&&onChange(); inp.focus();
+    // 한글을 조합하는 중이면 조합이 끝난 뒤에 넣습니다 (아이폰에서 마지막 글자가 남거나 되살아나는 문제)
+    if(composing){ pending = true; return; }
+    const names = inp.value.split(/[,，\n]+/).map(v=>v.trim().replace(/\s+/g,' ')).filter(Boolean);
+    if(!names.length){ inp.focus(); return; }
+    const dup = [];
+    names.forEach(n=>{
+      n = n.slice(0,12);
+      if(list.includes(n)) dup.push(n);
+      else if(list.length < 20) list.push(n);
+    });
+    // 조합 상태가 완전히 풀린 뒤에 비워야 글자가 되살아나지 않아요
+    inp.value = '';
+    requestAnimationFrame(()=>{ inp.value = ''; inp.focus(); });
+    repaint(); onChange&&onChange();
+    if(dup.length) toast(`${dup.join(', ')}은(는) 이미 있어요`);
+    else if(list.length>=20) toast('최대 20명까지 넣을 수 있어요');
   };
-  document.getElementById('memAddBtn').onclick = add;
-  inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); add(); } });
+
+  inp.addEventListener('compositionstart', ()=>{ composing = true; });
+  inp.addEventListener('compositionend', ()=>{
+    composing = false;
+    if(pending){ pending = false; setTimeout(add, 0); }
+  });
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.keyCode===13){
+      e.preventDefault();
+      if(e.isComposing || e.keyCode===229){ pending = true; return; }
+      add();
+    }
+  });
+  // '추가'를 눌러도 입력칸 포커스를 뺏지 않게 (키보드가 내려가며 화면이 밀리지 않도록)
+  btn.addEventListener('pointerdown', e=> e.preventDefault());
+  btn.addEventListener('mousedown', e=> e.preventDefault());
+  btn.onclick = ()=>{
+    if(composing){ pending = true; inp.blur(); inp.focus(); return; }   // 조합을 끝내도록 유도
+    add();
+  };
   repaint();
 }
 function openMembersSheet(){
