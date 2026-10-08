@@ -2026,6 +2026,18 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
   .si-prev img{ display:block; width:100%; height:auto; }
   .si-save{ display:block; text-align:center; text-decoration:none; }
   .st-foot #stShare{ background:var(--glass-2) !important; color:var(--ink-2) !important; border:1px solid rgba(255,255,255,.95) !important; box-shadow:0 1px 2px rgba(25,45,75,.05) !important; }
+
+  .st-foot #stSend{ background:var(--brand) !important; color:#fff !important; border-color:var(--brand) !important; }
+  #moneyForm .si-prev{ max-height:46vh; }
+  .ss-acts{ display:flex; flex-direction:column; gap:2px; margin-top:14px; }
+  .ss-acts .btn-primary{ width:100%; padding:14px; font-size:15px; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .ss-acts .btn-primary .icon{ width:17px; height:17px; }
+  .ss-alt{ border:none; background:none; padding:12px; font-size:13.5px; font-weight:600; color:var(--brand); cursor:pointer; }
+
+  /* 정산 보내기 : 보조 버튼 공통 규칙(.st-foot button:not(#stShare))보다 우선하도록 */
+  .settle .st-foot button#stSend{ background:var(--brand) !important; color:#fff !important;
+    border:1px solid var(--brand) !important; box-shadow:none !important; }
+  .settle .st-foot button#stSend .icon{ color:#fff; }
 </style>
 
 </head>
@@ -6366,29 +6378,41 @@ function dataUrlToFile(dataUrl, name){
   return new File([arr], name, { type:'image/png' });
 }
 
-/* 공유 창으로 사진 보내기 (카카오톡·메시지·사진 저장). 공유 창이 없으면 미리보기와 저장 버튼 */
-function shareSettleImage(){
+/* 정산 보내기 : 보낼 이미지를 먼저 보여주고, 이미지로 보낼지 글로 보낼지 고릅니다.
+   아이폰은 누른 직후에만 공유 창을 열 수 있어서, 이미지는 시트를 열 때 미리 만들어 둡니다. */
+function openSettleSend(){
   let cv;
-  try{ cv = settleImageCanvas(); }catch(e){ console.warn('[정산 이미지]', e); toast('이미지를 만들지 못했어요'); return; }
-  const dataUrl = cv.toDataURL('image/png');
+  try{ cv = settleImageCanvas(); }catch(e){ console.warn('[정산 이미지]', e); cv = null; }
+  const dataUrl = cv ? cv.toDataURL('image/png') : '';
   const name = `${(TRIP.title||'여행').replace(/[\\/:*?"<>|]/g,'').trim()} 정산.png`;
-  const file = dataUrlToFile(dataUrl, name);
-  // 아이폰은 누른 직후에만 공유 창을 열 수 있어서, 기다리는 단계 없이 바로 엽니다
-  if(navigator.canShare && navigator.canShare({ files:[file] })){
-    navigator.share({ files:[file] }).catch(e=>{ if(!e || e.name!=='AbortError') previewSettleImage(dataUrl, name); });
-    return;
-  }
-  previewSettleImage(dataUrl, name);
-}
-function previewSettleImage(dataUrl, name){
-  document.querySelector('#moneyModalBg h2').textContent = '정산 이미지';
+  const file = dataUrl ? dataUrlToFile(dataUrl, name) : null;
+  const canFile = !!(file && navigator.canShare && navigator.canShare({ files:[file] }));
+  const bg = document.getElementById('moneyModalBg');
+
+  document.querySelector('#moneyModalBg h2').textContent = '정산 보내기';
   document.getElementById('moneyForm').innerHTML = `
     <div class="form-card flat">
-      <div class="si-prev"><img src="${dataUrl}" alt="정산 이미지"></div>
-      <p class="hint" style="text-align:center">이미지를 길게 눌러 저장하거나 아래 버튼으로 내려받으세요.</p>
-      <div class="form-actions"><a class="btn-primary si-save" href="${dataUrl}" download="${esc(name)}">이미지 저장</a></div>
+      ${dataUrl ? `<div class="si-prev"><img src="${dataUrl}" alt="보낼 정산 이미지"></div>` : ''}
+      <div class="ss-acts">
+        ${!dataUrl ? '' : canFile
+          ? `<button type="button" class="btn-primary" id="ssImg"><span class="icon">${iconSvg('share')}</span>이미지로 보내기</button>`
+          : `<a class="btn-primary si-save" id="ssImg" href="${dataUrl}" download="${esc(name)}">이미지 저장</a>`}
+        <button type="button" class="ss-alt" id="ssText">글로 보내기</button>
+      </div>
     </div>`;
-  document.getElementById('moneyModalBg').classList.add('open');
+
+  const img = document.getElementById('ssImg');
+  if(img && canFile) img.onclick = ()=>{
+    navigator.share({ files:[file] })
+      .then(()=> closeModal(bg))
+      .catch(e=>{ if(e && e.name!=='AbortError') toast('이미지를 보내지 못했어요. 이미지를 길게 눌러 저장할 수 있어요'); });
+  };
+  document.getElementById('ssText').onclick = async ()=>{
+    const r = await shareOrCopy({ title:`${TRIP.title||'여행'} 경비 정산`, text: settleText(computeSettle()) },
+                                '정산 내용을 복사했어요. 단톡방이나 문자에 붙여넣어 주세요');
+    if(r==='shared' || r==='copied') closeModal(bg);
+  };
+  bg.classList.add('open');
 }
 
 function renderMoney(){
@@ -6522,8 +6546,7 @@ function settleCardHtml(){
     ${S.unassigned? `<p class="st-note">결제한 사람을 안 적은 지출 ${S.unassigned}건은 정산에서 빠졌어요.</p>`:''}
     ${S.noRate? `<p class="st-note">환율이 없는 지출 ${S.noRate}건은 정산에서 빠졌어요.</p>`:''}
     <div class="st-foot">
-      <button type="button" id="stImage"><span class="icon">${iconSvg('share')}</span>이미지로 보내기</button>
-      <button type="button" id="stShare">글로 보내기</button>
+      <button type="button" id="stSend"><span class="icon">${iconSvg('share')}</span>정산 보내기</button>
       <button type="button" id="stPeople">사람 편집</button>
       ${sentN? `<button type="button" id="stUndo">보낸 기록 ${sentN}건 되돌리기</button>`:''}
     </div>
@@ -6569,8 +6592,7 @@ function bindSettleCard(){
     if(!confirm('보냈다고 표시한 송금 기록을 모두 되돌릴까요?')) return;
     m.settled = []; markChanged(); renderMoney();
   };
-  const share = document.getElementById('stShare'); if(share) share.onclick = shareSettle;
-  const img = document.getElementById('stImage'); if(img) img.onclick = shareSettleImage;
+  const send = document.getElementById('stSend'); if(send) send.onclick = openSettleSend;
 }
 
 /* ---- 함께 간 사람 ---- */
@@ -8449,7 +8471,7 @@ const GUIDE_STEPS = [
     body:'오른쪽 위 추가로 쓴 돈을 적어요. 영수증을 찍으면 금액과 가게를 읽어서 채워주고, 엔이나 달러로 적어도 합계는 한 통화로 모아 보여줘요. 함께 간 사람을 넣으면 정산까지 해줘요.' },
   { screen:'prep', bag:'money', target:['.settle .st-foot', '.settle'],
     title:'정산',
-    body:'누가 누구에게 얼마를 보내면 되는지 1원 단위까지 맞춰 계산해요. 각자 결제와 총무가 관리 중에 고를 수 있고, 문자·카톡으로 보내기를 누르면 정산 내용을 바로 보낼 수 있어요.' },
+    body:'누가 누구에게 얼마를 보내면 되는지 1원 단위까지 맞춰 계산해요. 각자 결제와 총무가 관리 중에 고를 수 있고, 정산 보내기를 누르면 이미지나 글로 바로 보낼 수 있어요.' },
   { screen:'schedule', target:null,
     title:'준비 끝!',
     body:'이제 첫 일정을 넣어보세요. 이 가이드는 여행 설정에서 언제든 다시 볼 수 있어요.' }
