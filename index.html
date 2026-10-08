@@ -1969,6 +1969,57 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
   .ob-install-link .icon{ width:15px; height:15px; }
   #installHowBtn[hidden]{ display:none !important; }
   .ig-main b{ font-weight:700; }
+
+  /* ---------- 똑같이 / 직접 나누기 ---------- */
+  .split-toggle{ position:relative; display:grid; grid-template-columns:1fr 1fr; margin-top:10px;
+    background:var(--soft); border-radius:12px; padding:3px; }
+  .split-toggle button{ position:relative; z-index:1; border:none; background:none; padding:8px; font-size:13px; font-weight:600;
+    color:var(--muted); cursor:pointer; transition:color .25s; }
+  .split-toggle button.on{ color:var(--ink); }
+  .split-toggle .st-thumb{ position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:9px; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.08); transform:translateX(calc(var(--i,0)*100%)); transition:transform .3s cubic-bezier(.32,.72,0,1); }
+  .split-rows{ display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+  .split-rows[hidden]{ display:none; }
+  .split-row{ display:flex; align-items:center; gap:10px; margin:0 !important; padding:6px 6px 6px 12px; border-radius:12px;
+    background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.9); font-size:14px; font-weight:600; color:var(--ink); }
+  .split-row span{ flex:1; min-width:0; }
+  .split-row input{ flex:0 0 46%; min-width:0; text-align:right; font-variant-numeric:tabular-nums; font-weight:700;
+    background:var(--soft) !important; border:none !important; border-radius:9px !important; padding:9px 10px !important; font-size:15px !important; }
+  .split-row input::placeholder{ color:#A8B0BC; font-weight:600; }
+  .split-row em{ flex:0 0 auto; font-style:normal; font-size:12px; color:var(--muted); min-width:14px; }
+  #m_withHint.bad{ color:#C2412F; }
+
+  .form-card label.split-row{ display:flex !important; flex-direction:row !important; align-items:center; gap:10px;
+    margin:0 !important; padding:6px 6px 6px 14px; font-size:14px !important; font-weight:600 !important; color:var(--ink) !important; }
+  .form-card .split-row span{ flex:1 1 auto; min-width:0; }
+  .form-card .split-row input{ flex:0 0 46% !important; width:46% !important; min-width:0; margin:0 !important; }
+  .form-card .split-row em{ flex:0 0 auto; width:auto; margin:0; padding-right:4px; }
+  .form-card .split-row input:focus{ background:#fff !important; box-shadow:0 0 0 2px rgba(47,147,221,.45) !important; }
+
+  /* ---------- 직접 나누기 (간결형) : 칩 자리가 한 장의 목록으로 ---------- */
+  .sp-acts{ display:inline-flex; gap:12px; }
+  .sp-acts [hidden]{ display:none !important; }
+  .pay-chips[hidden]{ display:none !important; }
+  .sp-list{ background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.92); border-radius:14px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(25,45,75,.04); animation:optIn .25s var(--ease); }
+  .sp-list[hidden]{ display:none; }
+  .sp-row{ display:flex; align-items:center; gap:11px; min-height:46px; padding:0 12px; border-bottom:1px solid rgba(28,28,30,.07); }
+  .sp-chk{ flex:0 0 22px; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--brand); background:var(--brand);
+    color:#fff; display:grid; place-items:center; padding:0; cursor:pointer; transition:background .2s, border-color .2s; }
+  .sp-chk svg{ width:13px; height:13px; }
+  .sp-row.off .sp-chk{ background:transparent; border-color:#C5CCD6; color:transparent; }
+  .sp-name{ flex:1; min-width:0; font-size:14.5px; font-weight:600; color:var(--ink); }
+  .sp-row.off .sp-name{ color:var(--muted); }
+  .form-card .sp-amt{ flex:0 0 42% !important; width:42% !important; margin:0 !important; text-align:right;
+    background:transparent !important; border:none !important; box-shadow:none !important; border-radius:0 !important;
+    padding:12px 0 !important; font-size:15px !important; font-weight:700; color:var(--ink);
+    font-variant-numeric:tabular-nums; border-bottom:1.5px solid transparent !important; }
+  .form-card .sp-amt::placeholder{ color:#A8B0BC; font-weight:600; }
+  .form-card .sp-amt:focus{ border-bottom-color:var(--brand) !important; outline:none; }
+  .form-card .sp-amt:disabled{ opacity:1; -webkit-text-fill-color:#C5CCD6; }
+  .sp-foot{ padding:10px 12px; font-size:12.5px; color:var(--muted); background:rgba(28,28,30,.025); }
+  .sp-foot.bad{ color:#C2412F; }
+  #m_withHint[hidden]{ display:none; }
 </style>
 
 </head>
@@ -6014,6 +6065,23 @@ function moneyMembers(){ const m=moneyData(); return Array.isArray(m.members) ? 
 function settleStep(unit){ return ['달러','유로','파운드','싱가포르달러','호주달러'].includes(unit) ? 0.01 : 1; }
 function roundStep(v, step){ return Math.round(v/step)*step; }
 
+/* 한 지출을 사람별 몫으로 나눕니다. 모든 값은 최소 단위 정수(원 1, 달러 0.01 → 1)
+   · 금액을 적은 사람은 그 금액
+   · 나머지 사람은 남은 돈을 똑같이, 자투리는 결제한 사람부터 1단위씩
+   · 모두 적었는데 합이 조금 다르면(환산 반올림) 차이는 결제한 사람에게 */
+function splitShares(total, people, payer, fixed){
+  const out = {}; people.forEach(p=> out[p]=0);
+  let rest = total; const free = [];
+  people.forEach(p=>{ if(fixed && fixed[p]!=null){ out[p]=fixed[p]; rest-=fixed[p]; } else free.push(p); });
+  if(free.length){
+    const q = Math.floor(rest/free.length), r = rest - q*free.length;
+    const order = free.includes(payer) ? [payer, ...free.filter(p=>p!==payer)] : free;
+    order.forEach((p,i)=> out[p] += q + (i<r ? 1 : 0));
+  } else if(rest!==0 && people.length){
+    out[people.includes(payer) ? payer : people[0]] += rest;
+  }
+  return out;
+}
 /* 정산은 합계 통화와 상관없이 항상 원화로 계산합니다 (송금은 원으로 하니까요) */
 function toKRW(amount, unit){
   unit = unit || bagCur();
@@ -6050,10 +6118,15 @@ function computeSettle(){
     if(withP.length < members.length) uneven = true;
     const amt = U(v);
     paidU[payer] += amt; sharedU += amt;
-    // 똑같이 나누고, 남는 자투리는 결제한 사람부터 1단위씩
-    const q = Math.floor(amt / withP.length), r = amt - q*withP.length;
-    const order = withP.includes(payer) ? [payer, ...withP.filter(p=>p!==payer)] : withP;
-    order.forEach((p,i)=> owedU[p] += q + (i<r ? 1 : 0));
+    // 직접 나눈 지출이면 적은 금액을 원화로 바꿔 쓰고, 나머지는 똑같이
+    let fx = null;
+    if(x.split && x.split.fixed){
+      fx = {};
+      Object.entries(x.split.fixed).forEach(([p,a])=>{ if(withP.includes(p)) fx[p] = U(toKRW(a, x.cur)); });
+      if(Object.keys(fx).length) uneven = true; else fx = null;
+    }
+    const sh = splitShares(amt, withP, payer, fx);
+    withP.forEach(p=> owedU[p] += sh[p]);
   });
   members.forEach(p=> balU[p] = paidU[p] - owedU[p]);
 
@@ -6178,7 +6251,7 @@ function renderMoney(){
             const other = u!==cur;
             return `<button type="button" class="money-row" data-m="${x.id}">
               <i style="background:${col}"></i>
-              <span class="mr-main"><b>${esc(x.title||x.cat)}</b><small>${esc(x.cat)}${x.payer? ' · '+esc(x.payer)+' 결제':''}${Array.isArray(x.with)&&x.with.length&&moneyMembers().length&&x.with.length<moneyMembers().length? ' · '+x.with.length+'명이 나눔':''}</small></span>
+              <span class="mr-main"><b>${esc(x.title||x.cat)}</b><small>${esc(x.cat)}${x.payer? ' · '+esc(x.payer)+' 결제':''}${Array.isArray(x.with)&&x.with.length&&moneyMembers().length&&x.with.length<moneyMembers().length? ' · '+x.with.length+'명이 나눔':''}${x.split&&x.split.fixed&&Object.keys(x.split.fixed).length? ' · 직접 나눔':''}</small></span>
               <span class="mr-v"><span class="mr-amt">${moneyFmt(x.amount,u)}<small>${esc(u)}</small></span>
                 ${other? `<em>${conv[k]!=null? `≈ ${moneyFmt(conv[k],cur)}${esc(cur)}` : '환율 필요'}</em>`:''}</span></button>`;
           }).join('')}</div>`;
@@ -6427,11 +6500,14 @@ function openMoneyForm(editId){
               ${mgrMode? `<button type="button" data-p="" class="${!defPayer?'on':''}">회비에서</button>`:''}
               ${mem.map(n=>`<button type="button" data-p="${esc(n)}" class="${n===defPayer?'on':''}">${esc(n)}</button>`).join('')}
             </div>
-            <div class="lbl-row" style="margin:14px 0 7px"><label style="margin:0">나눌 사람</label>
-              <button type="button" class="ai-mini" id="m_withAll">모두</button></div>
-            <div class="pay-chips multi" id="m_with">
-              ${mem.map(n=>`<button type="button" data-w="${esc(n)}" class="${withSel.includes(n)?'on':''}">${esc(n)}</button>`).join('')}
-            </div>
+            ${(()=>{ const c = !!(x && x.split && x.split.fixed && Object.keys(x.split.fixed).length);
+              return `<div class="lbl-row" style="margin:14px 0 7px"><label style="margin:0">나눌 사람</label>
+                <span class="sp-acts"><button type="button" class="ai-mini" id="m_withAll" ${c?'hidden':''}>모두</button>
+                <button type="button" class="ai-mini" id="m_splitLink">${c?'똑같이 나누기':'금액 직접 입력'}</button></span></div>
+              <div class="pay-chips multi" id="m_with" ${c?'hidden':''}>
+                ${mem.map(n=>`<button type="button" data-w="${esc(n)}" class="${withSel.includes(n)?'on':''}">${esc(n)}</button>`).join('')}
+              </div>
+              <div class="sp-list" id="m_splitRows" ${c?'':'hidden'}></div>`; })()}
             <p class="hint" id="m_withHint"></p>`;
         })()
       : `<label>결제한 사람 <span class="lb-opt">선택</span></label>
@@ -6494,18 +6570,97 @@ function openMoneyForm(editId){
       payBox.querySelectorAll('[data-p]').forEach(z=>z.classList.remove('on')); b.classList.add('on'); payer=b.dataset.p; });
   }
   const withBox = document.getElementById('m_with');
+  const rowsBox = document.getElementById('m_splitRows');
+  let splitCustom = !!(x && x.split && x.split.fixed && Object.keys(x.split.fixed).length);
+  const fixedVals = { ...((x && x.split && x.split.fixed) || {}) };     // 이 지출 통화 기준 금액
+  const selectedPeople = ()=> withBox ? [...withBox.querySelectorAll('.on')].map(b=>b.dataset.w) : [];
+  // 폼에서 보는 금액과 정산 결과가 같도록, 정산과 같은 규칙(splitShares)으로 계산
+  const calcSplit = ()=>{
+    const st = settleStep(unit), total = Math.round(readAmt()/st), ppl = selectedPeople();
+    const fx = {};
+    ppl.forEach(p=>{ if(fixedVals[p]!=null && fixedVals[p]!=='') fx[p] = Math.round(Number(fixedVals[p])/st); });
+    const sum = Object.values(fx).reduce((a,b)=>a+b, 0);
+    return { st, total, ppl, fx, sum, free: ppl.filter(p=>fx[p]==null), sh: splitShares(total, ppl, payer, fx) };
+  };
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5l4 4 8-9"/></svg>';
+  const allPeople = ()=> withBox ? [...withBox.querySelectorAll('[data-w]')].map(b=>b.dataset.w) : [];
+  // 직접 입력 : 칩 자리가 한 장의 목록으로 바뀝니다 (동그라미로 넣고 빼고, 숫자를 눌러 고치기)
+  const renderRows = ()=>{
+    if(!rowsBox) return;
+    const sel = selectedPeople();
+    rowsBox.innerHTML = allPeople().map(p=>{
+      const on = sel.includes(p);
+      const val = fixedVals[p]!=null && fixedVals[p]!=='' ? moneyFmt(fixedVals[p], unit) : '';
+      return `<div class="sp-row ${on?'':'off'}">
+        <button type="button" class="sp-chk" data-tog="${esc(p)}" aria-pressed="${on}" aria-label="${esc(p)} 나누기에 ${on?'빼기':'넣기'}">${CHECK}</button>
+        <span class="sp-name">${esc(p)}</span>
+        <input type="text" inputmode="decimal" class="sp-amt" data-fx="${esc(p)}" autocomplete="off" value="${on?val:''}" ${on?'':'disabled'} aria-label="${esc(p)} 금액">
+      </div>`;
+    }).join('') + `<div class="sp-foot" id="m_splitFoot"></div>`;
+    rowsBox.querySelectorAll('[data-tog]').forEach(btn=> btn.onclick = ()=>{
+      const chip = withBox.querySelector(`[data-w="${CSS.escape(btn.dataset.tog)}"]`);
+      chip.classList.toggle('on');
+      const on = chip.classList.contains('on'), row = btn.closest('.sp-row'), inp = row.querySelector('.sp-amt');
+      row.classList.toggle('off', !on); btn.setAttribute('aria-pressed', on);
+      inp.disabled = !on;
+      inp.value = on && fixedVals[btn.dataset.tog]!=null && fixedVals[btn.dataset.tog]!=='' ? moneyFmt(fixedVals[btn.dataset.tog], unit) : '';
+      paintWith();
+    });
+    rowsBox.querySelectorAll('[data-fx]').forEach(inp=>{
+      inp.addEventListener('focus', ()=> inp.select());
+      inp.addEventListener('input', ()=>{
+        const raw = inp.value.replace(/[^\d.]/g,''); const [a,b] = raw.split('.');
+        inp.value = (a? Number(a).toLocaleString('ko-KR') : (b!==undefined?'0':'')) + (b!==undefined? '.'+b.slice(0,2) : '');
+        if(inp.value==='') delete fixedVals[inp.dataset.fx];
+        else fixedVals[inp.dataset.fx] = Number(inp.value.replace(/,/g,''));
+        paintWith();
+      });
+    });
+  };
   const paintWith = ()=>{
     if(!withBox) return;
+    const hint = document.getElementById('m_withHint');
+    hint.hidden = splitCustom;
     const n = withBox.querySelectorAll('.on').length, all = withBox.querySelectorAll('[data-w]').length;
-    const v = toBase(readAmt(), unit);
-    document.getElementById('m_withHint').textContent = n
-      ? `${n===all? '모두' : n+'명이'} 나눠서 1인당 ${v!=null && v>0 ? moneyFmt(v/n, base)+base : '-'}`
-      : '한 명 이상 골라주세요';
+    if(!splitCustom){
+      hint.classList.toggle('bad', !n);
+      if(!n){ hint.textContent = '한 명 이상 골라주세요'; return; }
+      const v = toBase(readAmt(), unit);
+      hint.textContent = `${n===all? '모두' : n+'명이'} 나눠서 1인당 ${v!=null && v>0 ? moneyFmt(v/n, base)+base : '-'}`;
+      return;
+    }
+    const foot = document.getElementById('m_splitFoot'); if(!foot) return;
+    foot.classList.remove('bad');
+    const c = calcSplit(), f = u=> `${moneyFmt(u*c.st, unit)}${unit}`;
+    // 비워둔 칸에는 자동으로 들어갈 금액을 흐리게
+    rowsBox.querySelectorAll('[data-fx]').forEach(inp=>{
+      const p = inp.dataset.fx, on = c.ppl.includes(p);
+      inp.placeholder = !on ? '빠짐' : (c.fx[p]==null && c.total ? moneyFmt(Math.max(0,c.sh[p])*c.st, unit) : '0');
+    });
+    const say = (t, bad)=>{ foot.textContent = t; foot.classList.toggle('bad', !!bad); };
+    if(!n) return say('한 명 이상 넣어주세요', true);
+    if(!c.total) return say('금액을 먼저 넣어주세요');
+    if(c.sum > c.total) return say(`적은 금액이 총액보다 ${f(c.sum-c.total)} 많아요`, true);
+    if(!c.free.length && c.sum !== c.total) return say(`모두 적었는데 총액보다 ${f(c.total-c.sum)} 적어요`, true);
+    if(!Object.keys(c.fx).length) return say(`지금은 1인당 ${f(c.sh[c.ppl[0]])}씩이에요. 다른 사람 금액만 적어주세요`);
+    say(c.free.length ? `나머지 ${f(c.total-c.sum)}을 ${c.free.length}명이 똑같이 나눠요` : `${f(c.total)} 딱 맞아요`);
   };
   if(withBox){
     withBox.querySelectorAll('[data-w]').forEach(b=> b.onclick=()=>{ b.classList.toggle('on'); paintWith(); });
     document.getElementById('m_withAll').onclick = ()=>{ withBox.querySelectorAll('[data-w]').forEach(b=>b.classList.add('on')); paintWith(); };
+    const link = document.getElementById('m_splitLink');
+    link.onclick = ()=>{
+      splitCustom = !splitCustom;
+      link.textContent = splitCustom ? '똑같이 나누기' : '금액 직접 입력';
+      document.getElementById('m_withAll').hidden = splitCustom;
+      withBox.hidden = splitCustom;
+      rowsBox.hidden = !splitCustom;
+      if(splitCustom){ renderRows(); }
+      paintWith();
+    };
+    if(payBox) payBox.querySelectorAll('[data-p]').forEach(b=> b.addEventListener('click', ()=> setTimeout(paintWith, 0)));
     amt.addEventListener('input', paintWith);
+    if(splitCustom) renderRows();
     paintWith();
   }
   const toPeople = document.getElementById('m_toPeople'); if(toPeople) toPeople.onclick = openMembersSheet;
@@ -6519,7 +6674,17 @@ function openMoneyForm(editId){
     const item = x || { id:'m'+Date.now().toString(36) };
     Object.assign(item, { amount:v, cur:unit, title:document.getElementById('m_title').value.trim(), cat, dayId,
                           payer: payerText ? payerText.value.trim() : payer });
+    if(withBox && splitCustom){
+      const c = calcSplit();
+      if(c.sum > c.total){ toast('직접 적은 금액이 총액보다 많아요'); return; }
+      if(!c.free.length && c.sum !== c.total){ toast('모두 적은 금액의 합이 총액과 달라요'); return; }
+    }
     if(withSel && withSel.length < moneyMembers().length) item.with = withSel; else delete item.with;
+    if(withBox && splitCustom){
+      const c = calcSplit(), fixed = {};
+      Object.keys(c.fx).forEach(p=> fixed[p] = Math.round(c.fx[p]*c.st*100)/100);
+      if(Object.keys(fixed).length) item.split = { fixed }; else delete item.split;
+    } else delete item.split;
     if(item.payer) m.lastPayer = item.payer;
     if(!x) m.items.push(item);
     markChanged();
