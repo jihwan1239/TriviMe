@@ -6172,7 +6172,7 @@ function settleCardHtml(){
   const rows = S.members.map(p=>{
     const b = roundStep(S.bal[p], S.step);
     const tag = Math.abs(b) < S.step/2 ? '<span class="sb zero">끝</span>'
-              : b>0 ? `<span class="sb plus">${moneyFmt(b,u)} 받기</span>` : `<span class="sb minus">${moneyFmt(-b,u)} 보내기</span>`;
+              : b>0 ? `<span class="sb plus">${moneyFmt(b,u)}${esc(u)} 받기</span>` : `<span class="sb minus">${moneyFmt(-b,u)}${esc(u)} 보내기</span>`;
     const potTxt = (S.mode==='manager' && S.pot[p]) ? `, 회비 ${moneyFmt(S.pot[p],u)}${esc(u)}` : '';
     return `<div class="sr"><div class="sr-l">
         <span class="sn">${esc(p)}${S.mode==='manager'&&p===S.manager? '<i>총무</i>':''}</span>
