@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko" class="splash-active">
 <head>
+<script>
+/* 앱 안에서 다른 여행으로 이동할 땐 시작 화면을 다시 보여주지 않습니다 */
+try{ if(sessionStorage.getItem('trivime:skipSplash')){
+  sessionStorage.removeItem('trivime:skipSplash');
+  document.documentElement.classList.remove('splash-active');
+  document.documentElement.classList.add('no-splash');
+} }catch(e){}
+</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#5CB8EC" />
@@ -1911,6 +1919,8 @@
   @media (prefers-reduced-motion: no-preference){ .tl-rail i{ transition:opacity .25s ease; } }
 
   .st-krw{ font-size:11.5px; color:var(--muted); margin:2px 2px 8px; }
+
+  html.no-splash #splash{ display:none !important; }
 </style>
 
 </head>
@@ -6774,9 +6784,14 @@ function openTripLibrary(fromStartup){
 
   list.querySelectorAll('[data-trip-id]').forEach(button=>button.addEventListener('click',()=>{
     if(list.classList.contains('editing')) return;
-    if(button.dataset.tripId===TRIP_ID){ bg.classList.remove('open'); return; }
+    const past = button.closest('.tl-item').classList.contains('st-past');
+    if(button.dataset.tripId===TRIP_ID){
+      bg.classList.remove('open');
+      if(past){ switchScreen('prep'); if(typeof setBagTab==='function') setBagTab('money'); }
+      return;
+    }
     button.closest('.tl-item').classList.add('opening');
-    setTimeout(()=> location.assign(tripUrl(button.dataset.tripId)), 180);
+    setTimeout(()=> goTrip(button.dataset.tripId, past ? 'money' : null), 180);
   }));
   list.querySelectorAll('[data-delete-trip]').forEach(button=>button.addEventListener('click',()=>{
     const id=button.dataset.deleteTrip;
@@ -6808,7 +6823,14 @@ document.getElementById('tlEdit').addEventListener('click', ()=>{
 document.getElementById('tripLibraryBtn').onclick=openTripLibrary;
 document.getElementById('scheduleTripsTopBtn').onclick=openTripLibrary;
 document.getElementById('ob_saved_trips').onclick=openTripLibrary;
-document.getElementById('tripLibraryNew').onclick=()=>location.assign(tripUrl(randomTripId()));
+document.getElementById('tripLibraryNew').onclick=()=>{
+  const ob=document.getElementById('onboard');
+  if(ob && !ob.hidden && needOnboarding()){
+    document.getElementById('tripLibraryModalBg').classList.remove('open');   // 이미 새 여행 화면이 떠 있어요
+    return;
+  }
+  goTrip(randomTripId());
+};
 function updateOnboardingTripActions(editMode=false){
   const hasTrips=localTrips().length>0;
   document.getElementById('ob_saved_trips').hidden=!!editMode || !hasTrips;
@@ -6829,7 +6851,7 @@ function openSharedTripLink(input=document.getElementById('tripLibraryLink')){
   }
   // 같은 여행방의 스냅샷 링크는 hash 변경만으로는 init이 실행되지 않아 새로고침합니다.
   if(id===TRIP_ID){ history.replaceState(null,'',url.href); location.reload(); }
-  else location.assign(url.href);
+  else { try{ sessionStorage.setItem('trivime:skipSplash','1'); }catch(e){} location.assign(url.href); }
 }
 document.getElementById('tripLibraryOpen').onclick=()=>openSharedTripLink();
 document.getElementById('tripLibraryLink').addEventListener('keydown',e=>{if(e.key==='Enter') openSharedTripLink();});
@@ -7138,8 +7160,9 @@ document.getElementById('shareBtn').addEventListener('click', ()=>{
     <button type="button" class="btn-primary share-main" id="shareLinkBtn">링크 보내기</button>
     <button type="button" class="share-sub" id="shareTextBtn">일정을 글로 보내기</button>`;
 
+  // 주소만 넘겨요. 공유 창에서 '복사'를 눌러도 링크만 깔끔하게 복사됩니다
   document.getElementById('shareLinkBtn').onclick = ()=> shareOrCopy(
-    { title: TRIP.title||'TriviMe 여행', text: `${TRIP.title||'여행'} 일정을 TriviMe에서 같이 봐요`, url },
+    { title: TRIP.title||'TriviMe 여행', url },
     '링크를 복사했어요. 친구에게 붙여넣어 보내주세요');
 
   document.getElementById('shareTextBtn').onclick = ()=>{
@@ -8146,6 +8169,7 @@ function scheduleStartup(){
     if(START_WITH_TRIP_LIBRARY && localTrips().length){
       openTripLibrary(true);
     } else {
+      applyPendingView();
       scheduleGuide();
     }
   };
@@ -8163,6 +8187,24 @@ function scheduleGuide(){
   wait();
 }
 
+/* 앱 안 이동 : 시작 화면 없이 열고, 필요하면 도착해서 열 화면을 정해둡니다 */
+function goTrip(id, view){
+  try{
+    sessionStorage.setItem('trivime:skipSplash','1');
+    if(view) sessionStorage.setItem('trivime:openView', view); else sessionStorage.removeItem('trivime:openView');
+  }catch(e){}
+  location.assign(tripUrl(id));
+}
+function applyPendingView(){
+  let v=null;
+  try{ v=sessionStorage.getItem('trivime:openView'); sessionStorage.removeItem('trivime:openView'); }catch(e){}
+  if(v==='money'){ switchScreen('prep'); if(typeof setBagTab==='function') setBagTab('money'); return true; }
+  return false;
+}
+if(document.documentElement.classList.contains('no-splash')){
+  document.getElementById('splash')?.remove();
+  const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content='#F8FBFF';
+}
 const splashStartedAt = performance.now();
 const splashReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let splashDismissScheduled = false;
