@@ -1921,6 +1921,54 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
   .st-krw{ font-size:11.5px; color:var(--muted); margin:2px 2px 8px; }
 
   html.no-splash #splash{ display:none !important; }
+
+  /* 여행 목록 팝업 닫힘 : 열릴 때의 반대 */
+  #tripLibraryModalBg.tl-bg.closing{ animation:tlFadeOut .3s ease forwards; pointer-events:none; }
+  @keyframes tlFadeOut{ from{ background:rgba(16,34,56,.26); } to{ background:rgba(16,34,56,0);
+    -webkit-backdrop-filter:blur(0); backdrop-filter:blur(0); } }
+  #tripLibraryModalBg.closing .modal.tl-pop{ animation:tlPopOut .26s cubic-bezier(.4,0,.9,.6) forwards; }
+  @keyframes tlPopOut{ from{ opacity:1; transform:none; } to{ opacity:0; transform:translateY(16px) scale(.96); } }
+
+  /* ---------- 홈 화면에 추가 안내 팝업 (여행 목록 팝업과 같은 유리) ---------- */
+  #installModalBg.tl-bg{ align-items:center; justify-content:center;
+    padding:calc(18px + env(safe-area-inset-top,0px)) 14px 18px; background:rgba(16,34,56,.26);
+    -webkit-backdrop-filter:blur(10px) saturate(150%); backdrop-filter:blur(10px) saturate(150%); }
+  #installModalBg.tl-bg.open{ display:flex; animation:tlFade .32s ease both; }
+  #installModalBg .modal.tl-pop{ position:relative; width:100%; max-width:400px; max-height:100%; margin:0; overflow-y:auto;
+    border-radius:28px; padding:22px 18px 16px;
+    background:linear-gradient(165deg, rgba(255,255,255,.88) 0%, rgba(244,249,255,.76) 100%) !important;
+    -webkit-backdrop-filter:blur(30px) saturate(190%); backdrop-filter:blur(30px) saturate(190%);
+    border:1px solid rgba(255,255,255,.85) !important;
+    box-shadow:0 26px 70px rgba(8,28,58,.30), 0 2px 8px rgba(8,28,58,.08), inset 0 1px 0 rgba(255,255,255,.95);
+    animation:tlPop .55s cubic-bezier(.2,.9,.25,1.06) both; }
+  #installModalBg .modal.tl-pop::before{ display:none; }
+  #installModalBg h2{ margin:0 44px 6px 4px; font-size:22px; letter-spacing:-.035em; }
+  .tl-bg.closing{ animation:tlFadeOut .3s ease forwards !important; pointer-events:none; }
+  .tl-bg.closing .modal.tl-pop{ animation:tlPopOut .26s cubic-bezier(.4,0,.9,.6) forwards !important; }
+  .ig-sub{ margin:0 4px 14px; font-size:13.5px; line-height:1.6; color:var(--ink-2); }
+  .ig-steps{ list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:8px; counter-reset:ig; }
+  .ig-steps li{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:16px;
+    background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.9); counter-increment:ig;
+    animation:tlItem .45s cubic-bezier(.2,.8,.2,1) both; }
+  .ig-steps li:nth-child(2){ animation-delay:.06s; } .ig-steps li:nth-child(3){ animation-delay:.12s; }
+  .ig-ico{ position:relative; flex:0 0 40px; width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+    background:rgba(47,147,221,.12); color:var(--brand); }
+  .ig-ico .icon{ width:21px; height:21px; }
+  .ig-ico::after{ content:counter(ig); position:absolute; top:-5px; left:-5px; width:17px; height:17px; border-radius:50%;
+    background:var(--brand); color:#fff; font-size:10.5px; font-weight:800; display:grid; place-items:center;
+    box-shadow:0 0 0 2px #fff; }
+  .ig-txt{ display:flex; flex-direction:column; gap:2px; font-size:14px; color:var(--ink); line-height:1.45; }
+  .ig-txt small{ font-size:11.5px; color:var(--muted); }
+  .ig-ok{ width:100%; padding:14px; font-size:15px; }
+  .ig-link{ display:block; width:100%; margin-top:4px; border:none; background:none; padding:11px;
+    font-size:13px; font-weight:600; color:var(--brand); cursor:pointer; }
+  .ig-foot{ margin:10px 0 0; text-align:center; font-size:11.5px; color:var(--muted); }
+  .ob-install-link{ display:inline-flex; align-items:center; gap:6px; border:none; background:none; padding:4px 2px;
+    margin:0 0 14px; font-size:13px; font-weight:600; color:var(--brand); cursor:pointer; }
+  .ob-install-link[hidden]{ display:none; }
+  .ob-install-link .icon{ width:15px; height:15px; }
+  #installHowBtn[hidden]{ display:none !important; }
+  .ig-main b{ font-weight:700; }
 </style>
 
 </head>
@@ -2023,7 +2071,6 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
         <button class="mini-btn ghost" id="tripSetBtn" aria-expanded="false" aria-controls="tripSet"><span class="icon" data-i="pencil"></span>여행 설정</button>
       </div>
       <div class="wx-line" id="wxLine" aria-live="polite"><span class="wx-none">날씨 안내</span></div>
-      <aside class="ios-inline-guide" id="iosInlineGuide" hidden role="note"><span id="iosInlineText"></span><br><button type="button" id="iosInlineTrips">내 여행 목록</button><button type="button" id="iosInlineClose">닫기</button></aside>
       <div class="quick-actions" aria-label="항공편과 숙소">
         <button class="stay-row" id="flightBtn">
           <span class="icon" data-i="plane"></span>
@@ -2048,6 +2095,8 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
           <button type="button" class="mini-btn" id="scheduleShareBtn"><span class="icon" data-i="share"></span>친구와 공유</button>
           <button type="button" class="mini-btn" id="scheduleBackupBtn">백업과 복구</button>
         </div>
+        <button type="button" class="mini-btn guide-again" id="installHowBtn" style="width:100%;margin-top:8px" hidden>
+          <span class="icon" data-i="plusSq"></span>홈 화면에 추가하는 법</button>
         <button type="button" class="mini-btn guide-again" id="guideAgainBtn" style="width:100%;margin-top:8px">
           <span class="icon" data-i="info"></span>사용 가이드 다시 보기</button>
       </div>
@@ -2098,12 +2147,7 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
       <button type="button" class="ob-cancel" id="ob_cancel" hidden>변경 취소</button>
       <div class="ob-heading"><img class="ob-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjE1Yzc5YWUwLTQ0ZGItNDQzNC1hNjliLWE1M2RjNTlkZDk1OAAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoxmsUjhUxEhCQCAQqfWkk8gAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6NWJiMDEzNGQtM2Q2Yy00ZmUxLThmYjAtZWJjMGMxM2Y1NGY2bHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaLAUGnrfsva+9Vi0nYyNaW4AAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYILUAha5aUWm8IEUxuVOOC/Z7ZiD7Yg3ERYWgB9sBMEcVpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2h2u45BVKCLBLavnkLjb5HJAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFgg7O7gArg8HQFaXwFPl3fcXMqYx/F32Dbi5hpfcKJNtjxkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYToxNWM3OWFlMC00NGRiLTQ0MzQtYTY5Yi1hNTNkYzU5ZGQ5NTgvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDpiY2JhYWRiNC0yMWYxLTQ5YTAtYjU1Ni1kOTkwOTNjOGNiYTRyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggtQCFrlpRabwgRTG5U44L9ntmIPtiDcRFhaAH2wEwRxWiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIDSjLy1B4NsZQgCYa2LEoYGqGKSYHhcA0uCajKYAPPlVomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIEnIdojJ0ZSs3waOYRvaDNk0BsPQHQ6dJby8Gn8g/kQodGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" width="36" height="36" alt=""><h2 class="ob-title" id="ob_heading">TriviMe와 어디로 떠나세요?</h2></div>
       <p class="ob-sub">여행지와 날짜를 정하고 일정을 시작해보세요.</p>
-      <details class="ios-install-guide" id="iosInstallGuide" hidden>
-        <summary>iPhone에서 앱처럼 사용하기</summary>
-        <p id="kakaoInstallStep" hidden><b>카카오톡으로 링크를 받았다면:</b> 화면 오른쪽 아래의 공유 버튼을 눌러 <b>Safari로 열기</b>를 선택하세요. 메뉴 위치가 다르면 카카오톡 브라우저의 메뉴(⋯)에서 Safari로 열기를 찾아보세요.</p>
-        <ol><li>Safari에서 TriviMe를 엽니다.</li><li>Safari의 공유 버튼 → <b>홈 화면에 추가</b>를 누릅니다.</li><li><b>웹 앱으로 열기</b>를 켜고 추가합니다.</li></ol>
-        <p>친구가 보낸 여행 링크는 홈 화면 웹앱에 자동으로 옮겨지지 않을 수 있어요. 링크를 복사한 뒤 <b>공유받은 여행 링크 열기</b>에 붙여넣으면 그 여행을 열 수 있습니다.</p>
-      </details>
+      <button type="button" class="ob-install-link" id="iosInstallGuide" hidden><span class="icon" data-i="info"></span>iPhone에서 앱처럼 쓰는 법</button>
       <button type="button" class="mini-btn" id="ob_saved_trips" hidden style="width:100%;margin-bottom:20px">이미 만든 여행 목록 보기</button>
       <div class="ob-share-link" id="ob_share_link" hidden>
         <label class="ob-label" for="ob_shared_trip_link">공유받은 여행 링크 열기</label>
@@ -2234,6 +2278,13 @@ try{ if(sessionStorage.getItem('trivime:skipSplash')){
     </div>
   </div>
 
+  <div class="modal-bg tl-bg" id="installModalBg">
+    <div class="modal tl-pop ig-pop">
+      <button class="modal-close tl-close" data-close="installModalBg"><span class="icon" data-i="close"></span></button>
+      <div id="installBody"></div>
+    </div>
+  </div>
+
   <div class="modal-bg tl-bg" id="tripLibraryModalBg">
     <div class="modal tl-pop">
       <button class="modal-close tl-close" data-close="tripLibraryModalBg"><span class="icon" data-i="close"></span></button>
@@ -2351,6 +2402,10 @@ const RAW = {
   navBag:'<rect x="4" y="7.5" width="16" height="12.5" rx="3"/><path d="M9 7.5V6a3 3 0 0 1 6 0v1.5"/><path d="M4 12.5h16"/>',
   navNote:'<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
   heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  iosShare:'<path d="M12 3.5v11M8 7.5l4-4 4 4"/><path d="M7 10.5H6.5A2.5 2.5 0 0 0 4 13v5.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V13a2.5 2.5 0 0 0-2.5-2.5H17"/>',
+  plusSq:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/>',
+  appToggle:'<rect x="3" y="7.5" width="18" height="9" rx="4.5"/><circle cx="16.5" cy="12" r="2.6"/>',
+  compass:'<circle cx="12" cy="12" r="8.5"/><path d="M15.3 8.7l-1.9 4.7-4.7 1.9 1.9-4.7z"/>',
   camera:'<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.8l1.3-2h4.8l1.3 2h1.8A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/>',
   wallet:'<rect x="3.5" y="6.5" width="17" height="13" rx="3"/><path d="M3.5 10.5h17"/><circle cx="16.5" cy="15" r="1.2"/>',
   route:'<circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/>',
@@ -6707,9 +6762,6 @@ function isIOSDevice(){
   return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 }
 function isKakaoBrowser(){ return /KAKAOTALK/i.test(navigator.userAgent); }
-document.getElementById('iosInstallGuide').addEventListener('toggle',e=>{
-  if(e.currentTarget.open) e.currentTarget.classList.remove('is-new');
-});
 /* 여행 목록 — 떠 있는 유리 팝업
    앱을 켰을 때는 "다시 오셨네요", 메뉴에서 열 때는 "내 여행 목록"으로 인사가 달라집니다 */
 function tlTodayIso(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -6786,7 +6838,7 @@ function openTripLibrary(fromStartup){
     if(list.classList.contains('editing')) return;
     const past = button.closest('.tl-item').classList.contains('st-past');
     if(button.dataset.tripId===TRIP_ID){
-      bg.classList.remove('open');
+      closeTripLibrary();
       if(past){ switchScreen('prep'); if(typeof setBagTab==='function') setBagTab('money'); }
       return;
     }
@@ -6810,6 +6862,7 @@ function openTripLibrary(fromStartup){
     updateOnboardingTripActions();
     toast('이 기기의 여행 목록에서 삭제했어요.');
   }));
+  clearTimeout(bg._closeT); bg.classList.remove('closing');   // 닫히는 중이면 취소하고 다시 엽니다
   bg.classList.add('open');
 }
 document.getElementById('tlEdit').addEventListener('click', ()=>{
@@ -6826,7 +6879,7 @@ document.getElementById('ob_saved_trips').onclick=openTripLibrary;
 document.getElementById('tripLibraryNew').onclick=()=>{
   const ob=document.getElementById('onboard');
   if(ob && !ob.hidden && needOnboarding()){
-    document.getElementById('tripLibraryModalBg').classList.remove('open');   // 이미 새 여행 화면이 떠 있어요
+    closeTripLibrary();   // 이미 새 여행 화면이 떠 있어요
     return;
   }
   goTrip(randomTripId());
@@ -6846,7 +6899,7 @@ function openSharedTripLink(input=document.getElementById('tripLibraryLink')){
     toast('TriviMe 여행 공유 링크를 입력해주세요.'); input.focus(); return;
   }
   if(id===TRIP_ID && !url.hash){
-    document.getElementById('tripLibraryModalBg').classList.remove('open');
+    closeTripLibrary();
     toast('이미 이 여행을 보고 있어요.'); return;
   }
   // 같은 여행방의 스냅샷 링크는 hash 변경만으로는 init이 실행되지 않아 새로고침합니다.
@@ -6857,22 +6910,83 @@ document.getElementById('tripLibraryOpen').onclick=()=>openSharedTripLink();
 document.getElementById('tripLibraryLink').addEventListener('keydown',e=>{if(e.key==='Enter') openSharedTripLink();});
 document.getElementById('ob_open_shared_trip').onclick=()=>openSharedTripLink(document.getElementById('ob_shared_trip_link'));
 document.getElementById('ob_shared_trip_link').addEventListener('keydown',e=>{if(e.key==='Enter') openSharedTripLink(e.currentTarget);});
-document.getElementById('iosInlineTrips').onclick=openTripLibrary;
-document.getElementById('iosInlineClose').onclick=()=>{
-  document.getElementById('iosInlineGuide').hidden=true;
-  try{localStorage.setItem('trivime:ios-guide-dismissed','1');}catch(e){}
-};
-function showIosGuideForExistingTrip(){
-  const isIOS=isIOSDevice();
-  const installed=navigator.standalone===true || window.matchMedia?.('(display-mode: standalone)').matches;
-  let dismissed=false;try{dismissed=localStorage.getItem('trivime:ios-guide-dismissed')==='1';}catch(e){}
-  if(!isIOS || installed || dismissed) return;
-  const kakao=isKakaoBrowser();
-  document.getElementById('iosInlineText').textContent=kakao
-    ? '카카오톡에서 받은 링크는 오른쪽 아래 공유 버튼 → Safari로 열기를 선택하세요. Safari에서는 공유 → 홈 화면에 추가로 앱처럼 쓸 수 있어요. 이미 앱을 설치했다면 링크를 복사해 내 여행 목록에서 여세요.'
-    : 'Safari의 공유 → 홈 화면에 추가 → 웹 앱으로 열기로 앱처럼 사용할 수 있어요. 공유받은 여행은 내 여행 목록에 링크를 붙여넣어 열 수 있습니다.';
-  document.getElementById('iosInlineGuide').hidden=false;
+/* ================= 홈 화면에 추가 안내 (한 번만 뜨는 팝업) =================
+   · 카카오톡 안에서 열면 바로 : Safari로 옮기는 법
+   · Safari에서는 탭을 한 번 옮기거나 30초 뒤 : 홈 화면에 추가하는 법
+   · 홈 화면 앱에서는 띄우지 않고, 다른 팝업이나 사용 가이드가 떠 있으면 끝난 뒤에 */
+const INSTALL_SEEN = 'trivime:install-guide-seen:v1';
+function isInstalledApp(){ return navigator.standalone===true || !!window.matchMedia?.('(display-mode: standalone)').matches; }
+function installSeen(){
+  try{ return localStorage.getItem(INSTALL_SEEN)==='1' || localStorage.getItem('trivime:ios-guide-dismissed')==='1'; }catch(e){ return false; }
 }
+function openInstallGuide(){
+  const bg = document.getElementById('installModalBg');
+  const box = document.getElementById('installBody');
+  const kakao = isKakaoBrowser();
+  const step = (icon, html, sub)=> `<li><span class="ig-ico"><span class="icon">${iconSvg(icon)}</span></span>
+      <span class="ig-txt"><span class="ig-main">${html}</span>${sub? `<small>${sub}</small>`:''}</span></li>`;
+  box.innerHTML = kakao ? `
+      <p class="tl-hello">카카오톡에서 열었어요</p>
+      <h2>Safari에서 열어주세요</h2>
+      <p class="ig-sub">카카오톡 안에서는 홈 화면에 추가할 수 없어요. Safari로 옮기면 앱처럼 쓸 수 있어요.</p>
+      <ol class="ig-steps">
+        ${step('iosShare', '오른쪽 아래 <b>공유 버튼</b>을 눌러요', '안 보이면 ⋯ 메뉴를 눌러요')}
+        ${step('compass', '<b>Safari로 열기</b>를 골라요')}
+      </ol>
+      <button type="button" class="btn-primary ig-ok">확인했어요</button>
+      <button type="button" class="ig-link" id="igCopy">이미 앱이 있다면 링크 복사</button>`
+    : `
+      <p class="tl-hello">앱처럼 쓰기</p>
+      <h2>홈 화면에 추가해보세요</h2>
+      <p class="ig-sub">주소창 없이 전체 화면으로, 홈 화면에서 바로 열려요.</p>
+      <ol class="ig-steps">
+        ${step('iosShare', 'Safari의 <b>공유 버튼</b>을 눌러요', '아래쪽 막대나 ⋯ 메뉴 안에 있어요')}
+        ${step('plusSq', '<b>홈 화면에 추가</b>를 골라요', '목록을 조금 내리면 보여요')}
+        ${step('appToggle', '<b>웹 앱으로 열기</b>를 켜고 추가해요')}
+      </ol>
+      <button type="button" class="btn-primary ig-ok">확인했어요</button>
+      <p class="ig-foot">이 안내는 여행 설정에서 다시 볼 수 있어요.</p>`;
+  box.querySelector('.ig-ok').onclick = ()=> closeModal(bg);
+  const copy = document.getElementById('igCopy');
+  if(copy) copy.onclick = async ()=>{
+    const url = tripUrl();
+    try{ await navigator.clipboard.writeText(url); toast('링크를 복사했어요. 앱의 ≡ 메뉴에서 공유받은 링크로 열기에 붙여넣으세요'); }
+    catch(e){ prompt('아래 링크를 복사해주세요', url); }
+  };
+  clearTimeout(bg._closeT); bg.classList.remove('closing');
+  bg.classList.add('open');
+}
+function scheduleInstallGuide(){
+  if(!isIOSDevice() || isInstalledApp() || installSeen()) return;
+  const kakao = isKakaoBrowser();
+  let ready = kakao;
+  if(!ready){
+    setTimeout(()=>{ ready = true; }, 30000);
+    document.querySelectorAll('.navbtn').forEach(b=> b.addEventListener('click', ()=> setTimeout(()=>{ ready = true; }, 1200), { once:true }));
+  }
+  let freeSince = 0;
+  const tick = ()=>{
+    if(installSeen() || isInstalledApp()) return;
+    const free = !document.getElementById('splash') && !document.querySelector('.modal-bg.open') && !window.__gdRunning;
+    const onTrip = kakao || document.getElementById('onboard').hidden;
+    // 화면이 1초 넘게 계속 비어 있을 때만 (여행 목록·사용 가이드가 먼저 뜰 시간을 줍니다)
+    freeSince = free ? (freeSince || Date.now()) : 0;
+    if(ready && free && onTrip && Date.now() - freeSince >= 1000){
+      try{ localStorage.setItem(INSTALL_SEEN,'1'); }catch(e){}
+      openInstallGuide();
+      return;
+    }
+    setTimeout(tick, 400);
+  };
+  tick();
+}
+document.getElementById('iosInstallGuide').onclick = openInstallGuide;
+document.getElementById('installHowBtn').onclick = ()=>{
+  const box=document.getElementById('tripSet'); if(box) box.hidden=true;
+  document.getElementById('tripSetBtn').classList.remove('on');
+  openInstallGuide();
+};
+document.getElementById('installHowBtn').hidden = !(isIOSDevice() && !isInstalledApp());
 
 /* 지도 상단의 여행 제목을 눌러 바로 바꿉니다 */
 (function bindTitleEdit(){
@@ -7096,8 +7210,20 @@ document.getElementById('tripSetBtn').addEventListener('click', ()=>{
 });
 document.getElementById('carousel').addEventListener('scroll', onCarouselScroll, {passive:true});
 window.addEventListener('resize', setCarouselMetrics);
-document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', ()=> document.getElementById(b.dataset.close).classList.remove('open')));
-document.querySelectorAll('.modal-bg').forEach(bg=> bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('open'); }));
+/* 여행 목록 팝업은 열릴 때의 반대로, 살짝 가라앉으며 흐려지고 뒤 배경의 흐림도 함께 걷히게 닫습니다 */
+function closeModal(bg){
+  if(!bg || !bg.classList.contains('open')) return;
+  if(!bg.classList.contains('tl-bg')){ bg.classList.remove('open'); return; }
+  if(bg.classList.contains('closing')) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ bg.classList.remove('open'); return; }
+  bg.classList.add('closing');
+  clearTimeout(bg._closeT);
+  bg._closeT = setTimeout(()=> bg.classList.remove('open','closing'), 300);
+}
+function closeTripLibrary(){ closeModal(document.getElementById('tripLibraryModalBg')); }
+document.querySelectorAll('[data-close]').forEach(b=> b.addEventListener('click', ()=> closeModal(document.getElementById(b.dataset.close))));
+document.querySelectorAll('.modal-bg').forEach(bg=> bg.addEventListener('click', e=>{ if(e.target===bg) closeModal(bg); }));
 
 /* 모달 접근성: 제목, 초점 유지, Escape 닫기 */
 document.querySelectorAll('.modal-bg').forEach(bg=>{
@@ -7114,7 +7240,7 @@ document.querySelectorAll('.modal-bg').forEach(bg=>{
 });
 document.addEventListener('keydown',event=>{
   const dialog=document.querySelector('.modal-bg.open'); if(!dialog) return;
-  if(event.key==='Escape'){dialog.classList.remove('open');event.preventDefault();return;}
+  if(event.key==='Escape'){closeModal(dialog);event.preventDefault();return;}
   if(event.key!=='Tab') return;
   const items=[...dialog.querySelectorAll('button,input,select,textarea,a[href],[tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
   if(!items.length){event.preventDefault();return;}
@@ -7461,21 +7587,8 @@ function showOnboarding(editMode){
   const box = document.getElementById('onboard');
   const list = document.getElementById('ob_countries');
   if(!box || !list) return;
-  const isIOS=isIOSDevice();
-  const guide=document.getElementById('iosInstallGuide');
-  guide.hidden=!!editMode || !isIOS;
-  guide.open=false;
-  guide.classList.remove('is-new');
-  const installed=navigator.standalone===true || window.matchMedia?.('(display-mode: standalone)').matches;
-  if(!editMode && isIOS && !installed){
-    let firstOpen=false;
-    try{
-      firstOpen=localStorage.getItem('trivime:ios-install-hint-shown:v1')!=='1';
-      if(firstOpen) localStorage.setItem('trivime:ios-install-hint-shown:v1','1');
-    }catch(e){ firstOpen=true; }
-    guide.classList.toggle('is-new',firstOpen);
-  }
-  document.getElementById('kakaoInstallStep').hidden=!isKakaoBrowser();
+  // iPhone 브라우저에서만, 홈 화면 앱에서는 숨김
+  document.getElementById('iosInstallGuide').hidden = !!editMode || !isIOSDevice() || isInstalledApp();
   updateOnboardingTripActions(editMode);
 
   if(editMode){
@@ -7892,8 +8005,8 @@ async function init(){
   if(!needOnboarding()){
     try{localStorage.setItem(LS_LAST_TRIP,TRIP_ID);}catch(e){}
     if(!new URLSearchParams(location.search).get('trip')) history.replaceState(null,'',tripUrl());
-    showIosGuideForExistingTrip();
   }
+  scheduleInstallGuide();
 
   // 아직 나라가 정해지지 않은 새 여행방이면 온보딩을 띄웁니다
   if(needOnboarding()){
@@ -8150,7 +8263,7 @@ function replayGuide(){
   const box=document.getElementById('tripSet'); if(box) box.hidden=true;
   document.getElementById('tripSetBtn').setAttribute('aria-expanded','false');
   document.getElementById('tripSetBtn').classList.remove('on');
-  document.getElementById('tripLibraryModalBg').classList.remove('open');
+  closeTripLibrary();
   startGuide(true);
 }
 document.getElementById('guideAgainBtn').addEventListener('click', replayGuide);
